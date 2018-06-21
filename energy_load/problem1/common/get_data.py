@@ -65,6 +65,11 @@ def get_data():
     dir_processed = os.path.join(base_dir, 'energy_load')
     unzipped_file = os.path.join(dir_raw, 'GEFCom2014.zip')
 
+    # check data dir exists, if not create directory
+    if not os.path.exists(base_dir):
+        os.makedirs(base_dir)
+        os.makedirs(dir_raw)
+
     # check if processed data exists, if not create directory
     if not os.path.exists(dir_processed):
         os.makedirs(dir_processed)

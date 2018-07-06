@@ -38,6 +38,5 @@ def generate_forecasts():
     print('Now run python energy_load/problem1/common/evaluate.py', fname, 'to evaluate performance')
 
 
-if __name__=="__main__":
-    
+if __name__=="__main__":    
     generate_forecasts()

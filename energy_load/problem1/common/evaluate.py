@@ -1,6 +1,7 @@
 import os
 import sys
 import pandas as pd
+sys.path.append('.')
 from common.metrics import sMAPE
 
 

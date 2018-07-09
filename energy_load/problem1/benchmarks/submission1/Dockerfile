@@ -1,11 +1,11 @@
-#Download base image
+# Download base image
 FROM nvidia/cuda:9.0-cudnn7-runtime-ubuntu16.04
 WORKDIR /tmp
 
-#Update Ubuntu software repository
+# Update Ubuntu software repository
 RUN apt-get update
 
-#Install basic packages
+# Install basic packages
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
     build-essential \
@@ -18,8 +18,8 @@ ENV PATH $PYENV_ROOT/shims:$PYENV_ROOT/bin:$PATH
 RUN apt-get install -y python-setuptools
 RUN apt-get install -y python-pip python3-pip virtualenv htop vim
 
-#Mount requirement.txt into the docker
-ADD . /tmp
+# Mount requirements.txt into the docker
+ADD ./requirements.txt /tmp
 
 #Install additional packages in the txt file
 RUN pip3 install -r requirements.txt

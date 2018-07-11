@@ -18,14 +18,16 @@ TODO: add public holiday features to dataset (this is allowed in GEFCom2014 comp
 
 # 2. Instructions to run benchmarks
 
-Download and preprocess the data using the following commands
+1. Steps to configure machine
 
-```bash
-# from the TSPerf root directory
-cd TSPerf
-python energy_load/problem1/common/get_data.py
-```
-TODO: wrap the above into `download_data.sh` file
+2. Download and preprocess the data using the following commands
+
+    ```bash
+    # from the TSPerf root directory
+    cd TSPerf
+    python energy_load/problem1/common/get_data.py
+    ```
+    TODO: wrap the above into `download_data.sh` file
 
 # 3. Instructions to submit new benchmarks
 

@@ -18,9 +18,13 @@ TODO: add public holiday features to dataset (this is allowed in GEFCom2014 comp
 
 # 2. Instructions to run benchmarks
 
-1. Steps to configure machine
+1. Steps to configure machine  
+   You can start with an Ubuntu 16.04 machine (12 CPUs, 2 x K80 GPUs, 112GB RAM, 680GB disk) or  
+   an [Azure Linux Deep Learning Virtual Machine (DLVM)](https://azuremarketplace.microsoft.com/en-us/marketplace/apps/microsoft-ads.linux-data-science-vm-ubuntu) with Standard NC12 instance. The DLVM will have Docker and NVIDIA driver automatically installed.  
 
-2. Download and preprocess the data using the following commands
+2. Clone the Github repo to your machine
+
+3. Download and preprocess the data using the following commands
 
     ```bash
     # from the TSPerf root directory
@@ -28,6 +32,16 @@ TODO: add public holiday features to dataset (this is allowed in GEFCom2014 comp
     python energy_load/problem1/common/get_data.py
     ```
     TODO: wrap the above into `download_data.sh` file
+
+4. Log into Azure Container Registry (ACR)
+
+5. Pull a Docker image from ACR
+
+6. Create a Docker container with `/TSPerf` mounted to the container
+
+7. Run benchmarks inside the Docker container
+
+
 
 # 3. Instructions to submit new benchmarks
 

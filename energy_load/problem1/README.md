@@ -57,11 +57,11 @@ TODO: add public holiday features to dataset (this is allowed in GEFCom2014 comp
    
 
 7. Run benchmarks inside the Docker container   
-   In the container, you can go to the /TSPerf folder and run the script for model training and scoring by
+   In the container, you can go to the `/TSPerf` folder and run the script for model training and scoring by
    ```bash
    python3 ./energy_load/problem1/benchmarks/submission1/train_score.py
    ```
-   This will generate a `submission.csv` file under the `/submission1` folder. Then, you can evaluate the forecasting results by 
+   This will generate a `submission.csv` file under the `/benchmarks/submission1` folder. Then, you can evaluate the forecasting results by 
    ```bash
    python3 energy_load/problem1/common/evaluate.py 'energy_load/problem1/benchmarks/submission1/submission.csv'
    ```
@@ -110,7 +110,7 @@ TODO: add public holiday features to dataset (this is allowed in GEFCom2014 comp
 6. Include a Dockerfile containing all dependencies for running your benchmark (see [./benchmarks/submission1/Dockerfile](./benchmarks/submission1/Dockerfile) for an example). The Dockerfile can point to a `.txt` file which contains a list of necessary packages. 
 
 7. Create a Docker image and push it to the ACR   
-   To create your Docker image, you can go to [./benchmarks/submission1/](./benchmarks/submission1/) folder and run the following command   
+   To create your Docker image, you can go to `/benchmarks/submission1/` folder and run the following command   
    ```bash
    docker build -t submission1_image .
    ```
@@ -127,7 +127,18 @@ TODO: add public holiday features to dataset (this is allowed in GEFCom2014 comp
 
 10. ...
 
-# 4. Quality
+
+# 4. Reproducibility
+
+To ensure the reproducibility of the benchmark results, you need to    
+
+0. Submit all source code for generating the forecasting results
+1. Specify the random seeds according to instructions
+2. Report results afer repeated runs of the benchmark
+3. Include a Dockerfile containing all dependencies
+4. Provide instructions about hyperparameter tuning (optional)
+
+# 5. Quality
 
 **Evaluation metrics**: sMAPE
 
@@ -135,7 +146,7 @@ TODO: add public holiday features to dataset (this is allowed in GEFCom2014 comp
 
 ...
 
-# 5. Leaderboard
+# 6. Leaderboard
 
 | **Submission** | **Model description** | **sMAPE** |
 | -------------- | --------------------- | --------- |

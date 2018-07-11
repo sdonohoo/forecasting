@@ -42,12 +42,30 @@ TODO: add public holiday features to dataset (this is allowed in GEFCom2014 comp
    docker login --username tsperf --password <ACR Access Key> tsperf.azurecr.io
    ```
 
-5. Pull a Docker image from ACR
+5. Pull a Docker image from ACR   
+   You can pull a Docker image associated with a certain benchmark by
+   ```bash
+   docker pull tsperf.azurecr.io/energy_load/problem1/submission1/submission1_image:v1
+   ```
 
-6. Create a Docker container with `/TSPerf` mounted to the container
+6. Create a Docker container   
+   After pulling the image, you can create a Docker container that runs the image by 
+   ```bash
+   docker run -it -v ~/TSPerf:/TSPerf --name submission1_container tsperf.azurecr.io/energy_load/problem1/submission1/submission1_image:v1
+   ```
+   Note that you need to mount `/TSPerf` folder (the one you cloned) to the container so that you will have access to the source code in the container.
+   
 
-7. Run benchmarks inside the Docker container
-
+7. Run benchmarks inside the Docker container   
+   In the container, you can go to the /TSPerf folder and run the script for model training and scoring by
+   ```bash
+   python3 ./energy_load/problem1/benchmarks/submission1/train_score.py
+   ```
+   This will generate a `submission.csv` file under the `/submission` folder. Then, you can evaluate the forecasting results by 
+   ```bash
+   python3 energy_load/problem1/common/evaluate.py 'energy_load/problem1/benchmarks/submission1/submission.csv'
+   ```
+   The above command will output the evaluation metric of this submission. 
 
 
 # 3. Instructions to submit new benchmarks

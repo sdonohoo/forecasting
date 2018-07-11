@@ -61,7 +61,7 @@ TODO: add public holiday features to dataset (this is allowed in GEFCom2014 comp
    ```bash
    python3 ./energy_load/problem1/benchmarks/submission1/train_score.py
    ```
-   This will generate a `submission.csv` file under the `/submission` folder. Then, you can evaluate the forecasting results by 
+   This will generate a `submission.csv` file under the `/submission1` folder. Then, you can evaluate the forecasting results by 
    ```bash
    python3 energy_load/problem1/common/evaluate.py 'energy_load/problem1/benchmarks/submission1/submission.csv'
    ```
@@ -106,10 +106,26 @@ TODO: add public holiday features to dataset (this is allowed in GEFCom2014 comp
     python energy_load/problem1/common/evaluate.py \ 
     energy_load/problem1/benchmarks/<submission_dir>/submission.csv
     ```
-6. Create a README file in the submission folder documenting the reported model performance and your approach (see [./benchmarks/submission1/README.md](./benchmarks/submission1/README.md) for an example)
-7. Include a dockerfile containing the image which includes all dependencies for running your benchmark (TODO: create example)
-7. Create pull request for review
-8. ...
+
+6. Include a Dockerfile containing all dependencies for running your benchmark (see [./benchmarks/submission1/Dockerfile](./benchmarks/submission1/Dockerfile) for an example). The Dockerfile can point to a `.txt` file which contains a list of necessary packages. 
+
+7. Create a Docker image and push it to the ACR   
+   To create your Docker image, you can go to [./benchmarks/submission1/](./benchmarks/submission1/) folder and run the following command   
+   ```bash
+   docker build -t submission1_image .
+   ```
+   Then, you can push the image to ACR by executing
+   ```bash
+   docker tag submission1_image tsperf.azurecr.io/energy_load/problem1/submission1/submission1_image:v1
+   docker push tsperf.azurecr.io/energy_load/problem1/submission1/submission1_image:v1
+   ```
+   Note that you will need to log into the ACR before pushing the image.
+
+8. Create a README file in the submission folder documenting the reported model performance and your approach (see [./benchmarks/submission1/README.md](./benchmarks/submission1/README.md) for an example)
+
+9. Create pull request for review
+
+10. ...
 
 # 4. Quality
 

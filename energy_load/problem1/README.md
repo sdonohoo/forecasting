@@ -20,7 +20,7 @@ TODO: add public holiday features to dataset (this is allowed in GEFCom2014 comp
 
 1. Steps to configure machine  
    You can start with an Ubuntu 16.04 machine (12 CPUs, 2 x K80 GPUs, 112GB RAM, 680GB disk) or  
-   an [Azure Linux Deep Learning Virtual Machine (DLVM)](https://azuremarketplace.microsoft.com/en-us/marketplace/apps/microsoft-ads.linux-data-science-vm-ubuntu) with Standard NC12 instance. The DLVM will have Docker and NVIDIA driver automatically installed.  
+   an [Azure Linux Deep Learning Virtual Machine (DLVM)](https://azuremarketplace.microsoft.com/en-us/marketplace/apps/microsoft-ads.linux-data-science-vm-ubuntu) with Standard NC12 instance. The DLVM will have Docker and [NVIDIA Container Runtime for Docker](https://github.com/NVIDIA/nvidia-docker) automatically installed. If you need to install them manually, you can follow the steps for configuring the machine provided by MLPerf [here](https://github.com/mlperf/reference/tree/master/image_classification#steps-to-configure-machine) (Please follow the steps until the last two for cloning the Github repo of MLPerf). 
 
 2. Clone the Github repo to your machine by  
    ```bash
@@ -34,7 +34,7 @@ TODO: add public holiday features to dataset (this is allowed in GEFCom2014 comp
     cd TSPerf
     python energy_load/problem1/common/get_data.py
     ```
-    TODO: wrap the above into `download_data.sh` file
+    You need to have Pandas package installed to run the second command. TODO: wrap the above into `download_data.sh` file
 
 4. Log into Azure Container Registry  
    We use Azure Container Registry (ACR) to store and manage Docker images. You can log into the ACR by

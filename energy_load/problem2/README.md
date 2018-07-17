@@ -134,7 +134,6 @@ The input data should not go beyond the following:
 
 9. Create pull request for review
 
-10. ...
 
 
 # 4. Reproducibility

@@ -41,6 +41,7 @@ TODO: add public holiday features to dataset (this is allowed in GEFCom2014 comp
    ```bash
    docker login --username tsperf --password <ACR Access Key> tsperf.azurecr.io
    ```
+   If want to execute docker commands without sudo as a non-root user, you need to create a Unix group and add users to it by following the instructions [here](https://docs.docker.com/install/linux/linux-postinstall/#manage-docker-as-a-non-root-user).
 
 5. Pull a Docker image from ACR   
    You can pull a Docker image associated with a certain benchmark by

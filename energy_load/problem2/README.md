@@ -1,6 +1,6 @@
 # 1. Problem
 
-Electricity load point forecasting on GEFCom2014 competition data. Generate forecasts of hourly load for one month ahead.
+Electricity load probabilistic forecasting on GEFCom2017 competition data. Generate forecasts of hourly load for one month ahead.
 
 |  |  |
 | ----------------------------------- | - |
@@ -10,11 +10,22 @@ Electricity load point forecasting on GEFCom2014 competition data. Generate fore
 | **Forecast type**                   | point |
 | **Available model features**        | *LOAD*: historical hourly electricity load values<br/>*w1-25*: historical hourly temperature values from 25 weather stations in the region. No forecasted temperature values are available at prediction time |
 
-TODO: add public holiday features to dataset (this is allowed in GEFCom2014 competition so we should include it)
+TODO: add public holiday features to dataset (this is allowed in GEFCom2017 competition so we should include it)
 
-### Dataset attribution:
+### Data  
 
-    Tao Hong, Pierre Pinson, Shu Fan, Hamidreza Zareipour, Alberto Troccoli and Rob J. Hyndman, "Probabilistic energy forecasting: Global Energy Forecasting Competition 2014 and beyond", International Journal of Forecasting, vol.32, no.3, pp 896-913, July-September, 2016.
+The input data should not go beyond the following:
+
+1. Columns A, B, D, M and N in the worksheets of "YYYY SMD Hourly Data" files, where YYYY represents the year. These data files can be downloaded from ISO New England website via the zonal information page of the energy, load and demand reports. Contestants outside United States may need a VPN to access the data.
+
+2. US Federal Holidays as published via US Office of Personnel Management.
+
+
+
+### Dataset attribution (TBD):
+
+
+
 
 # 2. Instructions to run benchmarks
 
@@ -32,7 +43,7 @@ TODO: add public holiday features to dataset (this is allowed in GEFCom2014 comp
     ```bash
     # from the TSPerf root directory
     cd TSPerf
-    python energy_load/problem1/common/get_data.py 
+    python energy_load/problem1/common/get_data.py
     ```
     You need to have Pandas package installed to run the second command. TODO: wrap the above into `download_data.sh` file
 
@@ -62,9 +73,9 @@ TODO: add public holiday features to dataset (this is allowed in GEFCom2014 comp
    ```bash
    python3 ./energy_load/problem1/benchmarks/submission1/train_score.py
    ```
-   This will generate a `submission.csv` file under the `/benchmarks/submission1` folder. Then, you can evaluate the forecasting results by 
+   This will generate a `submission.xls` file under the `/benchmarks/submission1` folder. Then, you can evaluate the forecasting results by 
    ```bash
-   python3 energy_load/problem1/common/evaluate.py 'energy_load/problem1/benchmarks/submission1/submission.csv'
+   python3 energy_load/problem1/common/evaluate.py 'energy_load/problem1/benchmarks/submission1/submission.xls'
    ```
    The above command will output the evaluation metric of this submission. 
 
@@ -77,35 +88,32 @@ TODO: add public holiday features to dataset (this is allowed in GEFCom2014 comp
 
     For this problem, you are provided successive folds of training data. The goal is to generate forecasts for the following periods, using the available training data:
 
-    | **Fold** | **Train period start** | **Train period end** | **Forecast period start** | **Forecast period end** |
+    | **Round** | **Train period start** | **Train period end** | **Forecast period start** | **Forecast period end** |
     | -------- | --------------- | ------------------ | ------------------------- | ----------------------- |
-    | 1 | 2001-01-01 01:00:00 | 2010-10-01 00:00:00 | 2010-10-01 01:00:00 | 2010-11-01 00:00:00 |
-    | 1 | 2001-01-01 01:00:00 | 2010-11-01 00:00:00 | 2010-10-01 01:00:00 | 2010-12-01 00:00:00 |
-    | 1 | 2001-01-01 01:00:00 | 2010-12-01 00:00:00 | 2010-10-01 01:00:00 | 2011-01-01 00:00:00 |
-    | 1 | 2001-01-01 01:00:00 | 2011-01-01 00:00:00 | 2010-10-01 01:00:00 | 2011-02-01 00:00:00 |
-    | 1 | 2001-01-01 01:00:00 | 2011-02-01 00:00:00 | 2010-10-01 01:00:00 | 2011-03-01 00:00:00 |
-    | 1 | 2001-01-01 01:00:00 | 2011-03-01 00:00:00 | 2010-10-01 01:00:00 | 2011-04-01 00:00:00 |
-    | 1 | 2001-01-01 01:00:00 | 2011-04-01 00:00:00 | 2010-10-01 01:00:00 | 2011-05-01 00:00:00 |
-    | 1 | 2001-01-01 01:00:00 | 2011-05-01 00:00:00 | 2010-10-01 01:00:00 | 2011-06-01 00:00:00 |
-    | 1 | 2001-01-01 01:00:00 | 2011-06-01 00:00:00 | 2010-10-01 01:00:00 | 2011-07-01 00:00:00 |
-    | 1 | 2001-01-01 01:00:00 | 2011-07-01 00:00:00 | 2010-10-01 01:00:00 | 2011-08-01 00:00:00 |
-    | 1 | 2001-01-01 01:00:00 | 2011-08-01 00:00:00 | 2010-10-01 01:00:00 | 2011-09-01 00:00:00 |
-    | 1 | 2001-01-01 01:00:00 | 2011-09-01 00:00:00 | 2010-10-01 01:00:00 | 2011-10-01 00:00:00 |
-    | 1 | 2001-01-01 01:00:00 | 2011-10-01 00:00:00 | 2010-10-01 01:00:00 | 2011-11-01 00:00:00 |
-    | 1 | 2001-01-01 01:00:00 | 2011-11-01 00:00:00 | 2010-10-01 01:00:00 | 2011-12-01 00:00:00 |
+    | 1 | 2011-01-01 01:00:00 | 2016-12-15 00:00:00 | 2017-01-01 01:00:00 | 2017-01-31 00:00:00 |
+    | 2 | 2011-01-01 01:00:00 | 2016-12-31 00:00:00 | 2017-02-01 01:00:00 | 2017-02-28 00:00:00 |
+    | 3 | 2011-01-01 01:00:00 | 2017-01-15 00:00:00 | 2017-02-01 01:00:00 | 2017-02-28 00:00:00 |
+    | 4 | 2011-01-01 01:00:00 | 2017-01-31 00:00:00 | 2017-03-01 01:00:00 | 2017-03-31 00:00:00 |
+    | 5 | 2011-01-01 01:00:00 | 2017-02-14 00:00:00 | 2017-03-01 01:00:00 | 2017-03-31 00:00:00 |
+    | 6 | 2011-01-01 01:00:00 | 2017-02-28 00:00:00 | 2017-04-01 01:00:00 | 2017-04-30 00:00:00 |
+
 
 4. To submit your solution you must create a script (in any language) that includes all code necessary to train your model and produce predictions for all forecasted periods in the format:
 
-    | timestamp | prediction |
-    | --------- | ---------- |
-    | ... | ... |
+    * The file format should be *.xls;
+    * The file name should be "submission.xls". 
+    * The file should include 10 worksheets, named as CT, ME, NEMASSBOST, NH, RI, SEMASS, VT, WCMASS, MASS, TOTAL. Please arrange the worksheets in the same order as listed above. 
+    * In each worksheet, the first two columns should be date and hour, respectively, in chronological order.
+    * The 3rdto the 11th columns should be Q10, Q20, ... to Q90. 
+
+    The template is [HERE](https://www.dropbox.com/s/ksfiykyfqzmh3ph/TrackInitialRoundNumber-TeamName.xls?dl=0). You should replace the date column to reflect the forecast period in each round.
 
     The python helper function common/serve_folds.py can be used to serve up successive training and test period folds (see [./benchmarks/submission1/train_score.py](./benchmarks/submission1/train_score.py) for an example of how to use this). You are not obliged to use this function in your submission. You do not have to retrain or retune your model after each successive fold if it does not benefit your model performance. Forecasts **must not** be generated from models that have been trained on data of the forecast period or later. Submission code will be inspected to enforce this.
 
 5. Once you have generated your submission file, you can evaluate the model's performance with
     ```
     python energy_load/problem1/common/evaluate.py \ 
-    energy_load/problem1/benchmarks/<submission_dir>/submission.csv
+    energy_load/problem1/benchmarks/<submission_dir>/submission.xls
     ```
 
 6. Include a Dockerfile containing all dependencies for running your benchmark (see [./benchmarks/submission1/Dockerfile](./benchmarks/submission1/Dockerfile) for an example). The Dockerfile can point to a `.txt` file which contains a list of necessary packages. 

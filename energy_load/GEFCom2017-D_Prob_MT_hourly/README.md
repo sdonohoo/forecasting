@@ -1,6 +1,6 @@
 # Problem
 
-Probabilistic forecasting of electricity load on GEFCom2017 competition qualifying match data. Generate probabilistic forecasts of hourly load for 1~2 months ahead.
+Probabilistic forecasting of electricity load on GEFCom2017 competition qualifying match data. Generate probabilistic forecasts of hourly load for 1~2 months ahead. The forecasts should be in the form of 9 quantiles, i.e. the 10th, 20th, ... 90th percentiles, following the format of the provided template file.  There are 10 time series (zones) to forecast, including the 8 ISO New England zones, the Massachusetts (sum of three zones under Massachusetts), and the total (sum of the first 8 zones).
 
 |  |  |
 | ----------------------------------- | - |

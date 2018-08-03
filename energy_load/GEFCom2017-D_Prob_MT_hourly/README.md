@@ -1,8 +1,8 @@
 # Problem
 
 Probabilistic load forecasting (PLF) has become increasingly important in power systems planning and operations in recent years. The applications of PLF include unit commitment planning, reliability analysis, probabilistic price forecasting, etc.  
-The task of this benchmark is to generate probabilistic forecasting of electricity load on the GEFCom2017 competition qualifying match data. The 
-forecast horizon is 1~2 months ahead and granularity is hourly, see [Training and test separation](#Training-and-test-data-separation) for details. The forecasts should be in the form of 9 quantiles, i.e. the 10th, 20th, ... 90th percentiles, following the format of the provided template file.  There are 10 time series (zones) to forecast, including the 8 ISO New England zones, the Massachusetts (sum of three zones under Massachusetts), and the total (sum of the first 8 zones).  
+The task of this benchmark is to generate probabilistic forecasting of electricity load on the GEFCom2017 competition qualifying match data. The
+forecast horizon is 1~2 months ahead and granularity is hourly, see [Training and test separation](#training-and-test-data-separation) for details. The forecasts should be in the form of 9 quantiles, i.e. the 10th, 20th, ... 90th percentiles, following the format of the provided template file.  There are 10 time series (zones) to forecast, including the 8 ISO New England zones, the Massachusetts (sum of three zones under Massachusetts), and the total (sum of the first 8 zones).  
 The table below summarizes the benchmark problem definition:
 
 |  |  |

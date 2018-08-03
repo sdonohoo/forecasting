@@ -1,7 +1,9 @@
 # Problem
 
 Probabilistic load forecasting (PLF) has become increasingly important in power systems planning and operations in recent years. The applications of PLF include unit commitment planning, reliability analysis, probabilistic price forecasting, etc.  
-The task of this benchmark is to generate probabilistic forecasting of electricity load on GEFCom2017 competition qualifying match data. Generate probabilistic forecasts of hourly load for 1~2 months ahead. The forecasts should be in the form of 9 quantiles, i.e. the 10th, 20th, ... 90th percentiles, following the format of the provided template file.  There are 10 time series (zones) to forecast, including the 8 ISO New England zones, the Massachusetts (sum of three zones under Massachusetts), and the total (sum of the first 8 zones).
+The task of this benchmark is to generate probabilistic forecasting of electricity load on the GEFCom2017 competition qualifying match data. The 
+forecast horizon is 1~2 months ahead and granularity is hourly, see [Training and test separation](#Training-and-test-data-separation) for details. The forecasts should be in the form of 9 quantiles, i.e. the 10th, 20th, ... 90th percentiles, following the format of the provided template file.  There are 10 time series (zones) to forecast, including the 8 ISO New England zones, the Massachusetts (sum of three zones under Massachusetts), and the total (sum of the first 8 zones).  
+The table below summarizes the benchmark problem definition:
 
 |  |  |
 | ----------------------------------- | - |
@@ -9,7 +11,7 @@ The task of this benchmark is to generate probabilistic forecasting of electrici
 | **Forecast frequency**   | twice every month, mid and end of month |
 | **Forecast granularity**         | hourly |
 | **Forecast type**                   | probabilistic, 9 quantiles: 10th, 20th, ...90th percentiles|
-
+**TODO: create template of output file**
 # Data  
 ### Dataset attribution
 [ISO New England](https://www.iso-ne.com/isoexpress/web/reports/load-and-demand/-/tree/zone-info)
@@ -21,7 +23,7 @@ The task of this benchmark is to generate probabilistic forecasting of electrici
 2. US Federal Holidays as published via [US Office of Personnel Management](https://www.opm.gov/policy-data-oversight/snow-dismissal-procedures/federal-holidays/).
 
 ### Data preprocessing (TBD)
-Scripts for reading data and aggregating time series.
+**TODO: Scripts for reading data, aggregating time series, and extract basic features.**
 
 ### Training and test data separation
 For this problem, you are provided successive folds of training data. The goal is to generate forecasts for the forecast periods listed in the table below, using the available training data:
@@ -35,7 +37,7 @@ For this problem, you are provided successive folds of training data. The goal i
 | 5 | 2011-01-01 01:00:00 | 2017-02-14 00:00:00 | 2017-03-01 01:00:00 | 2017-03-31 00:00:00 |
 | 6 | 2011-01-01 01:00:00 | 2017-02-28 00:00:00 | 2017-04-01 01:00:00 | 2017-04-30 00:00:00 |
 
-**TODO: We need to provide code to do this separation. **
+**TODO: We need to provide code to do this separation.**
 
 # Model (TBD)
 
@@ -44,10 +46,12 @@ For this problem, you are provided successive folds of training data. The goal i
 **Evaluation metric**: Pinball loss function  
 **Minimum performance**: TBD  
 **Evaluation frequency**: TBD  
-**Evaluation thoroughness**: TBD
+**Evaluation thoroughness**: TBD  
+
+**TODO: Write script to compute pinball loss function.**
 
 # Instructions to run reference implementation
-**TODO: Revise this section when we have a draft reference implementation**
+**TODO: Revise this section when we have a draft reference implementation. We will need to update the script directories and maybe refine environment setup.**
 
 1. Steps to configure machine  
    You can start with an Ubuntu 16.04 machine (12 CPUs, 2 x K80 GPUs, 112GB RAM, 680GB disk) or  
@@ -65,7 +69,8 @@ For this problem, you are provided successive folds of training data. The goal i
     cd TSPerf
     python energy_load/problem1/common/get_data.py
     ```
-    You need to have Pandas package installed to run the second command. TODO: wrap the above into `download_data.sh` file
+    You need to have Pandas package installed to run the second command.  
+    **TODO: wrap the above into `download_data.sh` file**
 
 4. Log into Azure Container Registry  
    We use Azure Container Registry (ACR) to store and manage Docker images. You can log into the ACR by
@@ -104,7 +109,7 @@ For this problem, you are provided successive folds of training data. The goal i
 **TODO: Revise this section when we have a draft reference implementation**
 
 1. Create a new git branch
-2. Create a new numbered submission folder under ./energy_load/benchmarks. Pick the next number available
+2. Create a new numbered submission folder under ./GEFCom2017-D_Prob_MT_hourly/. Pick the next number available
 3. Download and preprocess the problem dataset as above
 4. To submit your solution you must create a script (in any language) that includes all code necessary to train your model and produce predictions for all forecasted periods in the format:
 
@@ -112,7 +117,7 @@ For this problem, you are provided successive folds of training data. The goal i
     * The file name should be "submission.xls".
     * The file should include 10 worksheets, named as CT, ME, NEMASSBOST, NH, RI, SEMASS, VT, WCMASS, MASS, TOTAL. Please arrange the worksheets in the same order as listed above.
     * In each worksheet, the first two columns should be date and hour, respectively, in chronological order.
-    * The 3rdto the 11th columns should be Q10, Q20, ... to Q90.
+    * The 3rd to the 11th columns should be Q10, Q20, ... to Q90.
 
     The template is [HERE](https://www.dropbox.com/s/ksfiykyfqzmh3ph/TrackInitialRoundNumber-TeamName.xls?dl=0). You should replace the date column to reflect the forecast period in each round.
 
@@ -141,19 +146,6 @@ For this problem, you are provided successive folds of training data. The goal i
 8. Create a README file in the submission folder documenting the reported model performance and your approach (see [./benchmarks/submission1/README.md](./benchmarks/submission1/README.md) for an example)
 
 9. Create pull request for review
-
-
-# Reproducibility
-**TODO: Revise this section when we have a draft reference implementation**
-
-To ensure the reproducibility of the benchmark results, you need to    
-
-0. Submit all source code for generating the forecasting results
-1. Specify the random seeds according to instructions
-2. Report results afer repeated runs of the benchmark
-3. Include a Dockerfile containing all dependencies
-4. Provide instructions about hyperparameter tuning (optional)
-
 
 # Leaderboard
 

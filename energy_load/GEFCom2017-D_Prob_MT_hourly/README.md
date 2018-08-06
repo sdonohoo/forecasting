@@ -43,12 +43,12 @@ For this problem, you are provided successive folds of training data. The goal i
 
 # Quality
 
-**Evaluation metric**: Pinball loss function  
+**Evaluation metric**: Pinball loss  
 **Minimum performance**: TBD  
 **Evaluation frequency**: TBD  
 **Evaluation thoroughness**: TBD  
 
-**TODO: Write script to compute pinball loss function.**
+**TODO: Write script to compute pinball losses over 6 rounds and computes the final metric.**
 
 # Instructions to run reference implementation
 **TODO: Revise this section when we have a draft reference implementation. We will need to update the script directories and maybe refine environment setup.**
@@ -114,7 +114,7 @@ For this problem, you are provided successive folds of training data. The goal i
 4. To submit your solution you must create a script (in any language) that includes all code necessary to train your model and produce predictions for all forecasted periods in the format:
 
     * The file format should be *.xls;
-    * The file name should be "submission.xls".
+    * The file name should be "submission_YYYYMMDDHHMMSS.xls". "YYYYMMDDHHMMSS" is the timestamp used to distinguish outputs of multiple runs. 
     * The file should include 10 worksheets, named as CT, ME, NEMASSBOST, NH, RI, SEMASS, VT, WCMASS, MASS, TOTAL. Please arrange the worksheets in the same order as listed above.
     * In each worksheet, the first two columns should be date and hour, respectively, in chronological order.
     * The 3rd to the 11th columns should be Q10, Q20, ... to Q90.
@@ -126,9 +126,9 @@ For this problem, you are provided successive folds of training data. The goal i
 5. Once you have generated your submission file, you can evaluate the model's performance with
     ```
     python energy_load/problem1/common/evaluate.py \
-    energy_load/problem1/benchmarks/<submission_dir>/submission.xls
+    energy_load/problem1/benchmarks/<submission_dir>/submission_YYYYMMDDHHMMSS.xls
     ```
-
+	Note that you need to run your model five times as instructed by the **Reproducibility Guidelines** section of the **User Guidelines** document, and submit the prediction outputs of all five runs. 
 6. Include a Dockerfile containing all dependencies for running your benchmark (see [./benchmarks/submission1/Dockerfile](./benchmarks/submission1/Dockerfile) for an example). The Dockerfile can point to a `.txt` file which contains a list of necessary packages.
 
 7. Create a Docker image and push it to the ACR   
@@ -143,7 +143,7 @@ For this problem, you are provided successive folds of training data. The goal i
    ```
    Note that you will need to log into the ACR before pushing the image.
 
-8. Create a README file in the submission folder documenting the reported model performance and your approach (see [./benchmarks/submission1/README.md](./benchmarks/submission1/README.md) for an example)
+8. Create a README file in the submission folder documenting the reported model performance and your approach (see [./benchmarks/submission1/README.md](./benchmarks/submission1/README.md) for an example). Note that you need to report preformance of all 5 runs as instructed by the **Reproducibility Guidelines** section of the **User Guidelines** document. 
 
 9. Create pull request for review
 

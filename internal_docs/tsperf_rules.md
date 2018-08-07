@@ -37,7 +37,7 @@ A *benchmark reference implementation* is a specific validated benchmark submiss
 
 The following diagram summarizes the relations betwwen different terms: 
 
-<img src="images/definitions.png" alt="drawing" heigh="300px" width="600px"/>
+<img src="./images/definitions.png" alt="drawing" heigh="300px" width="600px"/>
 
 ### Structure and hierarchy of documents 
 Ilan

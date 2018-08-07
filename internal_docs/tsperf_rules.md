@@ -13,7 +13,7 @@ A *benchmark* is an abstract problem that can be solved using ML by training a m
 
 *Benchmark rules* is a set of rules for implementing a benchmark to produce a class of comparable results, such as training and test set partition, performance evaluation metric and process.
 
-A *system* consists of a defined set of cloud harvare resources and services such as processors, memories, disks, clusters and interconnect. It also includes specific versions of all software such as operating system, compilers, libraries, and drivers that significantly influences the running time, excluding the ML framework.
+A *system* consists of a defined set of cloud hardware resources and services such as processors, memories, disks, clusters and interconnect. It also includes specific versions of all software such as operating system, compilers, libraries, and drivers that significantly influences the running time, excluding the ML framework.
 
 A *framework* is a specific version of a software library or set of related libraries, possibly with associated offline compiler, for training ML models using a system. Examples include specific versions of Caffe2, MXNet, PaddlePaddle, pyTorch, or TensorFlow.
 
@@ -76,8 +76,7 @@ Chenhui, Ilan
 
 ## Review of submissions
 
-Guidance for reviewing submissions  
-Dmitry
+
 
 ## Leaderboard
 

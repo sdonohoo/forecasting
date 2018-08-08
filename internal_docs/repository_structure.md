@@ -12,9 +12,9 @@ We use Git repo to maintain the source code and relevant files. The repository h
     * `/benchmarks` folder: This folder contains multiple subfolders with each subfolder including all the necessary scripts and the submission form for reproducing a certain benchmark implementation. For instance, `/submission1` folder under `/TSPerf/energy_load/problem1/benchmarks` includes all the scripts of submission1 which is a reference benchmark implementation.
     
 
-    * `/common` folder: As an example, `/TSPerf/energy_load/problem1/common` contains the modules that could be commonly used for problem1, such as Python modules that download the data, prepare training and scoring data, and evaluate performance of the benchmark. 
+    * `/common` folder: This folder includes utility functions for a certain problem. As an example, `/TSPerf/energy_load/problem1/common` contains the modules that could be commonly used for problem1, such as Python modules that download the data, prepare training and scoring data, and evaluate performance of the benchmark. 
 
-    * `/README.md`: For instance, `/TSPerf/energy_load/problem1/README.md` describes problem1 in detail and provides guidance about how to create submission of a benchmark and review the submission. 
+    * `/README.md`: This Markdown file provides detailed instructions about a certain problem. For instance, `/TSPerf/energy_load/problem1/README.md` describes problem1 in detail and provides guidance about how to run benchmarks and create new submissions for problem1. 
 
 * `/TSPerf/common` folder: This folder has the modules that could be used across different use cases, such as Python modules which compute the evaluation metrics of the forecasting results.
 

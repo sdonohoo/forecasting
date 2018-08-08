@@ -75,8 +75,77 @@ Guidance for submitting the code
 Chenhui, Ilan 
 
 ## Review of submissions
+The goal of the review is to validate the declared
 
+* quality of the model 
+* running time
+* cloud cost  
 
+We will explain below how to validate these quantities. Additionally the reviewer should check that the evaluation of the quality of the model is done using a standard `evaluate.py` script and that the code
+
+* does not use test data for training
+* has a good quality 
+* is well documented
+
+We do not have specific guidelines for checking these items. Reviewer should use his/her own judgement to decide if there is no test data leakage and if the code or documentation need improvement.
+
+Reviewer should set up execution environment before running benchmark implementation. Initially the reviewer needs to complete the following three steps:
+
+0. Verify that the submission has README.md file with  
+    * name of the branch with submission code
+    * benchmark path, for example /TSPerf/energy_load/problem1
+    * path to submission directory, for example  /TSPerf/energy_load/problem1/benchmarks/submission1
+    * instructions for provisioning the system (e.g. DSVM, Batch AI)
+    * name of Docker image stored in tsperf registry, for example tsperf.azurecr.io/energy_load/problem1/submission1/submission1_image:v1
+
+1. Follow the instructions in the README file and provision the system (e.g. DSVM or Batch AI) that was used to generate benchmark results. 
+
+The next steps depend on the system and are described in the following two subsections.
+
+### Standalone VM
+
+2. Log into VM
+
+3. Choose submission branch and clone the Github repo to your machine:
+
+        git clone https://msdata.visualstudio.com/DefaultCollection/AlgorithmsAndDataScience/_git/TSPerf
+        git checkout <branch name>
+
+4. Download the data using the following commands
+
+        python <benchmark path>/common/get_data.py
+
+    where \<benchmark path\> is a root benchmark directory, for example energy_load/problem1
+
+5. Log into Azure Container Registry:
+   
+       docker login --username tsperf --password <ACR Access Key> tsperf.azurecr.io
+   
+   If want to execute docker commands without sudo as a non-root user, you need to create a Unix group and add users to it by following the instructions [here](https://docs.docker.com/install/linux/linux-postinstall/#manage-docker-as-a-non-root-user).
+
+6. Pull a Docker image from ACR, using image name that is specified in README file:   
+      
+       docker pull <image name>
+
+7. Choose a name for a new Docker container and create it using command:   
+   
+       docker run -it -v ~/TSPerf:/TSPerf --name <container name> <image name>
+   
+   Note that you need to mount `/TSPerf` folder (the one you cloned) to the container so that you will have access to the source code in the container. 
+
+8. Run benchmark implementation inside the Docker container:   
+
+       time -p python <submission directory>/train_score.py
+
+   This will generate a `submission.xls` file in the submission directory. This command will also output the running time of train_score.py. The running time should be compared against the wallclock time declared in benchmark submission.
+   
+9. Evaluate the benchmark quality by running
+
+       python <benchmark directory>/common/evaluate.py <submission directory>/submission.xls
+
+    This command will output benchmark quality value (e.g. MAPE).
+
+### Batch AI
 
 ## Leaderboard
 

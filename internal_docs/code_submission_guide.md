@@ -34,7 +34,7 @@ Please follow the following steps to make submissions.
    ```
    where RANDOM_SEED is an integer between 1 and 5. Evaluate the performance of each run with `evaluate.py` and compute the median.
 
-8. Include other scripts that are necessary for reproducing the submitted benchmark results. For example, you should include a Dockerfile containing all dependencies for running your benchmark submission. The Dockerfile can point to a `.txt` file which contains a list of necessary packages. If you use Batch AI, please include a JSON file `job.json` to describe the Bath AI job. 
+8. Include other scripts that are necessary for reproducing the submitted benchmark results. For example, you should include a Dockerfile containing all dependencies for running your benchmark submission. The Dockerfile can point to a `.txt` file which contains a list of necessary packages. If you use Batch AI, please include a JSON file `job.json` that describes the Bath AI job. 
 
 9. Create a Docker image and push it to the ACR   
    To create your Docker image, for example you can go to `/benchmarks/submission1/` folder and run the following command   

@@ -10,7 +10,7 @@ Please follow the following steps to make submissions.
    git clone https://msdata.visualstudio.com/DefaultCollection/AlgorithmsAndDataScience/_git/TSPerf   
    git checkout -b <branch name>
    ```
-   
+
 2. Create a new submission folder under `<benchmark path>/benchmarks` where `<benchmark path>` is a root benchmark directory, e.g., `energy_load/problem1`. Please name your submission folder as `submission#` where `#` is the next number that has not been used.
 
 3. Download the data using the following commands
@@ -34,7 +34,7 @@ Please follow the following steps to make submissions.
    ```
    where RANDOM_SEED is an integer between 1 and 5. Evaluate the performance of each run with `evaluate.py` and compute the median.
 
-8. Include other scripts that is necessary for reproducing the submitted benchmark results. For example, you should include a Dockerfile containing all dependencies for running your benchmark submission. The Dockerfile can point to a `.txt` file which contains a list of necessary packages. If you use Batch AI, please include a JSON file `job.json` to describe the Bath AI job. 
+8. Include other scripts that are necessary for reproducing the submitted benchmark results. For example, you should include a Dockerfile containing all dependencies for running your benchmark submission. The Dockerfile can point to a `.txt` file which contains a list of necessary packages. If you use Batch AI, please include a JSON file `job.json` that describes the Bath AI job. 
 
 9. Create a Docker image and push it to the ACR   
    To create your Docker image, for example you can go to `/benchmarks/submission1/` folder and run the following command   
@@ -46,7 +46,7 @@ Please follow the following steps to make submissions.
    docker tag submission1_image tsperf.azurecr.io/energy_load/problem1/submission1/submission1_image:v1
    docker push tsperf.azurecr.io/energy_load/problem1/submission1/submission1_image:v1
    ```
-   Note that you will need to log into the ACR before pushing the image.
+   Note that you will need to log into the ACR before publishing the image.
 
 
 10. Include a submission form in the submission folder as README.md file. The submission form documents the submitter's information, method utlized in the benchmark implementation, information about the scripts, obtained results, and steps of reproducing the results. An example submission form can be found here (TODO: Add link). Specifically, it should include
@@ -58,5 +58,4 @@ Please follow the following steps to make submissions.
       tsperf.azurecr.io/energy_load/problem1/submission1/submission1_image:v1
     * benchmark quality values obtained with random seeds 1 through 5
 
-
-5. Create pull request for review
+11. Create pull request for review

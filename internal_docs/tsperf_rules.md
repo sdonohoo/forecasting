@@ -6,6 +6,8 @@ Vision, goals (Ilan - 3)
 
 ## Framework
 
+Framework goals
+
 ### Definitions 
 We adopt several definitions from [MLPerf](https://github.com/mlperf/policies/blob/master/rules.adoc) and also add a number of new ones:
 
@@ -54,7 +56,7 @@ Hong
 ### Retail sales forecasting 
 Chenhui
 
-## Model development
+## Development of benchmark implementation
 
 ### Availables Docker images
 Description of the available Docker images  
@@ -135,11 +137,11 @@ The next steps depend on the system and are described in the following two subse
 
        source <benchmark directory>/common/train_score_vm <submission directory> 
 
-   This will generate 5 `submission_<seed number>.xls` files in the submission directory, where \<seed number\> is between 1 and 5. These commands will also output 5 running times of train_score.py. The median of the times reported in rows starting with 'real' should be compared against the wallclock time declared in benchmark submission.
+   This will generate 5 `submission_<seed number>.xls` files in the submission directory, where \<seed number\> is between 1 and 5. This command will also output 5 running times of train_score.py. The median of the times reported in rows starting with 'real' should be compared against the wallclock time declared in benchmark submission.
    
 8. Evaluate the benchmark quality by running
 
-       source <benchmark directory>/common/evaluate_vm <submission directory> <benchmark directory>
+       source <benchmark directory>/common/evaluate <submission directory> <benchmark directory>
 
     This command will output 5 benchmark quality values (e.g. MAPEs). Their median should be compared against the benchmark quality declared in benchmark submission.
 
@@ -158,7 +160,7 @@ The next steps depend on the system and are described in the following two subse
 
     where \<benchmark path\> is a root benchmark directory, for example energy_load/problem1
 
-4. Follow the instructions in the README file and provision the resource group, Batch AI workspace, Batch AI cluster and storage account with file share and blob storage.
+4. Follow the instructions in the README file and provision the resource group, Batch AI workspace, Batch AI cluster and storage account with file share and blob storage. When creating resources, please record *resource group name*, *storage account name*, *storage account key* and *file share name*. You will need to provide these parameters it the later steps.
 
 5. Upload <submission directory>/train_score.py script to file share account by following the instructions in README file.
 
@@ -172,11 +174,21 @@ The next steps depend on the system and are described in the following two subse
 
 8. Run 5 Batch AI jobs
 
-        az batchai job create -n <job name>_1 -c <cluster name> -g <resource group name> -w <workspace name> -e <submission name>  -f <submission directory>/job.json --storage-account-name <storage account name>
-        az batchai job wait -g <resource group name> -w <workspace name> -n <job name>_1
+        source  train_score_batchai <resource group name> <workspace name> <cluster name> <submission directory> <storage account name>
 
+    This command will generate 5 `submission_<seed number>.xls` files, where \<seed number\> is between 1 and 5. The location of these files in file share storage will be printed out. This command will also output 5 running times of Batch AI jobs. The median of these times should be compared against the wallclock time declared in benchmark submission. 
 
+9.  Run the following command to download the first submission file:
 
+        az storage file download --account-name <storage account name> --account-key <storage account key> --share-name <file share name> --path <file share path to submission file of the first run> --dest <submission directory>/submission_1.xls
+
+    Repeat this command for other 4 submission files, by replacing pathes in `--path` and `--dest` parameters. 
+
+10. Evaluate the benchmark quality by running
+
+       source <benchmark directory>/common/evaluate <submission directory> <benchmark directory>
+
+    This command will output 5 benchmark quality values (e.g. MAPEs). Their median should be compared against the benchmark quality declared in the benchmark submission.
 
 ## Leaderboard
 

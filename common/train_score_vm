@@ -6,5 +6,6 @@
 
 for i in `seq 1 5`;
 do 
+    echo "Run $i"
     time -p python $1/train_score.py $i
 done

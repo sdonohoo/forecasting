@@ -7,9 +7,12 @@ az batchai experiment create -g $1 -w $2 -n $4
 
 for i in `seq 1 5`;
 do 
+     echo "Run $i"
      starttime=$(date +%s)
      az batchai job create -n job_$i -c $3 -g $1 -w $2 -e $4  -f $4/job.json --storage-account-name $5
      az batchai job wait -g $1 -w $2 -n job_$i
      endtime=$(date +%s)
-     echo "Elapsed time" $(expr $endtime - $starttime) seconds"
+     echo "Elapsed time: $(expr $endtime - $starttime) seconds"
+     echo "Location of the submission file"
+     az batchai job file list -j job_$i -w $2 -e $4 -g $1 -d SUBMISSIONS
 done

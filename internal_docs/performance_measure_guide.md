@@ -1,6 +1,6 @@
 ## Guidance for Performance Measuring
 
-Each benchmark result is the median of five run results produced using the integer random number generator seeds 1 through 5. All five run results must also be reported. The following measurements should be reported:
+Each benchmark result is the median of five run results produced using the integer random number generator seeds 1 through 5. All five run results must also be reported. The following measurements should be included:
   * quality of the model
   * running time
   * cloud cost 

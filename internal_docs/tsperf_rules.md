@@ -98,54 +98,85 @@ Reviewer should set up execution environment before running benchmark implementa
     * instructions for provisioning the system (e.g. DSVM, Batch AI)
     * name of Docker image stored in tsperf registry, for example tsperf.azurecr.io/energy_load/problem1/submission1/submission1_image:v1
 
-1. Follow the instructions in the README file and provision the system (e.g. DSVM or Batch AI) that was used to generate benchmark results. 
-
 The next steps depend on the system and are described in the following two subsections.
 
 ### Standalone VM
 
-2. Log into VM
+1. Follow the instructions in the README file and provision the virtual machine that was used to generate benchmark results. Then log into the provisioned VM.
 
-3. Choose submission branch and clone the Github repo to your machine:
+2. Choose submission branch and clone the Github repo to your machine:
 
         git clone https://msdata.visualstudio.com/DefaultCollection/AlgorithmsAndDataScience/_git/TSPerf
         git checkout <branch name>
 
-4. Download the data using the following commands
+3. Download the data using the following commands
 
         python <benchmark path>/common/get_data.py
 
     where \<benchmark path\> is a root benchmark directory, for example energy_load/problem1
 
-5. Log into Azure Container Registry:
+4. Log into Azure Container Registry:
    
        docker login --username tsperf --password <ACR Access Key> tsperf.azurecr.io
    
    If want to execute docker commands without sudo as a non-root user, you need to create a Unix group and add users to it by following the instructions [here](https://docs.docker.com/install/linux/linux-postinstall/#manage-docker-as-a-non-root-user).
 
-6. Pull a Docker image from ACR, using image name that is specified in README file:   
+5. Pull a Docker image from ACR, using image name that is specified in README file:   
       
        docker pull <image name>
 
-7. Choose a name for a new Docker container and create it using command:   
+6. Choose a name for a new Docker container and create it using command:   
    
        docker run -it -v ~/TSPerf:/TSPerf --name <container name> <image name>
    
    Note that you need to mount `/TSPerf` folder (the one you cloned) to the container so that you will have access to the source code in the container. 
 
-8. Run benchmark implementation inside the Docker container:   
+7. Inside Docker container, run the following command:  
 
-       time -p python <submission directory>/train_score.py
+       source <benchmark directory>/common/train_score_vm <submission directory> 
 
-   This will generate a `submission.xls` file in the submission directory. This command will also output the running time of train_score.py. The running time should be compared against the wallclock time declared in benchmark submission.
+   This will generate 5 `submission_<seed number>.xls` files in the submission directory, where \<seed number\> is between 1 and 5. These commands will also output 5 running times of train_score.py. The median of the times reported in rows starting with 'real' should be compared against the wallclock time declared in benchmark submission.
    
-9. Evaluate the benchmark quality by running
+8. Evaluate the benchmark quality by running
 
-       python <benchmark directory>/common/evaluate.py <submission directory>/submission.xls
+       source <benchmark directory>/common/evaluate_vm <submission directory> <benchmark directory>
 
-    This command will output benchmark quality value (e.g. MAPE).
+    This command will output 5 benchmark quality values (e.g. MAPEs). Their median should be compared against the benchmark quality declared in benchmark submission.
 
 ### Batch AI
+
+1. Provision Linux Data Science VM with DS4v2 configuration. 
+
+2. Choose submission branch and clone the Github repo to your machine:
+
+        git clone https://msdata.visualstudio.com/DefaultCollection/AlgorithmsAndDataScience/_git/TSPerf
+        git checkout <branch name>
+
+3. Download the data using the following commands
+
+        python <benchmark path>/common/get_data.py
+
+    where \<benchmark path\> is a root benchmark directory, for example energy_load/problem1
+
+4. Follow the instructions in the README file and provision the resource group, Batch AI workspace, Batch AI cluster and storage account with file share and blob storage.
+
+5. Upload <submission directory>/train_score.py script to file share account by following the instructions in README file.
+
+6. Upload the dataset to blob storage by following the instructions in README file.
+
+7. Create Batch AI experiment:
+
+       az batchai experiment create -g <resource group name> -w <workspace name > -n <submission name>
+
+   where resource group name and workspace name are the ones used in step 4. Submission name is rightmost directory in submission path. 
+
+8. Run 5 Batch AI jobs
+
+        az batchai job create -n <job name>_1 -c <cluster name> -g <resource group name> -w <workspace name> -e <submission name>  -f <submission directory>/job.json --storage-account-name <storage account name>
+        az batchai job wait -g <resource group name> -w <workspace name> -n <job name>_1
+
+
+
 
 ## Leaderboard
 

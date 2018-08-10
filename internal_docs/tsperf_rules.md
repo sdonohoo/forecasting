@@ -47,7 +47,7 @@ Ilan
 ### Structure of repository 
 Chenhui
 
-## Problems
+## Benchmarks
 training, test sets, what should be predicted, metrics
 
 ### Energy consumption forecasting  
@@ -191,9 +191,17 @@ The next steps depend on the system and are described in the following two subse
     This command will output 5 benchmark quality values (e.g. MAPEs). Their median should be compared against the benchmark quality declared in the benchmark submission.
 
 ## Leaderboard
+Each benchmark will have a separate leaderboards. All leaderboards will have the following columns:
+* submission name
+* URL of submission folder in VSTS
+* benchmark quality (e.g. MAPE)
+* running time
+* cost
+* system (e.g. DSVM)
+* framework (e.g. Tensorflow)
+* algorithm (e.g. LSTM)  
 
-Structure of the leaderboard  
-Dmitry
+Each row will be a validated benchmark submission. Leaderboard will be updated by reviewer, after validating a benchmark submission. Every validated benchmark submission will be shown in the leaderboard. Since benchmark submission are measured by three parameters (quality, running time and cost), there will be no ranking between leaderboard entries.
 
 ## Selection of reference implementation
 

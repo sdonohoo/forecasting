@@ -1,9 +1,10 @@
 """
-This script requires the user download the SMD Hourly Data from 2011 to 2017
-from ISO New England website (https://www.iso-ne.com/isoexpress/web/reports
-/load-and-demand/-/tree/zone-info). The downloaded data should be stored in
-a "data" directory that is at the same level as the folder containing this
-script.
+This script requires the user to use the script
+"TSPerf/energy_load/common/download_data_GEFCom2017-D.py" to download the SMD
+Hourly Data from 2011 to 2017 from ISO New England website (
+https://www.iso-ne.com/isoexpress/web/reports/load-and-demand/-/tree/zone-info).
+The downloaded data is stored in TSPerf/energy_load/data/GEFCom2017-D
+
 This script parses the excel files and creates training and testing data files.
 After running this script, the following files are generated:
 data/train/train_base.csv   : 2011-01-01 01:00:00 - 2016-12-01 00:00:00
@@ -53,6 +54,7 @@ from datetime import timedelta
 
 # This assumes that the script is stored in a directory of the same level
 # as the data directory
+RAW_DATA_DIR = '../../data/GEFCom2017-D'
 DATA_DIR = '../data'
 TRAIN_DATA_DIR = DATA_DIR + '/train'
 TEST_DATA_DIR = DATA_DIR + '/test'
@@ -105,7 +107,7 @@ def parse_excel(file_name):
     This function parses an excel file with multiple sheets and returns a
     panda data frame.
     """
-    file_path = os.path.join(DATA_DIR, file_name)
+    file_path = os.path.join(RAW_DATA_DIR, file_name)
     xls = pd.ExcelFile(file_path)
 
     if file_name in DATA_FILE_LIST_NEW_FORMAT:
@@ -174,7 +176,7 @@ def parse_excel(file_name):
 
 def main():
     # Make sure all files are downloaded to the data directory
-    check_data_exist(DATA_DIR)
+    check_data_exist(RAW_DATA_DIR)
 
     # Create train and test data directories
     if not os.path.isdir(TRAIN_DATA_DIR):

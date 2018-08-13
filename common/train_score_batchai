@@ -8,8 +8,15 @@ az batchai experiment create -g $1 -w $2 -n $4
 for i in `seq 1 5`;
 do 
      echo "Run $i"
+
+     # change seed value in job.json file
+     seed='"name": "SEED", "value": "'$i'"'
+     sed_command='s/"name": "SEED", "value": "TBD"/'$seed'/g'
+     echo $sed_command > script.sed
+     sed -f script.sed job.json > job_$i.json
+
      starttime=$(date +%s)
-     az batchai job create -n job_$i -c $3 -g $1 -w $2 -e $4  -f $4/job.json --storage-account-name $5
+     az batchai job create -n job_$i -c $3 -g $1 -w $2 -e $4  -f $4/job_$i.json --storage-account-name $5
      az batchai job wait -g $1 -w $2 -n job_$i
      endtime=$(date +%s)
      echo "Elapsed time: $(expr $endtime - $starttime) seconds"

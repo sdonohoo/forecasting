@@ -7,5 +7,5 @@
 
 for i in `seq 1 5`;
 do
-    python $2/common/evaluate.py $1/submission_$i.xls
+    python $2/common/evaluate.py $1/submission_$i.csv
 done

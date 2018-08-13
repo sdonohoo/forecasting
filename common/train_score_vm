@@ -7,5 +7,9 @@
 for i in `seq 1 5`;
 do 
     echo "Run $i"
-    time -p python $1/train_score.py $i
+    if [ "$2" = "R" ]; then
+        time -p Rscript $1/train_score.r $i
+    else
+        time -p python $1/train_score.py $i
+    fi
 done

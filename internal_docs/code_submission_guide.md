@@ -73,5 +73,7 @@ here (TODO: Add link). Specifically, it should include
     * name of Docker image stored in tsperf registry, for example
       tsperf.azurecr.io/energy_load/problem1/submission1/submission1_image:v1
     * benchmark quality values obtained with random seeds 1 through 5
+    * running time in each run
+    * cost in each run 
 
 11. Create pull request for review

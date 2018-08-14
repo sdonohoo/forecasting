@@ -9,18 +9,7 @@ from urllib.request import urlretrieve
 
 def download_data():
     
-    data_dir = "energy_load/data/GEFCom2017-D"
-    # Make raw data directory if it doesn't already exist
-    if not os.path.exists(data_dir):
-        os.makedirs(data_dir)
-    
-    # Check if data has already been downloaded and stop if so
-    for i in range(5):
-        year = str(2011+i)
-        fname = year + "_smd_hourly.xls"
-        fpath = data_dir + "/" + fname
-        if os.path.exists(fpath):
-            sys.exit("Data file " + fpath + " already exists.")
+    data_dir = os.path.join("energy_load", "GEFCom2017-D_Prob_MT_hourly", "data")
 
     # Download the data
     urls = [
@@ -28,13 +17,29 @@ def download_data():
         "https://www.iso-ne.com/static-assets/documents/markets/hstdata/znl_info/hourly/2012_smd_hourly.xls",
         "https://www.iso-ne.com/static-assets/documents/markets/hstdata/znl_info/hourly/2013_smd_hourly.xls",
         "https://www.iso-ne.com/static-assets/documents/2015/05/2014_smd_hourly.xls",
-        "https://www.iso-ne.com/static-assets/documents/2015/02/smd_hourly.xls"
+        "https://www.iso-ne.com/static-assets/documents/2015/02/smd_hourly.xls",
+        "https://www.iso-ne.com/static-assets/documents/2016/02/smd_hourly.xls",
+        "https://www.iso-ne.com/static-assets/documents/2017/02/2017_smd_hourly.xlsx"
     ]
 
-    for i, url in enumerate(urls):
-        year = str(2011+i)
-        fname = year + "_smd_hourly.xls"
-        fpath = data_dir + "/" + fname
+    for url in urls:
+        
+        url_tokens = url.split('/')
+        fname = url_tokens[-1]
+    
+        # add prefix to 2015 and 2016 file names
+        year_month = url_tokens[-3:-1]
+        year_month = "/".join(year_month)
+        print(year_month)
+        if year_month in ["2015/02", "2016/02"]:
+            fname = url_tokens[-3] + "_" + fname
+
+        fpath = os.path.join(data_dir, fname)
+
+        # Check if file already exists and skip if so
+        if os.path.exists(fpath):
+            print(fpath + " already exists")
+            continue
         print('Downloading', url)
         f, _ = urlretrieve(url, fpath)
         print('Downloaded to', fpath)

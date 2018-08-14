@@ -22,5 +22,4 @@ time -p python <submission directory>/train_score.py
 ### Cloud Cost
 
 Include the total cost of obtaining the median run result using fixed prices for the general public at the time the result is collected. Do not use spot 
-pricing. If you use Azure, you can estimate the costs for Azure products using this [online pricing calculator]
-(https://azure.microsoft.com/en-us/pricing/calculator/).  
+pricing. If you use Azure, you can estimate the costs for Azure products using this [online pricing calculator](https://azure.microsoft.com/en-us/pricing/calculator/).  

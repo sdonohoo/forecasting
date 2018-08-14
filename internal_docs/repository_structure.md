@@ -18,13 +18,13 @@ retail sales forecasting use case.
   submissions, a subfolder storing common utility scripts, and a Markdown file specifying the benchmark. The description of each item under the benchmark 
   folder is as follows
 
-    * `/reference` folder: This folder contains multiple subfolders with each subfolder including all the necessary scripts and the submission form for 
-    reproducing a certain reference implementation. For instance, `/reference1` folder under `/TSPerf/energy_load/GEFCom2014_Pt_1Month_Hourly/reference` 
-    includes all the required submission files of reference1.
+    * `/reference` folder: This folder contains all the necessary scripts and the submission form for reproducing the reference implementation. For 
+    instance, `/TSPerf/energy_load/GEFCom2014_Pt_1Month_Hourly/reference` includes the required submission files of the reference implementation for 
+    GEFCom2014_Pt_1Month_Hourly.
 
-    * `/submissions` folder: This is a folder similar to `/reference`. It contains subfolders with each subfolder including all the necessary scripts and 
+    * `/submissions` folder: This folder contains multiple subfolders with each subfolder including all the necessary scripts and 
     the submission form for reproducing a certain submission. For instance, `/submission1` folder under 
-    `/TSPerf/energy_load/GEFCom2014_Pt_1Month_Hourly/submissions` includes all the required submission files of submission1.
+    `/TSPerf/energy_load/GEFCom2014_Pt_1Month_Hourly/submissions` includes the required submission files of submission1.
     
 
     * `/common` folder: This folder includes utility scripts for a benchmark. As an example, `/TSPerf/energy_load/GEFCom2014_Pt_1Month_Hourly/common` 

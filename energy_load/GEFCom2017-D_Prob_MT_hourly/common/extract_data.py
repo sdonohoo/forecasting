@@ -95,6 +95,15 @@ TEST_STARTS_ENDS = [pd.to_datetime(('2017-01-01', '2017-02-01')),
                     pd.to_datetime(('2017-03-01', '2017-04-01')),
                     pd.to_datetime(('2017-04-01', '2017-05-01'))]
 
+# These dates are used to correct doubled demand values at the end of DST
+# every year. The problem is fixed starting from 2016. It doesn't worth
+# doing outlier detection for these 5 data points.
+DST_END_DATETIME = pd.to_datetime(['2011-11-06 02:00:00',
+                                   '2012-11-04 02:00:00',
+                                   '2013-11-03 02:00:00',
+                                   '2014-11-02 02:00:00',
+                                   '2015-11-01 02:00:00'])
+
 def check_data_exist(data_dir):
     """
     This function makes sure that all data are downloaded to the data
@@ -180,7 +189,7 @@ def parse_excel(file_name):
 
     return df_final
 
-def main(fill_zeros_flag):
+def main(preprocess_flag):
     # Make sure all files are downloaded to the data directory
     check_data_exist(RAW_DATA_DIR)
 
@@ -200,7 +209,7 @@ def main(fill_zeros_flag):
     file_df_final = pd.concat(file_df_list)
     file_df_final.reset_index(inplace=True, drop=True)
 
-    if fill_zeros_flag:
+    if preprocess_flag:
         # Fill zero values by interpolating nearby values. A simple method
         # is used because we know there are only 50 zero values spread out in
         # the data, and the input data is well sorted by load zones and time.
@@ -208,6 +217,11 @@ def main(fill_zeros_flag):
         file_df_final['DEMAND'].replace(to_replace=0, value=np.nan, inplace=True)
         file_df_final['DEMAND'].interpolate(inplace=True)
         file_df_final['DEMAND'] = round(file_df_final['DEMAND'])
+
+        dst_end_datetime_mask = \
+            file_df_final['Datetime'].isin(DST_END_DATETIME)
+        file_df_final.loc[dst_end_datetime_mask,'DEMAND'] = \
+            round(file_df_final.loc[dst_end_datetime_mask,'DEMAND']/2)
 
     file_df_final.set_index('Datetime', inplace=True)
 
@@ -248,11 +262,11 @@ def main(fill_zeros_flag):
         test_round_df.to_csv(file_name)
 
 if __name__ == '__main__':
-    fill_zeros_flag = True
+    preprocess_flag = True
 
-    opts, args = getopt.getopt(sys.argv[1:], '', ['fillzeros'])
+    opts, args = getopt.getopt(sys.argv[1:], '', ['preprocess'])
 
     for opt, arg in opts:
-        if opt == 'fillzeros':
-            fill_zeros_flag = arg
-    main(fill_zeros_flag)
+        if opt == 'preprocess':
+            preprocess_flag = arg
+    main(preprocess_flag)

@@ -161,7 +161,7 @@ benchmark results. Then log into the provisioned VM.
 
        source <benchmark directory>/common/train_score_vm <submission directory> 
 
-   This will generate 5 `submission_<seed number>.csv` files in the submission directory, where \<seed number\> 
+   This will generate 5 `submission_seed_<seed number>.csv` files in the submission directory, where \<seed number\> 
    is between 1 and 5. This command will also output 5 running times of train_score.py. The median of the times 
    reported in rows starting with 'real' should be compared against the wallclock time declared in benchmark 
    submission.
@@ -210,7 +210,7 @@ file.
         source  train_score_batchai <resource group name> <workspace name> <cluster name> <submission directory> 
         <storage account name>
 
-    This command will create 5 `submission_<seed number>.csv` files in the local directory, where \<seed number\> is 
+    This command will create 5 `submission_seed_<seed number>.csv` files in the local directory, where \<seed number\> is 
     between 1 and 5. This command will also output 5 running times of Batch AI jobs. The median of these times should 
     be compared against the wallclock time declared in benchmark submission. 
 

@@ -17,7 +17,7 @@ do
 
      starttime=$(date +%s)
      az batchai job create -n job_$i -c $3 -g $1 -w $2 -e $4  -f $4/job_$i.json --storage-account-name $5
-     az batchai job file stream -g $1 -w $2 -e $4 -j job_$1 -p submissions -f submission_$i.csv > submission_$i.csv
+     az batchai job file stream -g $1 -w $2 -e $4 -j job_$1 -p submissions -f submission_seed_$i.csv > submission__seed_$i.csv
      endtime=$(date +%s)
      echo "Elapsed time: $(expr $endtime - $starttime) seconds"
      echo "Location of the submission file"

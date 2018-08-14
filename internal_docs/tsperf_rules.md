@@ -210,20 +210,11 @@ file.
         source  train_score_batchai <resource group name> <workspace name> <cluster name> <submission directory> 
         <storage account name>
 
-    This command will generate 5 `submission_<seed number>.csv` files, where \<seed number\> is between 1 and 5. The 
-    location of these files in file share storage will be printed out. This command will also output 5 running times of 
-    Batch AI jobs. The median of these times should be compared against the wallclock time declared in benchmark 
-    submission. 
+    This command will create 5 `submission_<seed number>.csv` files in the local directory, where \<seed number\> is 
+    between 1 and 5. This command will also output 5 running times of Batch AI jobs. The median of these times should 
+    be compared against the wallclock time declared in benchmark submission. 
 
-9.  Run the following command to download the first submission file:
-
-        az storage file download --account-name <storage account name> --account-key <storage account key> --share-name 
-        <file share name> --path <file share path to submission file of the first run> --dest 
-        <submission directory>/submission_1.csv
-
-    Repeat this command for other 4 submission files, by replacing pathes in `--path` and `--dest` parameters. 
-
-10. Evaluate the benchmark quality by running
+9. Evaluate the benchmark quality by running
 
        source <benchmark directory>/common/evaluate <submission directory> <benchmark directory>
 

@@ -12,7 +12,10 @@ Framework goals
 We adopt several definitions from [MLPerf](https://github.com/mlperf/policies/blob/master/rules.adoc) 
 and also add a number of new ones:
 
-A *benchmark* is an abstract problem that can be solved using ML by training a model based on a 
+A *use case* is a broad family of abstract problems in a specific vertical. Examples include energy 
+demand forecasting, retail sales forecasting, medical image classification, 
+
+A *benchmark* is a specific abstract problem that can be solved using ML by training a model based on a 
 specific dataset.
 
 *Benchmark rules* is a set of rules for implementing a benchmark to produce a class of comparable 

@@ -48,14 +48,20 @@ aggregated to generate the TOTAL zone. Therefore, the 'Zone' column contains
 DryBulb and DewPnt are averaged across the zones.
 """
 
-import os
-import pandas as pd
+import os, sys, getopt, inspect
 from datetime import timedelta
+
+import pandas as pd
+import numpy as np
 
 # This assumes that the script is stored in a directory of the same level
 # as the data directory
-RAW_DATA_DIR = '../../data/GEFCom2017-D'
-DATA_DIR = '../data'
+SCRIPT_PATH = os.path.dirname(os.path.abspath(inspect.getfile(
+    inspect.currentframe())))
+RAW_DATA_DIR_level = os.path.dirname(os.path.dirname(SCRIPT_PATH))
+DATA_DIR_level = os.path.dirname(SCRIPT_PATH)
+RAW_DATA_DIR = os.path.join(RAW_DATA_DIR_level, 'data/GEFCom2017-D')
+DATA_DIR = os.path.join(DATA_DIR_level, 'data')
 TRAIN_DATA_DIR = DATA_DIR + '/train'
 TEST_DATA_DIR = DATA_DIR + '/test'
 # This file stores all the data before 2016-12-01
@@ -169,12 +175,12 @@ def parse_excel(file_name):
 
     df_total.reset_index(inplace=True)
 
-    df_final = pd.concat([df_eight_zones, df_MA, df_total])
+    df_final = pd.concat([df_eight_zones, df_MA, df_total], sort=True)
     df_final.reset_index(inplace=True, drop=True)
 
     return df_final
 
-def main():
+def main(fill_zeros_flag):
     # Make sure all files are downloaded to the data directory
     check_data_exist(RAW_DATA_DIR)
 
@@ -192,6 +198,16 @@ def main():
         file_df_list.append(file_df)
 
     file_df_final = pd.concat(file_df_list)
+    file_df_final.reset_index(inplace=True, drop=True)
+
+    if fill_zeros_flag:
+        # Fill zero values by interpolating nearby values. A simple method
+        # is used because we know there are only 50 zero values spread out in
+        # the data, and the input data is well sorted by load zones and time.
+        # First, replace zeros with nans in order to use panda's interpolate method
+        file_df_final['DEMAND'].replace(to_replace=0, value=np.nan, inplace=True)
+        file_df_final['DEMAND'].interpolate(inplace=True)
+        file_df_final['DEMAND'] = round(file_df_final['DEMAND'])
 
     file_df_final.set_index('Datetime', inplace=True)
 
@@ -232,4 +248,11 @@ def main():
         test_round_df.to_csv(file_name)
 
 if __name__ == '__main__':
-    main()
+    fill_zeros_flag = True
+
+    opts, args = getopt.getopt(sys.argv[1:], '', ['fillzeros'])
+
+    for opt, arg in opts:
+        if opt == 'fillzeros':
+            fill_zeros_flag = arg
+    main(fill_zeros_flag)

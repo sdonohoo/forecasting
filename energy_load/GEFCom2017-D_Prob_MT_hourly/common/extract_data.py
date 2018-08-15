@@ -319,11 +319,11 @@ def main(preprocess_flag):
 def usage():
     print('usage: python extract_data.py [--preprocess]\n'
           'Options and arguments:\n'
-          '--preprocess: a boolean flag that determines whether data '
+          '--preprocess: A boolean flag that determines whether data '
           'preprocessing should be applied to the extracted data.\n'
-          '              If True, zero values will be filled by linearly '
-          'interpolation, outliers caused by end of Daylight Saving Time '
-          'will be divided by 2.\n'
+          '              If True, zero values will be filled by the '
+          'values of the same hour of the previous day, outliers caused by '
+          'end of Daylight Saving Time will be divided by 2.\n'
           '              Default: True.')
 
 if __name__ == '__main__':

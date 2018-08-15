@@ -10,7 +10,7 @@ Framework goals
 
 ### Definitions 
 We adopt several definitions from [MLPerf](https://github.com/mlperf/policies/blob/master/rules.adoc) 
-and also add a number of new ones:
+and also add a number of new ones:  
 
 A *benchmark* is an abstract problem that can be solved using ML by training a model based on a 
 specific dataset.
@@ -50,23 +50,38 @@ A *benchmark leaderboard* is a table of validated benchmark submissions.
 A *benchmark reference implementation* is a specific validated benchmark submission chosen from the 
 leaderboard. 
 
-The following diagram summarizes the relations betwwen different terms: 
+The following diagram summarizes the relations betwwen different terms:
 
 <img src="./images/definitions.png" alt="drawing" heigh="300px" width="600px"/>
 
-### Structure and hierarchy of documents 
+### Structure and hierarchy of documents
 Ilan
 
-### Structure of repository 
+### Structure of repository
 Chenhui
 
-## Benchmarks
-training, test sets, what should be predicted, metrics
+## Benchmarks  
 
-### Energy consumption forecasting  
-Hong
+| **Benchmark problem** | **Benchmark directory** |  
+| --------------------- | -------------------- |  
+| Probabilistic electricity load forecasting | TSPerf\energy_load\GEFCom2017-D_Prob_MT_Hourly |
 
-### Retail sales forecasting 
+### Probabilistic electricity load forecasting
+Probabilistic load forecasting (PLF) has become increasingly important in
+power systems planning and operations in recent years. The applications of PLF
+include energy production planning, reliability analysis, probabilistic price
+forecasting, etc.
+The task of this benchmark is to generate probabilistic forecasting of
+electricity load on the GEFCom2017 competition qualifying match data. We use
+about 6 years of data for training. Forecast is done at 6 time points, with
+horizon of 1 ~ 2 months and granularity of 1 hour. The forecasts should be in
+the form of 9 quantiles, i.e. the 10th, 20th, ... 90th percentiles, following
+the format of the provided template file.  There are 10 time series (zones) to
+forecast, including the 8 ISO New England zones, the Massachusetts (sum of
+three zones under Massachusetts), and the total (sum of the first 8 zones).
+The quality metric of this benchmark is the Pinball loss function.
+
+### Retail sales forecasting
 Chenhui
 
 ## Development of benchmark implementation
@@ -77,7 +92,7 @@ Chenhui
 
 ### Guideline for measuring performance
 Guideline for measuring performance  
-Chenhui 
+Chenhui
 
 ## Submission
 
@@ -87,7 +102,7 @@ Hong, Ilan
 
 ### Guideline for submitting the code
 Guidance for submitting the code  
-Chenhui, Ilan 
+Chenhui, Ilan
 
 ## Review of submissions
 The goal of the review is to validate the declared

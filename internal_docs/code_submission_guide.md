@@ -30,25 +30,24 @@ folder under `<benchmark directory>` to see if there is a module which creates t
 data of the forecast period or later. Submission code will be inspected to enforce this.
 
 5. To submit your solution you must create a script (in any language) that includes all code necessary to train your model and produce predictions for all 
-forecasted periods in the required format. This script should be named as `train_score.*` with * indicating the file type. This script should accept an input argument which is an integer random number generator seed. For example, it should run as `python <submission directory>/train_score.py <seed value>` if it is in Python.  Moreover, the predictions should be stored in an Excel file named `submission_seed_<seed value>.csv`. Please include 
+forecasted periods in the required format. This script should be named as `train_score.*` with * indicating the file type. It should accept an input argument which is an integer random number generator seed. For example, it should run as `python <submission directory>/train_score.py <seed value>` if it is in Python. This command will generate a CSV file named `submission_seed_<seed value>.csv` which includes the predictions. Please include 
 `train_score.*` script and `submission_seed_<seed value>.csv` files in your submission directory. 
 
-6. Once you have generated your submission file, you can evaluate the model's performance with
+6. Report five run results produced using the integer random number generator seeds 1 through 5. This can be done by running the model 
+training and scoring script as follows
+   ```bash
+   time -p python <submission directory>/train_score.py <seed value>
+   ```
+   where `<seed value>` is an integer between 1 and 5. This command also computes the running time of each run. 
+
+7. Evaluate the performance of each run with evaluate.py and compute the median. Once you have generated your submission files, you can evaluate the quality of the predictions with
    ```bash
    python <benchmark directory>/common/evaluate.py <submission directory>/submission_seed_<seed value>.csv 
    ```
-   This command will output benchmark quality value (e.g. MAPE).
-
-7. Report the median of five run results produced using the integer random number generator seeds 1 through 5. This can be done by running the model 
-training and scoring script as follows
-   ```bash
-   python <submission directory>/train_score.py --seed RANDOM_SEED
-   ```
-   where RANDOM_SEED is an integer between 1 and 5. Evaluate the performance of each run with `evaluate.py` and compute the median.
+   This command will output a benchmark quality value (e.g. MAPE). Evaluate the quality of each run by changing `<seed value>` above and compute the median of the quality values out of five runs.
 
 8. Include other scripts that are necessary for reproducing the submitted benchmark results. For example, you should include a Dockerfile containing all 
-dependencies for running your benchmark submission. The Dockerfile can point to a `.txt` file which contains a list of necessary packages. If you use Batch 
-AI, please include a JSON file `job.json` that describes the Bath AI job. 
+dependencies for running your benchmark submission. The Dockerfile can point to a `.txt` file which contains a list of necessary packages. 
 
 9. Create a Docker image and push it to the ACR   
    To create your Docker image, for example you can go to `/submissions/submission1/` folder and run the following command   

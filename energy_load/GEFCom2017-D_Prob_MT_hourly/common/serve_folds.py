@@ -1,8 +1,11 @@
-import os
+import os, sys, inspect
 import pandas as pd
 
 def serve_folds():
-    DATA_DIR = '../data'
+    SCRIPT_PATH = os.path.dirname(os.path.abspath(inspect.getfile(
+        inspect.currentframe())))
+    DATA_DIR_LEVEL = os.path.dirname(SCRIPT_PATH)
+    DATA_DIR = os.path.join(DATA_DIR_LEVEL, 'data')
     TRAIN_DATA_DIR = DATA_DIR + '/train'
     TEST_DATA_DIR = DATA_DIR + '/test'
     # This file stores all the data before 2016-12-01

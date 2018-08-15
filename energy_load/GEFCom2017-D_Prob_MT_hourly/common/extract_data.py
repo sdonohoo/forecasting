@@ -1,9 +1,10 @@
 """
 This script requires the user to use the script
-"TSPerf/energy_load/common/download_data_GEFCom2017-D.py" to download the SMD
-Hourly Data from 2011 to 2017 from ISO New England website (
-https://www.iso-ne.com/isoexpress/web/reports/load-and-demand/-/tree/zone-info).
-The downloaded data is stored in TSPerf/energy_load/data/GEFCom2017-D
+"TSPerf/energy_load/GEFCom2017-D_Prob_MT_hourly/common/download_data.py" to
+download the SMD Hourly Data from 2011 to 2017 from the ISO New England
+website (https://www.iso-ne.com/isoexpress/web/reports/load-and-demand/-/tree/zone-info).
+The downloaded data is stored in
+"TSPerf/energy_load/TSPerf/energy_load/GEFCom2017-D_Prob_MT_hourly/data"
 
 This script parses the excel files and creates training and testing data files.
 After running this script, the following files are generated:
@@ -58,10 +59,8 @@ import numpy as np
 # as the data directory
 SCRIPT_PATH = os.path.dirname(os.path.abspath(inspect.getfile(
     inspect.currentframe())))
-RAW_DATA_DIR_level = os.path.dirname(os.path.dirname(SCRIPT_PATH))
-DATA_DIR_level = os.path.dirname(SCRIPT_PATH)
-RAW_DATA_DIR = os.path.join(RAW_DATA_DIR_level, 'data/GEFCom2017-D')
-DATA_DIR = os.path.join(DATA_DIR_level, 'data')
+DATA_DIR_LEVEL = os.path.dirname(SCRIPT_PATH)
+DATA_DIR = os.path.join(DATA_DIR_LEVEL, 'data')
 TRAIN_DATA_DIR = DATA_DIR + '/train'
 TEST_DATA_DIR = DATA_DIR + '/test'
 # This file stores all the data before 2016-12-01
@@ -103,6 +102,23 @@ DST_END_DATETIME = pd.to_datetime(['2011-11-06 02:00:00',
                                    '2013-11-03 02:00:00',
                                    '2014-11-02 02:00:00',
                                    '2015-11-01 02:00:00'])
+# Holiday data file path
+HOLIDAY_DATA_DIR_LEVEL = os.path.dirname(os.path.dirname(os.path.dirname(
+    SCRIPT_PATH)))
+HOLIDAY_DATA_FILE = \
+    os.path.join(HOLIDAY_DATA_DIR_LEVEL, 'common', 'us_holidays.csv')
+
+# Holiday dictionary used to map holidays to integers
+HOLIDAY_TO_INT_DICT = {"New Year's Day": 1,
+                       "Birthday of Martin Luther King Jr.": 2,
+                       "Washington's Birthday": 3,
+                       "Memorial Day": 4,
+                       "Independence Day": 5,
+                       "Labor Day": 6,
+                       "Columbus Day": 7,
+                       "Veterans Day": 8,
+                       "Thanksgiving Day": 9,
+                       "Christmas Day": 10}
 
 def check_data_exist(data_dir):
     """
@@ -122,7 +138,7 @@ def parse_excel(file_name):
     This function parses an excel file with multiple sheets and returns a
     panda data frame.
     """
-    file_path = os.path.join(RAW_DATA_DIR, file_name)
+    file_path = os.path.join(DATA_DIR, file_name)
     xls = pd.ExcelFile(file_path)
 
     if file_name in DATA_FILE_LIST_NEW_FORMAT:
@@ -189,6 +205,32 @@ def parse_excel(file_name):
 
     return df_final
 
+def preprocess_holiday_data():
+    holidays = pd.read_csv(HOLIDAY_DATA_FILE)
+    holidays['Date'] = pd.to_datetime(holidays['Date'])
+    # Map holiday names to integers
+    holidays = holidays.replace({'Holiday': HOLIDAY_TO_INT_DICT})
+    # Create a holiday record for each hour
+    hours = pd.DataFrame({'hour': list(range(1, 25))})
+    holidays['key'] = 1
+    hours['key'] = 1
+    holidays_with_hours = pd.merge(holidays, hours, on='key')
+    holidays_with_hours['Datetime'] = holidays_with_hours.apply(
+        lambda row: row.Date + timedelta(hours=row.hour), axis=1)
+    holidays_with_hours.drop(['Date', 'hour', 'key'], axis=1, inplace=True)
+
+    holidays_with_hours.set_index('Datetime', inplace=True)
+
+    return holidays_with_hours
+
+def merge_with_holiday_data(input_df, holiday_df):
+    output_df = pd.merge(input_df, holiday_df, how='left', left_index=True,
+                         right_index=True)
+    output_df.fillna(value=0, inplace=True)
+    output_df['Holiday'] = output_df['Holiday'].astype(int)
+
+    return output_df
+
 def main(preprocess_flag):
     """
     :param preprocess_flag: A boolean flag that determines whether data '
@@ -199,7 +241,10 @@ def main(preprocess_flag):
     :type preprocess_flag: bool
     """
     # Make sure all files are downloaded to the data directory
-    check_data_exist(RAW_DATA_DIR)
+    check_data_exist(DATA_DIR)
+
+    # preprocess the holiday data
+    holiday_df = preprocess_holiday_data()
 
     # Create train and test data directories
     if not os.path.isdir(TRAIN_DATA_DIR):
@@ -215,23 +260,26 @@ def main(preprocess_flag):
         file_df_list.append(file_df)
 
     file_df_final = pd.concat(file_df_list)
+    file_df_final.sort_values(['Zone', 'Datetime'])
     file_df_final.reset_index(inplace=True, drop=True)
 
     if preprocess_flag:
-        # Fill zero values by interpolating nearby values. A simple method
-        # is used because we know there are only 50 zero values spread out in
-        # the data, and the input data is well sorted by load zones and time.
-        # First, replace zeros with nans in order to use panda's interpolate method
-        file_df_final['DEMAND'].replace(to_replace=0, value=np.nan, inplace=True)
-        file_df_final['DEMAND'].interpolate(inplace=True)
-        file_df_final['DEMAND'] = round(file_df_final['DEMAND'])
+        # Fill zero values at the beginning of DST using the demand
+        # of the same hour of yesterday
+        zero_indices = file_df_final[file_df_final['DEMAND']==0].index.values
+        lag_24_indices = zero_indices - 24
 
+        file_df_final.loc[zero_indices, 'DEMAND'] = \
+            file_df_final.loc[lag_24_indices, 'DEMAND'].values
+
+        # Divide outliers at the end of DST by 2
         dst_end_datetime_mask = \
             file_df_final['Datetime'].isin(DST_END_DATETIME)
         file_df_final.loc[dst_end_datetime_mask,'DEMAND'] = \
             round(file_df_final.loc[dst_end_datetime_mask,'DEMAND']/2)
 
     file_df_final.set_index('Datetime', inplace=True)
+    file_df_final = merge_with_holiday_data(file_df_final, holiday_df)
 
     index_value = file_df_final.index.get_level_values(0)
     train_base_df = file_df_final.loc[index_value <= TRAIN_BASE_END]

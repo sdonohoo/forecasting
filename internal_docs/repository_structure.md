@@ -1,7 +1,7 @@
 
 ## Structure of Repository
 
-We use Git repo to maintain the source code and relevant files. The repository has three hierarchies: use case, benchmark, and benchmark implementation.
+We use Git repo to maintain the source code and relevant files. The repository has three levels of folders: use case, benchmark, and benchmark implementation.
 The top-level directory `/TSPerf` consists of folders for all the existing use cases, a folder storing common utility scripts, a folder storing internal 
 docs, and a Markdown file describing the time series benchmarking framework. 
 

@@ -328,6 +328,7 @@ def main(preprocess_flag):
         .format(max(test_round_df.index.get_level_values(0))))
         print('')
         test_round_df.to_csv(file_name)
+
 def usage():
     print('usage: python extract_data.py [--preprocess]\n'
           'Options and arguments:\n'
@@ -341,15 +342,20 @@ def usage():
 if __name__ == '__main__':
     preprocess_flag = True
     try:
-        opts, args = getopt.getopt(sys.argv[1:], 'h', ['help', 'preprocess'])
+        opts, args = getopt.getopt(sys.argv[1:], 'h', ['help', 'preprocess='])
     except getopt.GetoptError as err:
         print(err)
         usage()
         sys.exit(2)
 
     for opt, arg in opts:
-        if opt == 'preprocess':
-            preprocess_flag = arg
+        if opt == '--preprocess':
+            if arg in ('True', 'T'):
+                preprocess_flag = True
+            elif arg in ('False', 'F'):
+                preprocess_flag = False
+            else:
+                raise Exception('Invalid value for option "--preprocess": {0}. Valid values are True or T, False or F'.format(arg))
         elif opt in ("-h", "--help"):
             usage()
             sys.exit()

@@ -41,12 +41,24 @@ DewPnt:
     to the load zone or Trading Hub.
 Zone:
     The load zone, which corresponds to the sheet names in the excel files.
-
-In addition to the eight zones in the excel files, 'SEMA', 'WCMA', and 'NEMA'
-are aggregated to generate the MA_TOTAL zone and all eight zones are
-aggregated to generate the TOTAL zone. Therefore, the 'Zone' column contains
-10 unique values in total. The DEMAND is summed across the zones, and the
-DryBulb and DewPnt are averaged across the zones.
+    In addition to the eight zones in the excel files, 'SEMA', 'WCMA',
+    and 'NEMA' are aggregated to generate the MA_TOTAL zone and all eight
+    zones are aggregated to generate the TOTAL zone. Therefore, the 'Zone'
+    column contains 10 unique values in total. The DEMAND is summed across
+    the zones, and the DryBulb and DewPnt are averaged across the zones.
+Holiday:
+    Ten major US holidays encoded in integers.
+    0: Non-holiday
+    1: New Year's Day
+    2: Birthday of Martin Luther King Jr.
+    3: Washington's Birthday
+    4: Memorial Day
+    5: Independence Day
+    6: Labor Day
+    7: Columbus Day
+    8: Veterans Day
+    9: Thanksgiving Day
+    10: Christmas Day
 """
 
 import os, sys, getopt, inspect

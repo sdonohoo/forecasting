@@ -1,12 +1,12 @@
 # Problem
 
-Retail sales forecasting is a key task for the management of stores. With the projection of future sales, store managers will be able to optimize 
-the inventory based on their business goals. This will generate more profitable order fulfillment while reducing the inventory cost. 
+Sales forecasting is a key task for the management of retail stores. With the projection of future sales, store managers will be able to optimize 
+the inventory based on their business goals. This will generate more profitable order fulfillment and reduce the inventory cost. 
 
 The task of this benchmark is to forecast orange juice sales of different brands for multiple stores with the Orange Juice (OJ) dataset from R package 
 `bayesm`. The forecast type is point forecasting. The forecast horizon is 3 weeks ahead and granularity is weekly. There are 12 forecasting rounds, each of 
-which involves forecasting the sales in a target period. The training and test data in each round are specified in the subsection [Training and test data 
-separation](#training-and-test-data-separation). The table below summarizes the benchmark characteristics
+which involves forecasting the sales during a target period. The training and test data in each round are specified in the subsection [Training and test data 
+separation](#training-and-test-data-separation). The table below summarizes the characteristics of this benchmark
 
 |  |  |
 | ----------------------------------- | - |
@@ -29,7 +29,7 @@ This dataset contains the following two tables:
 
 2. Demographic information on those stores. This table has 83 rows and 13 columns. For every store, the table describes demographic information of its consumers, distance to the nearest warehouse store, average distance to the nearest 5 supermarkets, ratio of its sales to the nearest warehouse store, and ratio of its sales to the average of the nearest 5 stores.
 
-Please see pages 40 and 41 in the [bayesm reference manual](https://cran.r-project.org/web/packages/bayesm/bayesm.pdf) for more details about each data column. 
+Please see pages 40 and 41 of the [bayesm reference manual](https://cran.r-project.org/web/packages/bayesm/bayesm.pdf) for more details about each data column. 
  
 
 ## Training and test data separation
@@ -72,3 +72,4 @@ The forecasts should be in the following format
 
 # Instructions to submit new benchmark implementations
 **TODO: Fill this section when we have a draft reference implementation**
+

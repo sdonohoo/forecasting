@@ -190,6 +190,14 @@ def parse_excel(file_name):
     return df_final
 
 def main(preprocess_flag):
+    """
+    :param preprocess_flag: A boolean flag that determines whether data '
+          'preprocessing should be applied to the extracted data. If True, '
+          'zero values will be filled by linearly interpolation, outliers '
+          'caused by end of Daylight Saving Time will be divided by 2. '
+          'Default: True.'
+    :type preprocess_flag: bool
+    """
     # Make sure all files are downloaded to the data directory
     check_data_exist(RAW_DATA_DIR)
 
@@ -260,13 +268,30 @@ def main(preprocess_flag):
         .format(max(test_round_df.index.get_level_values(0))))
         print('')
         test_round_df.to_csv(file_name)
+def usage():
+    print('usage: python extract_data.py [--preprocess]\n'
+          'Options and arguments:\n'
+          '--preprocess: a boolean flag that determines whether data '
+          'preprocessing should be applied to the extracted data.\n'
+          '              If True, zero values will be filled by linearly '
+          'interpolation, outliers caused by end of Daylight Saving Time '
+          'will be divided by 2.\n'
+          '              Default: True.')
 
 if __name__ == '__main__':
     preprocess_flag = True
-
-    opts, args = getopt.getopt(sys.argv[1:], '', ['preprocess'])
+    try:
+        opts, args = getopt.getopt(sys.argv[1:], 'h', ['help', 'preprocess'])
+    except getopt.GetoptError as err:
+        print(err)
+        usage()
+        sys.exit(2)
 
     for opt, arg in opts:
         if opt == 'preprocess':
             preprocess_flag = arg
+        elif opt in ("-h", "--help"):
+            usage()
+            sys.exit()
+
     main(preprocess_flag)

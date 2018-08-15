@@ -64,7 +64,7 @@ Chenhui
 
 | **Benchmark problem** | **Benchmark directory** |  
 | --------------------- | -------------------- |  
-| Probabilistic electricity load forecasting | TSPerf\energy_load\GEFCom2017-D_Prob_MT_hourly |
+| Probabilistic electricity load forecasting | TSPerf\energy_load\GEFCom2017-D_Prob_MT_Hourly |
 
 ### Probabilistic electricity load forecasting
 Probabilistic load forecasting (PLF) has become increasingly important in

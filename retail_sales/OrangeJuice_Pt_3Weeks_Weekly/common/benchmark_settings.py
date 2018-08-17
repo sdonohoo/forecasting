@@ -1,7 +1,6 @@
 # Define benchmark related parameters. The parameters should conform with the benchmark definition
 # in ../README.md file
  
-
 import numpy as np
 
 NUM_ROUNDS = 12

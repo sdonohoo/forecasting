@@ -2,7 +2,9 @@
 
 import os, sys, inspect
 import pandas as pd
-import benchmark_settings as bs
+
+sys.path.append('.') # Assume run from /TSPerf root directory
+import retail_sales.OrangeJuice_Pt_3Weeks_Weekly.common.benchmark_settings as bs
 
 def serve_folds(write_csv=False): 
     # Get the path of this script and directory of the OrangeJuice dataset

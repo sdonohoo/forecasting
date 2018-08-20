@@ -61,15 +61,58 @@ The following diagram summarizes the relations betwwen different terms:
 Ilan
 
 ### Structure of repository
-Chenhui
+
+We use Git repo to maintain the source code and relevant files. The repository has three levels of folders: use case, benchmark, and benchmark implementation.
+The top-level directory `/TSPerf` consists of folders for all the existing use cases, a folder storing common utility scripts, a folder storing internal 
+docs, and a Markdown file describing the time series benchmarking framework. 
+
+* Use case folders: Each such folder is named after a specific use case and contains scripts of the implementations/submissions for every benchmark of this 
+use case. Currently we have a folder `/TSPerf/energy_load` for the energy load forecasting use case and another folder `/TSPerf/retail_sales` for the 
+retail sales forecasting use case. 
+
+  Under each use case folder, we have subfolders for different benchmarks and a Markdown file listing all benchmarks of this use case. For example, 
+  `/TSPerf/energy_load/GEFCom2017-D_Prob_MT_hourly` contains all the submissions for a probabilistic forecasting problem defined upon GEFCom2017-D dataset 
+  and `/TSPerf/energy_load/GEFCom2014_Pt_1Month_Hourly` includes all the submissions for a point forecasting problem defined upon GEFCom2014 dataset. In 
+  addition, `/TSPerf/energy_load/README.md` summarizes all the benchmarks of the energy load forecasting use case. 
+
+  Under each benchmark folder, there are a subfolder containing source code of all reference implementations, a subfolder containing source code of all 
+  submissions, a subfolder storing common utility scripts, and a Markdown file specifying the benchmark. The description of each item under the benchmark 
+  folder is as follows
+
+    * `/reference` folder: This folder contains all the necessary scripts and the submission form for reproducing the reference implementation. For 
+    instance, `/TSPerf/energy_load/GEFCom2014_Pt_1Month_Hourly/reference` includes the required submission files of the reference implementation for 
+    GEFCom2014_Pt_1Month_Hourly.
+
+    * `/submissions` folder: This folder contains multiple subfolders with each subfolder including all the necessary scripts and 
+    the submission form for reproducing a certain submission. For instance, `/submission1` folder under 
+    `/TSPerf/energy_load/GEFCom2014_Pt_1Month_Hourly/submissions` includes the required submission files of submission1.
+    
+
+    * `/common` folder: This folder includes utility scripts for a benchmark. As an example, `/TSPerf/energy_load/GEFCom2014_Pt_1Month_Hourly/common` 
+    contains the scripts that could be commonly used for GEFCom2014_Pt_1Month_Hourly, such as Python scripts that download the data, prepare training and 
+    scoring data, and evaluate performance of the benchmark implementation. 
+
+    * `/README.md`: This Markdown file provides detailed instructions about a certain benchmark. For instance, 
+    `/TSPerf/energy_load/GEFCom2014_Pt_1Month_Hourly/README.md` describes benchmark and provides benchmark-specific guidance for evaluating model 
+    performance and creating benchmark submission. 
+
+* `/TSPerf/common` folder: This folder has the scripts that could be used across different use cases, such as Python scripts which compute the evaluation 
+metrics of the forecasting results.
+
+* `/TSPerf/internal_docs` folder: This folder contains the internal documents that we create during the development of TSPerf. 
+
+* `/TSPerf/README.md` file: This Markdown file describes the TSPerf framework in general. It introduces the goal and vision, specifies the use cases and 
+benchmarks, as well as provides guidances for benchmark implementation, benchmark submission, and reviewing of the submissions. 
 
 ## Benchmarks  
 
 | **Benchmark problem** | **Benchmark directory** |  
 | --------------------- | -------------------- |  
 | Probabilistic electricity load forecasting | TSPerf\energy_load\GEFCom2017-D_Prob_MT_Hourly |
+| Retail sales forecasting | TsPerf\retail_sales\OrangeJuice_Pt_3Weeks_Weekly |
 
 ### Probabilistic electricity load forecasting
+
 Probabilistic load forecasting (PLF) has become increasingly important in
 power systems planning and operations in recent years. The applications of PLF
 include energy production planning, reliability analysis, probabilistic price
@@ -85,23 +128,87 @@ three zones under Massachusetts), and the total (sum of the first 8 zones).
 The quality metric of this benchmark is the Pinball loss function.
 
 ### Retail sales forecasting
-Chenhui
+
+
+Sales forecasting is a key task for the management of retail stores. With the projection of future sales, store managers will be able to optimize 
+the inventory based on their business goals. This will generate more profitable order fulfillment and reduce the inventory cost. 
+
+The task of this benchmark is to forecast orange juice sales of different brands for multiple stores with the Orange Juice dataset from R package 
+`bayesm`. The forecast type is point forecasting. Forecast is done at 12 time points, with horizon of 3 weeks and granularity of 1 week. The forecasts should  
+include the predicted sales during the target periods for each brand and each store. The output file of the forecast results should follow the format of the 
+provided template file. There are in total 913 time series to forecast. The quality metric of this benchmark is the mean average percentage error. 
 
 ## Development of benchmark implementation
 
 ### Availables Docker images
-Description of the available Docker images  
-Chenhui
 
-### Guideline for measuring performance
-Guideline for measuring performance  
-Chenhui
+We recommend to use Docker images for the reproduciblility of the submissions. In TSPerf, we provide a basic Docker image to speed up the process of new benchmark implementation, namely tsperf.azurecr.io/common/image:v1 in tsperf Azure Container Registry (ACR). This image contains basic configurations of the system and a few commonly used packages. One can directly use the basic image by pulling it from the ACR or modify it for their own benchmark implementations. 
+
+Under `/TSPerf/common` folder, there are a Dockerfile and requirements.txt file used for creating the basic image. The Dockerfile contains the main configuration steps and requirements.txt includes the necessary Python packages. By modifying these files, one can easily create their own Docker images and host them in ACR or other venues such as Docker Hub.
+
+## Guideline for measuring performance
+
+Each benchmark result is the median of five run results produced using the integer random number generator seeds 1 through 5. All five run results must also be reported. The following measurements should be included:
+  * quality of the model
+  * running time
+  * cloud cost 
+
+### Quality of the Model
+
+The quality of the model is measured by a certain evaluation metric e.g. MAPE. Please use common utility script `evaluate.py` to get the benchmark quality value in each run
+```bash
+python <benchmark directory>/common/evaluate.py <submission directory>/submission_seed_<seed value>.csv
+``` 
+
+### Running Time
+
+The wallclock running time of each run should be measured by 
+```bash
+time -p python <submission directory>/train_score.py
+```
+
+### Cloud Cost
+
+Include the total cost of obtaining the median run result using fixed prices for the general public at the time the result is collected. Do not use spot 
+pricing. If you use Azure, you can estimate the costs for Azure products using this [online pricing calculator](https://azure.microsoft.com/en-us/pricing/calculator/).  
 
 ## Submission
 
 ### Guideline for submitting reproduction instructions
-Guidance for submitting reproduction instructions  
-Hong, Ilan  
+
+#### System and framework availability
+This section is aligned with MLPerf.  
+If you are using a publicly available system or framework, you must use publicly available and widely-used used versions of the system or framework.  
+If you are using an experimental framework or system, you must make the system and framework you use available upon request for replication.
+
+#### Benchmark implementation source code
+This section is aligned with MLPerf.  
+Source code used for the benchmark implementations must be open-sourced under a license that permits a commercial entity to freely use the implementation for benchmarking. The code must be available as long as the results are actively used.
+
+#### Environment setup
+1. Parallel/distributed computation environment setup  
+If you are using multiple machines for parallel/distributed computation, you must provide a script for automatically creating the cluster (preferred) or instructions for manual creation.
+2. Virtual machine or Docker image setup  
+You need to provide instructions for setting up the implementation system from a plain VM, or a Docker file/image for creating the container needed to execute the implementation.
+3. Virtual environment setup  
+If your implementation is light-weight and does not have any system dependency, a YAML file for creating a conda environment is also acceptable.
+4. Framework and package version report  
+The submitter needs to submit a report summarizing all the framework and package versions used for producing the reported result. This is to prevent the newer version of a framework or package significantly changing the implementation result.
+
+#### Non-determinism restrictions
+This section is aligned with MLPerf. Some more detailed instructions are added.  
+The following forms of non-determinism are acceptable in MLPerf.
+- Floating point operation order. For example, certain functions in cuDNN do not guarantee reproducibility across runs.
+
+- Random initialization of the weights and/or biases.
+
+- Random traversal of the inputs.  
+
+In order to avoid any other sources of non-determinisms, we recommend setting random seeds whenever a package/framework provides a function for setting random seed, e.g. numpy.random.seed(), random.seed(), tf.set_random_seed().  
+The submitter needs to run the benchmark implementation five times using the integer random number generator seeds 1 through 5 and report all five results.  The variance of the five run results should be reasonable, otherwise, it's an indicator of instability of the implementation. The median of the five results is reported as the performance of the submitted implementation. 
+
+#### Hyperparameter tuning
+Instructions for hyperparameter tuning are optional. However, it's **highly recommended** to provide details of your hyperparameter tuning process, which will make it easier to adopt an implementation to a new dataset.
 
 ### Guideline for submitting the code
 Guidance for submitting the code  

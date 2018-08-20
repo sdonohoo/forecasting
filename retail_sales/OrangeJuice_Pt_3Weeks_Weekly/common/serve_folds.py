@@ -2,14 +2,12 @@
 
 import os, sys, inspect
 import pandas as pd
-
-sys.path.append('.') # Assume run from /TSPerf root directory
 import retail_sales.OrangeJuice_Pt_3Weeks_Weekly.common.benchmark_settings as bs
 
 def serve_folds(write_csv=False): 
-    # Get the path of this script and directory of the OrangeJuice dataset
-    SCRIPT_PATH = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
-    DATA_DIR = os.path.join(os.path.dirname(SCRIPT_PATH), 'data')
+    # Get the directory of this script and directory of the OrangeJuice dataset
+    SCRIPT_DIR = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+    DATA_DIR = os.path.join(os.path.dirname(SCRIPT_DIR), 'data')
     # Read sales data into dataframe
     sales = pd.read_csv(os.path.join(DATA_DIR, 'yx.csv'), index_col=0)
 
@@ -30,12 +28,12 @@ def serve_folds(write_csv=False):
         yield train, test
 
 # Test serve_folds
-write_csv = True
-for train, test in serve_folds(write_csv):    
-    print('Training data size: {}'.format(train.shape))
-    print('Testing data size: {}'.format(test.shape))
-    print('Minimum training week number: {}'.format(min(train['week'])))
-    print('Maximum training week number: {}'.format(max(train['week'])))
-    print('Minimum testing week number: {}'.format(min(test['week'])))
-    print('Maximum testing week number: {}'.format(max(test['week'])))
-    print('')
+if False:
+    for train, test in serve_folds(True):    
+        print('Training data size: {}'.format(train.shape))
+        print('Testing data size: {}'.format(test.shape))
+        print('Minimum training week number: {}'.format(min(train['week'])))
+        print('Maximum training week number: {}'.format(max(train['week'])))
+        print('Minimum testing week number: {}'.format(min(test['week'])))
+        print('Maximum testing week number: {}'.format(max(test['week'])))
+        print('')

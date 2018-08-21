@@ -11,18 +11,20 @@ def serve_folds(write_csv=False):
     # Read sales data into dataframe
     sales = pd.read_csv(os.path.join(DATA_DIR, 'yx.csv'), index_col=0)
 
+    if write_csv:
+        TRAIN_DATA_DIR = os.path.join(DATA_DIR, 'train')
+        TEST_DATA_DIR = os.path.join(DATA_DIR, 'test')
+        if not os.path.isdir(TRAIN_DATA_DIR):
+            os.mkdir(TRAIN_DATA_DIR)
+        if not os.path.isdir(TEST_DATA_DIR):
+            os.mkdir(TEST_DATA_DIR)
+
     for i in range(bs.NUM_ROUNDS):
         data_mask = (sales.week>=bs.TRAIN_START_WEEK) & (sales.week<=bs.TRAIN_END_WEEK_LIST[i])
         train = sales[data_mask].copy()
         data_mask = (sales.week>=bs.TEST_START_WEEK_LIST[i]) & (sales.week<=bs.TEST_END_WEEK_LIST[i])
         test = sales[data_mask].copy()
         if write_csv:
-            TRAIN_DATA_DIR = os.path.join(DATA_DIR, 'train')
-            TEST_DATA_DIR = os.path.join(DATA_DIR, 'test')
-            if not os.path.isdir(TRAIN_DATA_DIR):
-                os.mkdir(TRAIN_DATA_DIR)
-            if not os.path.isdir(TEST_DATA_DIR):
-                os.mkdir(TEST_DATA_DIR)
             train.to_csv(os.path.join(TRAIN_DATA_DIR, 'train_round_' + str(i+1) + '.csv'), index=False)
             test.to_csv(os.path.join(TEST_DATA_DIR, 'test_round_' + str(i+1) + '.csv'), index=False)
         yield train, test

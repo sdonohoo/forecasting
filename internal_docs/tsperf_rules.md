@@ -2,28 +2,28 @@
 
 ## Contents
 
-1. Introduction  
+1. [Introduction](#introduction)  
    1.1 [Vision](#vision)  
    1.2 [Goals](#goals)   
-2. Framework    
-    2.1 Definitions  
-    2.2 Structure and hierarchy of documents  
-    2.3 Structure of repository   
-3. Benchmarks  
-    3.1 Probabilistic electricity load forecasting  
-    3.2 Retail sales forecasting  
-4. Development of benchmark implementation  
-    4.1 Available Docker images  
-    4.2 Guideline for measuring performance 
-5. Submission of benchmark implementation  
-    5.1 Guideline for submitting reproduction instructions  
-    5.2 Guideline for submitting the code   
-    5.3 Pull request process
-6. Review of submissions  
-    6.1 Standalone VM  
-    6.2 Batch AI   
-7. Leaderboard  
-8. Selection of reference implementation
+2. [Framework](#framework)    
+    2.1 [Definitions](#definitions)  
+    2.2 [Structure and hierarchy of documents](#Structure-and-hierarchy-of-documents)  
+    2.3 [Structure of repository](#Structure-of-repository)   
+3. [Benchmarks](#Benchmarks)  
+    3.1 [Probabilistic electricity load forecasting](#Probabilistic-electricity-load-forecasting)  
+    3.2 [Retail sales forecasting](#Retail-sales-forecasting)  
+4. [Development of benchmark implementation](#Development-of-benchmark-implementation)  
+    4.1 [Available Docker images](#Available-Docker-images)  
+    4.2 [Guideline for measuring performance](#Guideline-for-measuring-performance) 
+5. [Submission of benchmark implementation](#Submission-of-benchmark-implementation)  
+    5.1 [Guideline for submitting reproduction instructions](#Guideline-for-submitting-reproduction-instructions)  
+    5.2 [Guideline for submitting the code](#Guideline-for-submitting-the-code)   
+    5.3 [Pull request process](#Pull-request-process)
+6. [Review of submissions](#Review-of-submissions)  
+    6.1 [Standalone VM](#Standalone-vm)  
+    6.2 [Batch AI](#Batch-AI)   
+7. [Leaderboard](#Leaderboard)  
+8. [Selection of reference implementation](#Selection-of-reference-implementation)
     
 ## Introduction
 

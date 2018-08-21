@@ -7,14 +7,14 @@ The following document is describing the Pull Request Process that we (the frame
 ## Terms Definition
 
 * Approver  - A person who is designated to approve PRs
-* Developer - A person who develop code or documents
-* Pull Request - A request to pull and merge code or documents into the master brunch
+* Developer - A person who develops code or documents
+* Pull Request - A request to merge code or documents into the master branch
 * Reviewer - A person who is assigned to review a PR by the developer
 
 ## Pull Request PR Process
 
-1. Code/docs development is performs by the developers on a separated brunch outside of the master brunch
-2. Upon completion of a given task the developer/submitter will issue a PR that includes the following elements:
+1. Code/docs development is performed by the developers on a separated brancg outside of the master branch
+2. Upon completion of a given task the developer will issue a PR that includes the following elements:
    * Code/Doc to be reviewed
    * List of reviewers (at least one reviewer)
    * Designated approver
@@ -26,11 +26,11 @@ The following document is describing the Pull Request Process that we (the frame
    * Collect all comments and verify implementation
    * Review the entire code/doc for validity
    * Approve the PR (after all comments are processed and completed)
-6. After the PR approval, the submitter should merge the relevant code/doc into the master brunch and resolve conflicts (if exist)
+6. After the PR approval, the developer should merge the relevant code/doc into the master branch and resolve conflicts (if exist)
 
 ## Resource Planing Implications
 
-Since reviewing and approving PRs could be time consuming, it is important to plan and allocating resources in advance for that.Therefor, the following guidelines should be considered:
+Since reviewing and approving PRs could be time consuming, it is important to plan and allocate resources in advance for that. Therefore, the following guidelines should be considered:
 
 * At the sprint planing, all expected PRs should be discussed based on inputs from all developers
 * At the sprint planning, the designated approver should be designated

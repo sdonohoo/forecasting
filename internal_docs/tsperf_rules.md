@@ -1,12 +1,51 @@
 # TSPerf Rules
 
+## Contents
+
+1. Introduction  
+   1.1 [Vision](#vision)  
+   1.2 [Goals](#goals)   
+2. Framework    
+    2.1 Definitions  
+    2.2 Structure and hierarchy of documents  
+    2.3 Structure of repository   
+3. Benchmarks  
+    3.1 Probabilistic electricity load forecasting  
+    3.2 Retail sales forecasting  
+4. Development of benchmark implementation  
+    4.1 Available Docker images  
+    4.2 Guideline for measuring performance 
+5. Submission of benchmark implementation  
+    5.1 Guideline for submitting reproduction instructions  
+    5.2 Guideline for submitting the code   
+    5.3 Pull request process
+6. Review of submissions  
+    6.1 Standalone VM  
+    6.2 Batch AI   
+7. Leaderboard  
+8. Selection of reference implementation
+    
 ## Introduction
 
-Vision, goals (Ilan - 3)
+### Vision
+
+Establish an industry leading framework that allows comparison of various time-series forecasting algorithms and frameworks in a practical way on real cloud based architectures. This will allow potential users or customers to discover the best approach that suites their needs from cost, time and quality perspective.
+
+The benchmarking framework is designed to facilitate community participation and contribution through the development of benchmark implementations against a practical set of forecasting problems and datasets. These implementations will be measured by means of standard metrics of accuracy, cost and training time.
+
+The benchmarking framework will provide a simple access, discovery, comparison, maintenance and contributions. 
+
+Note: The TSPerf vision is aligned with the [MLPerf](https://mlperf.org/) vision and designed to be merged with it after an internal implementation of it. 
+
+### Goals:
+
+Short Term (Internal Only):
+
+* Allow fair comparison of various forecasting frameworks/algorithms performance on a given problem/dataset on multiple environments with the ability to reproduce it
+* To become the central Microsoft repository for forecasting benchmarks
+* Establish time-series forecasting track in [MLPerf](https://mlperf.org/) and provide a reference implementation for it
 
 ## Framework
-
-Framework goals
 
 ### Definitions 
 We adopt several definitions from [MLPerf](https://github.com/mlperf/policies/blob/master/rules.adoc) 
@@ -58,7 +97,9 @@ The following diagram summarizes the relations betwwen different terms:
 <img src="./images/definitions.png" alt="drawing" heigh="300px" width="600px"/>
 
 ### Structure and hierarchy of documents
-Ilan
+
+This document serves as the master document and includes the generic concepts and scope of the forecasting framework.
+In addition to it there will be a specific benchmark submission guidelines documents that are part of each the benchmarks that are included in the framework. These will include the problem description, implementation and submission instructions. 
 
 ### Structure of repository
 
@@ -146,33 +187,33 @@ We recommend to use Docker images for the reproduciblility of the submissions. I
 
 Under `/TSPerf/common` folder, there are a Dockerfile and requirements.txt file used for creating the basic image. The Dockerfile contains the main configuration steps and requirements.txt includes the necessary Python packages. By modifying these files, one can easily create their own Docker images and host them in ACR or other venues such as Docker Hub.
 
-## Guideline for measuring performance
+### Guideline for measuring performance
 
 Each benchmark result is the median of five run results produced using the integer random number generator seeds 1 through 5. All five run results must also be reported. The following measurements should be included:
   * quality of the model
   * running time
   * cloud cost 
 
-### Quality of the Model
+#### Quality of the Model
 
 The quality of the model is measured by a certain evaluation metric e.g. MAPE. Please use common utility script `evaluate.py` to get the benchmark quality value in each run
 ```bash
 python <benchmark directory>/common/evaluate.py <submission directory>/submission_seed_<seed value>.csv
 ``` 
 
-### Running Time
+#### Running Time
 
 The wallclock running time of each run should be measured by 
 ```bash
 time -p python <submission directory>/train_score.py
 ```
 
-### Cloud Cost
+#### Cloud Cost
 
 Include the total cost of obtaining the median run result using fixed prices for the general public at the time the result is collected. Do not use spot 
 pricing. If you use Azure, you can estimate the costs for Azure products using this [online pricing calculator](https://azure.microsoft.com/en-us/pricing/calculator/).  
 
-## Submission
+## Submission of benchmark implementation
 
 ### Guideline for submitting reproduction instructions
 
@@ -288,6 +329,46 @@ here (TODO: Add link). Specifically, it should include
     * cost in each run 
 
 11. Create pull request for review
+
+### Pull request process
+
+This section describes the Pull Request Process that we (the framework team) would like to use for the TSPerf development process as well as for the benchmark implementation development. The process applies for both document and code development.
+
+#### Terms Definition
+
+* Approver  - A person who is designated to approve PRs
+* Developer - A person who develops code or documents
+* Pull Request - A request to merge code or documents into the master branch
+* Reviewer - A person who is assigned to review a PR by the developer
+
+#### Pull Request PR Process
+
+1. Code/docs development is performed by the developers on a separated brancg outside of the master branch
+2. Upon completion of a given task the developer will issue a PR that includes the following elements:
+   * Code/Doc to be reviewed
+   * List of reviewers (at least one reviewer)
+   * Designated approver
+3. Each of the listed reviewers should review and provide comments for the PR
+4. Comments could be of 2 types:
+   * General notes that don't require change or update of the submitted code/doc
+   * Comment with a request to change the code/doc
+5. The designated approver should:
+   * Collect all comments and verify implementation
+   * Review the entire code/doc for validity
+   * Approve the PR (after all comments are processed and completed)
+6. After the PR approval, the developer should merge the relevant code/doc into the master branch and resolve conflicts (if exist)
+
+#### Resource Planing Implications
+
+Since reviewing and approving PRs could be time consuming, it is important to plan and allocate resources in advance for that. Therefore, the following guidelines should be considered:
+
+* At the sprint planing, all expected PRs should be discussed based on inputs from all developers
+* At the sprint planning, the designated approver should be designated
+* The designated approver should estimate the required effort for reviewing all PRs and allocate the required time for the next sprint accordingly
+* A 2nd approver should be assigned in case of possible conflicts or time constraints
+* Developers should notify the reviewers in advance at the sprint planning 
+* Other developers who take dependency on the PR's code should be included as reviewers
+* Reviewers should allocate time for the next sprint for reviewing 
 
 ## Review of submissions
 The goal of the review is to validate the declared

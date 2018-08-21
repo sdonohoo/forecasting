@@ -1,0 +1,11 @@
+#!/bin/bash
+
+ENVNAME="tsperf"
+
+echo "Creating Conda environment tsperf"
+
+conda env create -f common/conda_dependencies.yml
+
+echo "Activating tsperf Conda environment"
+
+source activate $ENVNAME

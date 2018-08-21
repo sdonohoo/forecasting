@@ -7,7 +7,7 @@
    1.2 [Goals](#goals)   
 2. [Framework](#framework)    
     2.1 [Definitions](#definitions)  
-    2.2 [Structure and hierarchy of documents](#Structure-and-hierarchy-of-documents)  
+    2.2 [Structure and hierarchy of documents](#structure-and-hierarchy-of-documents)  
     2.3 [Structure of repository](#Structure-of-repository)   
 3. [Benchmarks](#Benchmarks)  
     3.1 [Probabilistic electricity load forecasting](#Probabilistic-electricity-load-forecasting)  

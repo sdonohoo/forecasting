@@ -1,3 +1,7 @@
+"""
+This file is shared by all submissions to get benchmark paths and add the
+benchmark common folder to sys.path
+"""
 import os, sys
 
 SUBMISSIONS_PATH = os.path.dirname(os.path.abspath(__file__))

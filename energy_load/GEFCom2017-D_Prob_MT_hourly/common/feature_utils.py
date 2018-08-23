@@ -1,24 +1,27 @@
 """
-This file contains helper functions for creating features on the GEFCom2017
+This file contains helper functions for creating features on the GEFCom2017-D
 dataset.
 """
 
 from datetime import timedelta
 import calendar
-import math
 import pandas as pd
 import numpy as np
+from functools import reduce
 
 from utils import is_datetime_like
 
 # 0: Monday, 2: T/W/TR, 4: F, 5:SA, 6: S
-WEEK_DAY_TYPE_MAP = {1:2, 3:2}
+WEEK_DAY_TYPE_MAP = {1: 2, 3: 2}    # Map for converting Wednesday and
+                                    # Thursday to have the same code as Tuesday
 HOLIDAY_CODE = 7
-SEMI_HOLIDAY_CODE = 8
-SEMI_HOLIDAY_OFFSET = timedelta(days=1)
-
+SEMI_HOLIDAY_CODE = 8  # days before and after a holiday
 
 def get_datetime_col(df, datetime_colname):
+    """
+    Helper function for extracting the datetime column as datetime type from
+    a data frame.
+    """
     if datetime_colname in df.index.names:
         datetime_col = df.index.get_level_values(datetime_colname)
     elif datetime_colname in df.columns:
@@ -36,8 +39,18 @@ def get_datetime_col(df, datetime_colname):
     return datetime_col
 
 
-def day_type(datetime_col, holiday_col=None):
-
+def day_type(datetime_col, holiday_col=None,
+             semi_holiday_offset=timedelta(days=1)):
+    """
+    Convert datetime_col to 7 day types
+    0: Monday
+    2: Tuesday, Wednesday, and Thursday
+    4: Friday
+    5: Saturday
+    6: Sunday
+    7: Holiday
+    8: Days before and after a holiday
+    """
     datetype = pd.DataFrame({'DayType': datetime_col.dt.dayofweek})
     datetype.replace({'DayType': WEEK_DAY_TYPE_MAP}, inplace=True)
 
@@ -45,12 +58,17 @@ def day_type(datetime_col, holiday_col=None):
         holiday_mask = holiday_col > 0
         datetype.loc[holiday_mask, 'DayType'] = HOLIDAY_CODE
 
-        #Create a temporary _Date column to calculate dates near the holidays
-        datetype['Date'] = datetime_col.dt.date
+        # Create a temporary Date column to calculate dates near the holidays
+        datetype['Date'] = pd.to_datetime(datetime_col.dt.date)
         holiday_dates = set(datetype.loc[holiday_mask, 'Date'])
 
-        semi_holiday_dates = [d + SEMI_HOLIDAY_OFFSET for d in holiday_dates] \
-                             + [d - SEMI_HOLIDAY_OFFSET for d in holiday_dates]
+        semi_holiday_dates = \
+            [pd.date_range(start=d - semi_holiday_offset,
+                           end=d + semi_holiday_offset,
+                           freq='D')
+             for d in holiday_dates]
+        semi_holiday_dates = [d for dates in semi_holiday_dates for d in dates]
+
         semi_holiday_dates = set(semi_holiday_dates)
         semi_holiday_dates = semi_holiday_dates.difference(holiday_dates)
 
@@ -72,16 +90,17 @@ def time_of_year(datetime_col):
     are normalized to be between [0; 1].
     """
     time_of_year = pd.DataFrame({'DayOfYear': datetime_col.dt.dayofyear,
-                                 'HourOfDay': datetime_col.dt.hour})
-    time_of_year['TimeOfYear'] = time_of_year.apply(
-        lambda row: (row.DayOfYear - 1) * 24 + row.HourOfDay, axis=1)
+                                 'HourOfDay': datetime_col.dt.hour,
+                                 'Year': datetime_col.dt.year})
+    time_of_year['TimeOfYear'] = \
+        (time_of_year['DayOfYear'] - 1) * 24 + time_of_year['HourOfDay']
 
-    #TODO: Update this based on if the year is leap year
-    min_toy = min(time_of_year['TimeOfYear'])
-    max_toy = max(time_of_year['TimeOfYear'])
+    time_of_year['YearLength'] = \
+        time_of_year['Year'].apply(
+            lambda y: 366 if calendar.isleap(y) else 365)
 
     time_of_year['TimeOfYear'] = \
-        (time_of_year['TimeOfYear'] - min_toy)/(max_toy - min_toy)
+        time_of_year['TimeOfYear']/(time_of_year['YearLength'] * 24 - 1)
 
     return time_of_year['TimeOfYear'].values
 
@@ -99,9 +118,9 @@ def current_year(datetime_col, min_year, max_year):
 
 
 def fourier_approximation(t, n, period):
-    x = n * 2 * math.pi * t/period
-    x_sin = x.apply(lambda i: math.sin(i))
-    x_cos = x.apply(lambda i: math.cos(i))
+    x = n * 2 * np.pi * t/period
+    x_sin = np.sin(x)
+    x_cos = np.cos(x)
 
     return x_sin, x_cos
 
@@ -146,16 +165,31 @@ def daily_fourier(datetime_col, n_harmonics):
 
 
 def same_week_day_hour_lag(datetime_col, value_col, n_years=3,
-                           week_window=1, agg_func='mean'):
+                           week_window=1, agg_func='mean',
+                           output_colname='SameWeekHourLag'):
+    """
+    Create a lag feature by averaging values of the same week, same day of
+    week, and same hour of day, of previous years.
+    :param datetime_col: Datetime column
+    :param value_col: Feature value column to create lag feature from
+    :param n_years: Number of previous years data to use
+    :param week_window:
+        Number of weeks before and after the same week to
+        use, which should help reduce noise in the data
+    :param agg_func: aggregation function to apply on multiple previous values
+    :param output_colname: name of the output lag feature column
+    """
 
+    if not is_datetime_like(datetime_col):
+        datetime_col = pd.to_datetime(datetime_col)
     min_time_stamp = min(datetime_col)
 
     df = pd.DataFrame({'Datetime': datetime_col, 'value': value_col})
     df.set_index('Datetime', inplace=True)
 
     week_lag_base = 52
-    week_lag_last_year = list(range(week_lag_base-week_window,
-                              week_lag_base+week_window+1))
+    week_lag_last_year = list(range(week_lag_base - week_window,
+                              week_lag_base + week_window + 1))
     week_lag_all = []
     for y in range(n_years):
         week_lag_all += [x + y * 52 for x in week_lag_last_year]
@@ -171,28 +205,125 @@ def same_week_day_hour_lag(datetime_col, value_col, n_years=3,
         df[col_name] = np.nan
 
         df.loc[valid_lag_mask, col_name] = \
-            df.loc[lag_datetime[valid_lag_mask], 'value']
+            df.loc[lag_datetime[valid_lag_mask], 'value'].values
 
     # Additional aggregation options will be added as needed
     if agg_func == 'mean':
-        df['aggregated_lag'] = df[week_lag_cols].mean(axis=1)
+        df[output_colname] = df[week_lag_cols].mean(axis=1)
 
-    return df['aggregated_lag'].values
+    return df[[output_colname]]
+
+
+def same_day_hour_lag(datetime_col, value_col, n_years=3,
+                      day_window=1, agg_func='mean',
+                      output_colname='SameDayHourLag'):
+    """
+    Create a lag feature by averaging values of the same day of year, and same
+    hour of day, of previous years.
+    :param datetime_col: Datetime column
+    :param value_col: Feature value column to create lag feature from
+    :param n_years: Number of previous years data to use
+    :param day_window:
+        Number of days before and after the same day to
+        use, which should help reduce noise in the data
+    :param agg_func: aggregation function to apply on multiple previous values
+    :param output_colname: name of the output lag feature column
+    """
+
+    if not is_datetime_like(datetime_col):
+        datetime_col = pd.to_datetime(datetime_col)
+    min_time_stamp = min(datetime_col)
+
+    df = pd.DataFrame({'Datetime': datetime_col, 'value': value_col})
+    df.set_index('Datetime', inplace=True)
+
+    day_lag_base = 365
+    day_lag_last_year = list(range(day_lag_base - day_window,
+                                   day_lag_base + day_window + 1))
+    day_lag_all = []
+    for y in range(n_years):
+        day_lag_all += [x + y * 365 for x in day_lag_last_year]
+
+    day_lag_cols = []
+    for d in day_lag_all:
+        col_name = 'day_lag_' + str(d)
+        day_lag_cols.append(col_name)
+
+        lag_datetime = df.index.get_level_values(0) - timedelta(days=d)
+        valid_lag_mask = lag_datetime >= min_time_stamp
+
+        df[col_name] = np.nan
+
+        df.loc[valid_lag_mask, col_name] = \
+            df.loc[lag_datetime[valid_lag_mask], 'value'].values
+
+    # Additional aggregation options will be added as needed
+    if agg_func == 'mean':
+        df[output_colname] = df[day_lag_cols].mean(axis=1)
+
+    return df[[output_colname]]
 
 
 def create_features(input_df, datetime_colname,
-                    holiday_colname=None, one_hot_encode=True):
+                    holiday_colname=None, one_hot_encode=False):
 
     categorical_columns = ['DayType', 'Hour', 'WeekOfYear']
 
     output_df = input_df.copy()
-    datetime_col = get_datetime_col(output_df, datetime_colname)
+    if not is_datetime_like(output_df[datetime_colname]):
+        output_df[datetime_colname] = pd.to_datetime(output_df[datetime_colname])
+    datetime_col = output_df[datetime_colname]
 
+    # Basic temporal features
     output_df['DayType'] = day_type(datetime_col, output_df[holiday_colname])
     output_df['Hour'] = hour_of_day(datetime_col)
     output_df['TimeOfYear'] = time_of_year(datetime_col)
     output_df['WeekOfYear'] = week_of_year(datetime_col)
     output_df['CurrentYear'] = current_year(datetime_col, 2011, 2017)
+
+    # Fourier approximation features
+    annual_fourier_approx = annual_fourier(datetime_col, n_harmonics=3)
+    weekly_fourier_approx = weekly_fourier(datetime_col, n_harmonics=3)
+    daily_fourier_approx = daily_fourier(datetime_col, n_harmonics=2)
+
+    for k, v in annual_fourier_approx.items():
+        output_df[k] = v
+
+    for k, v in weekly_fourier_approx.items():
+        output_df[k] = v
+
+    for k, v in daily_fourier_approx.items():
+        output_df[k] = v
+
+    # Load lag
+    same_week_day_hour_load_lag = \
+        output_df[[datetime_colname, 'DEMAND', 'Zone']].groupby('Zone').apply(
+            lambda g: same_week_day_hour_lag(g[datetime_colname],
+                                             g['DEMAND'],
+                                             output_colname='LoadLag'))
+    same_week_day_hour_load_lag.reset_index(inplace=True)
+
+    # Temperature lags, can serve as a rough temperature forecast
+    same_day_hour_drewpnt_lag = \
+        output_df[[datetime_colname, 'DewPnt', 'Zone']].groupby('Zone').apply(
+            lambda g: same_day_hour_lag(g[datetime_colname], g['DewPnt'],
+                                        output_colname='DewPntLag'))
+    same_day_hour_drewpnt_lag.reset_index(inplace=True)
+
+    same_day_hour_drybulb_lag = \
+        output_df[[datetime_colname, 'DryBulb', 'Zone']].groupby('Zone').apply(
+            lambda g: same_day_hour_lag(g[datetime_colname], g['DryBulb'],
+                                        output_colname='DryBulbLag'))
+    same_day_hour_drybulb_lag.reset_index(inplace=True)
+
+    output_df = reduce(
+        lambda left, right: pd.merge(left, right, on=[datetime_colname, 'Zone']),
+        [output_df, same_week_day_hour_load_lag,
+         same_day_hour_drewpnt_lag, same_day_hour_drybulb_lag])
+
+    # Drop some training data at the beginning which don't have previous
+    # year's data for computing lag features.
+    output_df.dropna(inplace=True)
 
     if one_hot_encode:
         one_hot_encode = \

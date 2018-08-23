@@ -3,7 +3,7 @@ import pandas as pd
 
 import localpath
 from benchmark_paths import BENCHMARK_DATA_PATH
-from create_features import create_features
+from feature_utils import create_features
 from utils import split_train_test, is_datetime_like
 
 DATETIME_COLNAME = 'Datetime'

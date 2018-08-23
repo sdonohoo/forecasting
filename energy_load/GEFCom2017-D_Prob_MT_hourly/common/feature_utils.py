@@ -324,6 +324,9 @@ def create_features(input_df, datetime_colname,
     # Drop some training data at the beginning which don't have previous
     # year's data for computing lag features.
     output_df.dropna(inplace=True)
+    # Drop the temperature columns, as these are not available for
+    # forecasting period.
+    output_df.drop(['DewPnt', 'DryBulb'], axis=1, inplace=True)
 
     if one_hot_encode:
         one_hot_encode = \

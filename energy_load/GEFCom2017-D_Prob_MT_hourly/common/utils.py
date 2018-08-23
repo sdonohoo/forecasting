@@ -44,7 +44,7 @@ def split_train_test(full_df, output_dir,
         os.mkdir(test_data_dir)
 
     index_value = full_df.index.get_level_values(0)
-    train_base_df = full_df.loc[index_value <= TRAIN_BASE_END]
+    train_base_df = full_df.loc[index_value < TRAIN_BASE_END]
     train_base_df.to_csv(os.path.join(train_data_dir, train_base_file))
     print('Base training data frame size: {}'.format(train_base_df.shape))
 
@@ -52,8 +52,8 @@ def split_train_test(full_df, output_dir,
         file_name = os.path.join(train_data_dir,
                                  train_file_prefix + str(i+1) + '.csv')
         train_round_delta_df = full_df.loc[
-            (index_value > TRAIN_BASE_END)
-            & (index_value <= TRAIN_ROUNDS_ENDS[i])]
+            (index_value >= TRAIN_BASE_END)
+            & (index_value < TRAIN_ROUNDS_ENDS[i])]
         print('Round {0} additional training data size: {1}'
               .format(i+1, train_round_delta_df.shape))
         print('Minimum timestamp: {0}'
@@ -68,7 +68,7 @@ def split_train_test(full_df, output_dir,
                                  test_file_prefix + str(i+1) + '.csv')
         start_end = TEST_STARTS_ENDS[i]
         test_round_df = full_df.loc[
-            ((index_value > start_end[0]) & (index_value <= start_end[1]))
+            ((index_value >= start_end[0]) & (index_value < start_end[1]))
         ]
         print('Round {0} testing data size: {1}'
               .format(i+1, test_round_df.shape))

@@ -8,19 +8,19 @@ The downloaded data is stored in
 
 This script parses the excel files and creates training and testing data files.
 After running this script, the following files are generated:
-data/train/train_base.csv   : 2011-01-01 01:00:00 - 2016-12-01 00:00:00
-data/train/train_round_1.csv: 2016-12-01 01:00:00 - 2016-12-15 00:00:00
-data/train/train_round_2.csv: 2016-12-01 01:00:00 - 2016-12-31 00:00:00
-data/train/train_round_3.csv: 2016-12-01 01:00:00 - 2017-01-15 00:00:00
-data/train/train_round_4.csv: 2016-12-01 01:00:00 - 2017-01-31 00:00:00
-data/train/train_round_5.csv: 2016-12-01 01:00:00 - 2017-02-14 00:00:00
-data/train/train_round_6.csv: 2016-12-01 01:00:00 - 2017-02-28 00:00:00
-data/test/test_round_1.csv  : 2017-01-01 01:00:00 - 2017-02-01 00:00:00
-data/test/test_round_2.csv  : 2017-02-01 01:00:00 - 2017-03-01 00:00:00
-data/test/test_round_3.csv  : 2017-02-01 01:00:00 - 2017-03-01 00:00:00
-data/test/test_round_4.csv  : 2017-03-01 01:00:00 - 2017-04-01 00:00:00
-data/test/test_round_5.csv  : 2017-03-01 01:00:00 - 2017-04-01 00:00:00
-data/test/test_round_6.csv  : 2017-04-01 01:00:00 - 2017-05-01 00:00:00
+data/train/train_base.csv   : 2011-01-01 00:00:00 - 2016-11-30 23:00:00
+data/train/train_round_1.csv: 2016-12-01 00:00:00 - 2016-12-14 23:00:00
+data/train/train_round_2.csv: 2016-12-01 00:00:00 - 2016-12-30 23:00:00
+data/train/train_round_3.csv: 2016-12-01 00:00:00 - 2017-01-14 23:00:00
+data/train/train_round_4.csv: 2016-12-01 00:00:00 - 2017-01-30 23:00:00
+data/train/train_round_5.csv: 2016-12-01 00:00:00 - 2017-02-13 23:00:00
+data/train/train_round_6.csv: 2016-12-01 00:00:00 - 2017-02-27 23:00:00
+data/test/test_round_1.csv  : 2017-01-01 00:00:00 - 2017-01-31 23:00:00
+data/test/test_round_2.csv  : 2017-02-01 00:00:00 - 2017-02-28 23:00:00
+data/test/test_round_3.csv  : 2017-02-01 00:00:00 - 2017-02-28 23:00:00
+data/test/test_round_4.csv  : 2017-03-01 00:00:00 - 2017-03-31 23:00:00
+data/test/test_round_5.csv  : 2017-03-01 00:00:00 - 2017-03-31 23:00:00
+data/test/test_round_6.csv  : 2017-04-01 00:00:00 - 2017-04-30 23:00:00
 Concatenating train_base.csv and train_round_n.csv give the training data
 of round n. The script serve_folds.py does this automatically.
 
@@ -147,9 +147,10 @@ def parse_excel(file_name):
         # make sure zone names are unified
         df['Zone'] = SHEET_LIST_NEW[i]
 
-        # combine date and hour column to get timestamp
+        # Combine date and hour column to get timestamp
+        # Subtract 1 from Hour to avoid date change at the end of the day
         df['Datetime'] = df.apply(
-            lambda row: row.Date + timedelta(hours=row.Hour), axis=1)
+            lambda row: row.Date + timedelta(hours=row.Hour-1), axis=1)
         df.drop(['Date', 'Hour'], axis=1, inplace=True)
 
         df_list.append(df)
@@ -197,7 +198,7 @@ def preprocess_holiday_data():
     # Map holiday names to integers
     holidays = holidays.replace({'Holiday': HOLIDAY_TO_INT_DICT})
     # Create a holiday record for each hour
-    hours = pd.DataFrame({'hour': list(range(1, 25))})
+    hours = pd.DataFrame({'hour': list(range(0, 24))})
     holidays['key'] = 1
     hours['key'] = 1
     holidays_with_hours = pd.merge(holidays, hours, on='key')

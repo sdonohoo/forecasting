@@ -25,16 +25,20 @@ The OJ dataset is from R package [`bayesm`](https://cran.r-project.org/web/packa
 
 This dataset contains the following two tables:
 
-1. Weekly sales of refrigerated orange juice at 83 stores. This table has 106139 rows and 19 columns. It includes weekly sales and prices of 11 orange juice brands as well as information about profit, deal, and advertisement for each brand. 
+1. Weekly sales of refrigerated orange juice at 83 stores. This table has 106139 rows and 19 columns. It includes weekly sales and prices of 11 orange juice 
+brands as well as information about profit, deal, and advertisement for each brand. 
 
-2. Demographic information on those stores. This table has 83 rows and 13 columns. For every store, the table describes demographic information of its consumers, distance to the nearest warehouse store, average distance to the nearest 5 supermarkets, ratio of its sales to the nearest warehouse store, and ratio of its sales to the average of the nearest 5 stores.
+2. Demographic information on those stores. This table has 83 rows and 13 columns. For every store, the table describes demographic information of its consumers, 
+distance to the nearest warehouse store, average distance to the nearest 5 supermarkets, ratio of its sales to the nearest warehouse store, and ratio of its sales 
+to the average of the nearest 5 stores.
 
 Please see pages 40 and 41 of the [bayesm reference manual](https://cran.r-project.org/web/packages/bayesm/bayesm.pdf) for more details about each data column. 
  
 
 ## Training and test data separation
 
-For this benchmark, you are provided successive folds of training data in 12 forecast rounds. The goal is to generate forecasts for the forecast periods listed in the table below, using the available training data:
+For this benchmark, you are provided successive folds of training data in 12 forecast rounds. The goal is to generate forecasts for the forecast periods listed 
+in the table below, using the available training data:
 
 | **Round** | **Train period start week** | **Train period end week** | **Forecast period start week** | **Forecast period end week** |
 | -------- | --------------- | ------------------ | ------------------------- | ----------------------- |
@@ -51,7 +55,8 @@ For this benchmark, you are provided successive folds of training data in 12 for
 | 11 | 40 | 155 | 157 | 158 |
 | 12 | 40 | 157 | 159 | 160 |
 
-
+Note that week 40 is the first week in the dataset. The gap of one week between training period and forecasting period allows the store managers to prepare the 
+stock to meet the forecasted demand.
 
 # Format of Forecasts
 

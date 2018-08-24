@@ -8,8 +8,8 @@ for i in `seq 1 5`;
 do 
     echo "Run $i"
     if [ "$2" = "R" ]; then
-        time -p Rscript $1/train_score.r $i
+        time -p Rscript $1/train_score.r --seed $i
     else
-        time -p python $1/train_score.py $i
+        time -p python $1/train_score.py --seed $i
     fi
 done

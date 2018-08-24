@@ -30,7 +30,7 @@ def serve_folds(write_csv=False):
         yield train, test
 
 # Test serve_folds
-if False:
+if True:
     for train, test in serve_folds(True):    
         print('Training data size: {}'.format(train.shape))
         print('Testing data size: {}'.format(test.shape))

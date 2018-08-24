@@ -1,6 +1,20 @@
 # Return training and testing data for each forecast round
+# 
+# You can use this script in either of the following two ways
+# 1. Import the serve_folds module from this script to generate the training and testing data for 
+# each forecast period on the fly
+# 2. Run the script using the syntax below
+#    python serve_folds [-h] [--test] [--save]
+# where if '--test' is specified a quick test of serve_folds module will run and furthermore if 
+# `--save' is specified the training and testing data will be saved as csv files. Note that '--save' 
+# is effective only if '--test' is specified. This means that you need to run
+#    python serve_folds --test --save 
+# to get the output data files stored in /train and /test folders under the data directory. 
 
-import os, sys, inspect
+import os
+import sys
+import inspect
+import argparse
 import pandas as pd
 import retail_sales.OrangeJuice_Pt_3Weeks_Weekly.common.benchmark_settings as bs
 
@@ -30,8 +44,12 @@ def serve_folds(write_csv=False):
         yield train, test
 
 # Test serve_folds
-if False:
-    for train, test in serve_folds(True):    
+parser = argparse.ArgumentParser()
+parser.add_argument('--test', help='Run the test of serve_folds function', action='store_true')
+parser.add_argument('--save', help='Write training and testing data into csv files', action='store_true')
+args = parser.parse_args()
+if args.test:
+    for train, test in serve_folds(args.save):    
         print('Training data size: {}'.format(train.shape))
         print('Testing data size: {}'.format(test.shape))
         print('Minimum training week number: {}'.format(min(train['week'])))

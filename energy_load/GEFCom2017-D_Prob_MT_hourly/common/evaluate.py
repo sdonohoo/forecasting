@@ -1,3 +1,20 @@
+"""
+This script evaluates an implementation of the 
+GEFCom2017-D_Prob_MT_hourly benchmark. It reads in
+the test set predictions contained in submission.csv
+file that should accompany every reference implementation
+and submission. It computes evaluation metrics by
+comparing the predictions to the actual true values
+contained within the test set.
+
+The script must be executed from the TSPerf root directory.
+
+Arguments:
+    submission_file:   relative file path to submission.csv 
+        to the reference or submission implementation
+"""
+
+
 import os
 import sys
 import pandas as pd
@@ -18,7 +35,6 @@ def read_test_files(benchmark_dir):
         else:
             test = test_round.copy()
     return test
-
 
 
 def evaluate(submission_file):

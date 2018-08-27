@@ -249,7 +249,8 @@ In order to avoid any other sources of non-determinisms, we recommend setting ra
 The submitter needs to run the benchmark implementation five times using the integer random number generator seeds 1 through 5 and report all five results.  The variance of the five run results should be reasonable, otherwise, it's an indicator of instability of the implementation. The median of the five results is reported as the performance of the submitted implementation. 
 
 #### Hyperparameter tuning
-Instructions for hyperparameter tuning are optional. However, it's **highly recommended** to provide details of your hyperparameter tuning process, which will make it easier to adopt an implementation to a new dataset.
+Submitter should justify choice of hyperparameter values if they are not the default ones. Example of justifications are improvement in validation error, reduction in running time or cost. 
+Detailed instructions for hyperparameter tuning are optional. However, it's **highly recommended** to provide details of your hyperparameter tuning process, which will make it easier to adopt an implementation to a new dataset.
 
 ### Guideline for submitting the code
 
@@ -385,7 +386,7 @@ evaluation of the quality of the model is done using a standard `evaluate.py` sc
 * is well documented
 
 We do not have specific guidelines for checking these items. Reviewer should use his/her own judgement 
-to decide if there is no test data leakage and if the code or documentation need improvement.
+to decide if there is no test data leakage and if the code or documentation need improvement. In particular, reviewer should verify that hyperparameters were chosen based on the training and validation set (see examples [here](#hyperparameter-tuning)) and were not chosen to optimize performance over the test set.
 
 Reviewer should set up execution environment before running benchmark implementation. Initially the 
 reviewer needs to complete the following three steps:

@@ -19,11 +19,12 @@ import sys
 import pandas as pd
 sys.path.append('.')
 from common.metrics import sMAPE
+from benchmark_settings import NUM_ROUNDS
 
 def read_test_files(benchmark_dir):
     
     test_data_dir = os.path.join(benchmark_dir, "data", "test")
-    for rnd in range(1, 13):
+    for rnd in range(1, NUM_ROUNDS+1):
         test_file = 'test_round_'+str(rnd)+'.csv'
         test_round = pd.read_csv(os.path.join(test_data_dir, test_file))
         test_round['round'] = rnd

@@ -51,7 +51,7 @@ def evaluate(submission_file):
 
     print("Mean pinball loss: ", evaluation['pinball'].mean())
 
-    print(evaluation.groupby('Zone').apply(lambda x: x.mean())[['pinball']].rename(columns={'pinball':'mean pinball loss'}))
+    print(evaluation[['Zone', 'pinball']].groupby('Zone').mean().rename(columns={'pinball':'mean pinball loss'}))
     
 
 if __name__=="__main__":

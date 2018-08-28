@@ -1,10 +1,15 @@
 import os
+from datetime import datetime
 import pandas as pd
+import numpy as np
 from statsmodels.regression.quantile_regression import QuantReg
-# import localpath
-# from benchmark_paths import BENCHMARK_DATA_DIR
-# from serve_folds import serve_folds
 
+import localpath
+from benchmark_paths import BENCHMARK_DATA_DIR, SUBMISSIONS_DIR
+from serve_folds import serve_folds
+
+# Model parameters
+QUANTILES = np.linspace(0.1, 0.9, 9)
 TARGET_COL = 'DEMAND'
 # FEATURE_COLS = ['Holiday', 'DayType', 'Hour', 'TimeOfYear', 'WeekOfYear',
 #                 'CurrentYear', 'annual_sin_1', 'annual_cos_1',
@@ -17,66 +22,74 @@ TARGET_COL = 'DEMAND'
 FEATURE_COLS = ['Holiday', 'DayType', 'Hour', 'TimeOfYear', 'WeekOfYear',
                 'CurrentYear', 'LoadLag', 'DewPntLag', 'DryBulbLag']
 
-BENCHMARK_DATA_DIR = 'C:\\Users\\honglu\\TSPerf\\energy_load\\GEFCom2017' \
-                     '-D_Prob_MT_hourly\data\\'
+# Data paths
+TRAIN_DATA_DIR = os.path.join(BENCHMARK_DATA_DIR, 'features', 'train')
+TEST_DATA_DIR = os.path.join(BENCHMARK_DATA_DIR, 'features', 'test')
+RESULT_DIR = os.path.join(SUBMISSIONS_DIR, 'submission_0', 'results')
+RESULT_FILE = 'submission.csv'
+RESULT_PATH = os.path.join(RESULT_DIR, RESULT_FILE)
 
-train_data_dir = os.path.join(BENCHMARK_DATA_DIR, 'features', 'train')
-test_data_dir = os.path.join(BENCHMARK_DATA_DIR, 'features', 'test')
-
-
-# This file stores all the data before 2016-12-01
-TRAIN_BASE_FILE = 'train_base.csv'
-# These files contain data to be added to train_base.csv to form the training
-# data of a particular round
-TRAIN_ROUND_FILE_PREFIX = 'train_round_'
-TEST_ROUND_FILE_PREFIX = 'test_round_'
-
-i = 1
-train_base = pd.read_csv(os.path.join(train_data_dir, TRAIN_BASE_FILE))
-
-train_round_file_name = TRAIN_ROUND_FILE_PREFIX + str(i+1) + '.csv'
-train_round_delta = \
-    pd.read_csv(os.path.join(train_data_dir, train_round_file_name))
-
-train_df = pd.concat([train_base, train_round_delta])
-
-test_round_file_name = TEST_ROUND_FILE_PREFIX + str(i+1) + '.csv'
-
-test_df = \
-    pd.read_csv(os.path.join(test_data_dir, test_round_file_name))
-
-train_df_single = train_df.loc[train_df['Zone'] == 'ME', ]
-model = QuantReg(train_df_single[TARGET_COL], train_df_single[FEATURE_COLS])
-
-model_fit = model.fit(q=0.5)
 
 def preprocess():
     # place holder for log transformation, box-jenkins transformation, etc.
     pass
 
 
-def train_single_group():
-    pass
+def train_single_group(train_df_single, quantiles):
+    model = QuantReg(train_df_single[TARGET_COL], train_df_single[FEATURE_COLS])
+    models_dict = {}
+    for q in quantiles:
+        models_dict['Q' + str(int(q*100))] = model.fit(q=q)
+
+    return models_dict
 
 
-def score_single_group():
-    pass
+def score_single_group(test_df_single, model_dict):
+    output = test_df_single[['Zone', 'Datetime']].copy()
+    for q, m in model_dict.items():
+        res = m.predict(test_df_single[FEATURE_COLS])
+        output[q] = res
+
+    return output
 
 
-def train():
-    pass
+def train(train_df):
+    models_all = train_df.groupby('Zone').apply(lambda g: train_single_group(g, QUANTILES))
+
+    return models_all
 
 
-def score():
-    pass
+def score(test_df, models_all):
+    group_names = models_all.index.values
+
+    predictions_all = []
+
+    for g in group_names:
+        predictions_all.append(score_single_group(test_df.loc[test_df['Zone'] == g, ], models_all[g]))
+
+    predictions_final = pd.concat(predictions_all)
+
+    return predictions_final
 
 
-train_test = serve_folds(TRAIN_DATA_DIR, TEST_DATA_DIR)
-for train, test in train_test:
-    print('Training data size: {}'.format(train.shape))
-    print('Testing data size: {}'.format(test.shape))
-    print('Minimum training timestamp: {}'.format(min(train['Datetime'])))
-    print('Maximum training timestamp: {}'.format(max(train['Datetime'])))
-    print('Minimum testing timestamp: {}'.format(min(test['Datetime'])))
-    print('Maximum testing timestamp: {}'.format(max(test['Datetime'])))
-    print('')
+def main():
+    startTime = datetime.now()
+    train_test = serve_folds(TRAIN_DATA_DIR, TEST_DATA_DIR)
+    predictions_all = []
+    for train_round, test_round, round_num in train_test:
+        print('Round ' + str(round_num))
+        models_all = train(train_round)
+        predictions_round = score(test_round, models_all)
+        predictions_round['Round'] = round_num
+        predictions_all.append(predictions_round)
+
+    predictions_final = pd.concat(predictions_all)
+
+    predictions_final.to_csv(RESULT_PATH, index=False)
+
+    print('Prediction output size: {0}'.format(predictions_final.shape))
+    print('Running time: {0}'. format(datetime.now() - startTime))
+
+if __name__ == '__main__':
+    main()
+

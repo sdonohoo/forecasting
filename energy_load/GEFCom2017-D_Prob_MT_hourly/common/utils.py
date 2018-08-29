@@ -80,7 +80,7 @@ def split_train_test(full_df, output_dir,
         start_end = TEST_STARTS_ENDS[i]
         test_round_df = full_df.loc[
             ((index_value >= start_end[0]) & (index_value < start_end[1]))
-        ]
+        ].copy()
         print('Round {0} testing data size: {1}'
               .format(i+1, test_round_df.shape))
         print('Minimum timestamp: {0}'.format(min(
@@ -90,5 +90,5 @@ def split_train_test(full_df, output_dir,
         print('')
         test_round_df.to_csv(ground_truth_file)
 
-        test_round_df.drop(DROP_COLUMNS, inplace=True)
+        test_round_df.drop(DROP_COLUMNS, inplace=True, axis=1)
         test_round_df.to_csv(test_file)

@@ -270,10 +270,10 @@ def main(preprocess_flag):
 
     file_df_test_demand_erased = file_df_final.copy()
     file_df_test_demand_erased.loc[
-        file_df_test_demand_erased['Datetime'] >= TEST_START_DATE,
-        ERASE_TEST_COLUMNS] = np.nan
+        file_df_test_demand_erased.index.get_level_values(0) >=
+        TEST_START_DATE, ERASE_TEST_COLUMNS] = np.nan
 
-    file_df_final.to_csv(os.path.join(DATA_DIR, FULL_OUTPUT_FILE))
+    file_df_test_demand_erased.to_csv(os.path.join(DATA_DIR, FULL_OUTPUT_FILE))
 
     split_train_test(file_df_final, DATA_DIR)
 

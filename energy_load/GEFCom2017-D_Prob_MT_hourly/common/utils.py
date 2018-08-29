@@ -54,6 +54,9 @@ def split_train_test(full_df, output_dir,
 
     index_value = full_df.index.get_level_values(0)
     train_base_df = full_df.loc[index_value < TRAIN_BASE_END]
+    # Drop some training data at the beginning which don't have previous
+    # year's data for computing lag features.
+    train_base_df.dropna(inplace=True)
     train_base_df.to_csv(os.path.join(train_data_dir, train_base_file))
     print('Base training data frame size: {}'.format(train_base_df.shape))
 
@@ -81,6 +84,11 @@ def split_train_test(full_df, output_dir,
         test_round_df = full_df.loc[
             ((index_value >= start_end[0]) & (index_value < start_end[1]))
         ].copy()
+
+        test_round_df.to_csv(ground_truth_file)
+        test_round_df.drop(DROP_COLUMNS, inplace=True, axis=1)
+        test_round_df.to_csv(test_file)
+
         print('Round {0} testing data size: {1}'
               .format(i+1, test_round_df.shape))
         print('Minimum timestamp: {0}'.format(min(
@@ -88,7 +96,4 @@ def split_train_test(full_df, output_dir,
         print('Maximum timestamp: {0}'.format(max(
             test_round_df.index.get_level_values(0))))
         print('')
-        test_round_df.to_csv(ground_truth_file)
 
-        test_round_df.drop(DROP_COLUMNS, inplace=True, axis=1)
-        test_round_df.to_csv(test_file)

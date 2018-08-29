@@ -65,9 +65,11 @@ import os, sys, getopt
 from datetime import timedelta
 
 import pandas as pd
+import numpy as np
 
 from utils import split_train_test
 from benchmark_paths import DATA_DIR, HOLIDAY_DATA_PATH
+from benchmark_settings import TEST_STARTS_ENDS
 
 # This assumes that the script is stored in a directory of the same level
 # as the data directory
@@ -105,6 +107,11 @@ HOLIDAY_TO_INT_DICT = {"New Year's Day": 1,
                        "Veterans Day": 8,
                        "Thanksgiving Day": 9,
                        "Christmas Day": 10}
+
+# These columns need to be set to nan in the test period of FULL_OUTPUT_FILE
+# to avoid data leakage
+TEST_START_DATE = TEST_STARTS_ENDS[0][0]
+ERASE_TEST_COLUMNS = ['DEMAND', 'DewPnt', 'DryBulb']
 
 def check_data_exist(data_dir):
     """
@@ -260,6 +267,11 @@ def main(preprocess_flag):
 
     file_df_final.set_index('Datetime', inplace=True)
     file_df_final = merge_with_holiday_data(file_df_final, holiday_df)
+
+    file_df_test_demand_erased = file_df_final.copy()
+    file_df_test_demand_erased.loc[
+        file_df_test_demand_erased['Datetime'] >= TEST_START_DATE,
+        ERASE_TEST_COLUMNS] = np.nan
 
     file_df_final.to_csv(os.path.join(DATA_DIR, FULL_OUTPUT_FILE))
 

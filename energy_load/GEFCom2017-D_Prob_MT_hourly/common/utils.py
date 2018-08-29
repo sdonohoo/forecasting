@@ -8,6 +8,10 @@ from benchmark_settings import TRAIN_BASE_END, TRAIN_ROUNDS_ENDS, \
 ALLOWED_TIME_COLUMN_TYPES = [pd.Timestamp, pd.DatetimeIndex,
                              datetime.datetime, datetime.date]
 
+# These columns should be dropped in the test data as they are not available
+#  at forecasting time
+DROP_COLUMNS = ['DEMAND', 'DewPnt', 'DryBulb']
+
 def is_datetime_like(x):
     return any(isinstance(x, col_type)
                for col_type in ALLOWED_TIME_COLUMN_TYPES)
@@ -36,12 +40,17 @@ def split_train_test(full_df, output_dir,
 
     train_data_dir = os.path.join(output_dir, 'train')
     test_data_dir = os.path.join(output_dir, 'test')
+    ground_truth_dir = os.path.join(output_dir, 'test_ground_truth')
+
     # Create train and test data directories
     if not os.path.isdir(train_data_dir):
         os.mkdir(train_data_dir)
 
     if not os.path.isdir(test_data_dir):
         os.mkdir(test_data_dir)
+
+    if not os.path.isdir(ground_truth_dir):
+        os.mkdir(ground_truth_dir)
 
     index_value = full_df.index.get_level_values(0)
     train_base_df = full_df.loc[index_value < TRAIN_BASE_END]
@@ -64,8 +73,10 @@ def split_train_test(full_df, output_dir,
         train_round_delta_df.to_csv(file_name)
 
     for i in range(len(TEST_STARTS_ENDS)):
-        file_name = os.path.join(test_data_dir,
+        test_file = os.path.join(test_data_dir,
                                  test_file_prefix + str(i+1) + '.csv')
+        ground_truth_file = os.path.join(ground_truth_dir,
+                                         test_file_prefix + str(i+1) + '.csv')
         start_end = TEST_STARTS_ENDS[i]
         test_round_df = full_df.loc[
             ((index_value >= start_end[0]) & (index_value < start_end[1]))
@@ -77,4 +88,7 @@ def split_train_test(full_df, output_dir,
         print('Maximum timestamp: {0}'.format(max(
             test_round_df.index.get_level_values(0))))
         print('')
-        test_round_df.to_csv(file_name)
+        test_round_df.to_csv(ground_truth_file)
+
+        test_round_df.drop(DROP_COLUMNS, inplace=True)
+        test_round_df.to_csv(test_file)

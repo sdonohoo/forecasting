@@ -17,6 +17,8 @@ WEEK_DAY_TYPE_MAP = {1: 2, 3: 2}    # Map for converting Wednesday and
 HOLIDAY_CODE = 7
 SEMI_HOLIDAY_CODE = 8  # days before and after a holiday
 
+DATETIME_FORMAT = '%Y-%m-%d %H:%M:%S'
+
 def get_datetime_col(df, datetime_colname):
     """
     Helper function for extracting the datetime column as datetime type from
@@ -32,7 +34,8 @@ def get_datetime_col(df, datetime_colname):
 
     if not is_datetime_like(datetime_col):
         try:
-            datetime_col = pd.to_datetime(df[datetime_colname])
+            datetime_col = pd.to_datetime(df[datetime_colname],
+                                          format=DATETIME_FORMAT)
         except:
             raise Exception('Column or index {0} can not be converted to '
                             'datetime type.'.format(datetime_colname))
@@ -59,7 +62,8 @@ def day_type(datetime_col, holiday_col=None,
         datetype.loc[holiday_mask, 'DayType'] = HOLIDAY_CODE
 
         # Create a temporary Date column to calculate dates near the holidays
-        datetype['Date'] = pd.to_datetime(datetime_col.dt.date)
+        datetype['Date'] = pd.to_datetime(datetime_col.dt.date,
+                                          format=DATETIME_FORMAT)
         holiday_dates = set(datetype.loc[holiday_mask, 'Date'])
 
         semi_holiday_dates = \
@@ -181,7 +185,7 @@ def same_week_day_hour_lag(datetime_col, value_col, n_years=3,
     """
 
     if not is_datetime_like(datetime_col):
-        datetime_col = pd.to_datetime(datetime_col)
+        datetime_col = pd.to_datetime(datetime_col, format=DATETIME_FORMAT)
     min_time_stamp = min(datetime_col)
 
     df = pd.DataFrame({'Datetime': datetime_col, 'value': value_col})
@@ -231,7 +235,7 @@ def same_day_hour_lag(datetime_col, value_col, n_years=3,
     """
 
     if not is_datetime_like(datetime_col):
-        datetime_col = pd.to_datetime(datetime_col)
+        datetime_col = pd.to_datetime(datetime_col, format=DATETIME_FORMAT)
     min_time_stamp = min(datetime_col)
 
     df = pd.DataFrame({'Datetime': datetime_col, 'value': value_col})
@@ -271,7 +275,8 @@ def create_features(input_df, datetime_colname,
 
     output_df = input_df.copy()
     if not is_datetime_like(output_df[datetime_colname]):
-        output_df[datetime_colname] = pd.to_datetime(output_df[datetime_colname])
+        output_df[datetime_colname] = \
+            pd.to_datetime(output_df[datetime_colname], format=DATETIME_FORMAT)
     datetime_col = output_df[datetime_colname]
 
     # Basic temporal features

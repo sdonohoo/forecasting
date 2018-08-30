@@ -53,7 +53,7 @@ def split_train_test(full_df, output_dir,
         os.mkdir(ground_truth_dir)
 
     index_value = full_df.index.get_level_values(0)
-    train_base_df = full_df.loc[index_value < TRAIN_BASE_END]
+    train_base_df = full_df.loc[index_value < TRAIN_BASE_END].copy()
     # Drop some training data at the beginning which don't have previous
     # year's data for computing lag features.
     train_base_df.dropna(inplace=True)

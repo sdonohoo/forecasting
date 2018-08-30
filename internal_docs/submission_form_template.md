@@ -1,5 +1,7 @@
 # Implementation submission form
 
+Fill out this form before making a submission. Save it as README.md in the submission directory.
+
 ## Submission details
 
 **Benchmark name:** <*e.g. GEFCom2017-D_Prob_MT_hourly*>

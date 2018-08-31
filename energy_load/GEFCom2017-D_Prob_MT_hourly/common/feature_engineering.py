@@ -24,7 +24,7 @@ def main(input_file, output_dir, datetime_colname, holiday_colname):
                                   holiday_colname=holiday_colname)
     if not is_datetime_like(df_features[datetime_colname]):
         df_features[datetime_colname] = \
-            pd.to_datetime(df_features[datetime_colname], 
+            pd.to_datetime(df_features[datetime_colname],
                            format=DATETIME_FORMAT)
     df_features.set_index(datetime_colname, inplace=True)
     split_train_test(df_features, output_dir)

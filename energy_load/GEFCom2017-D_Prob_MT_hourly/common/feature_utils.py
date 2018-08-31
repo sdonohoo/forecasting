@@ -113,7 +113,7 @@ def week_of_year(datetime_col):
     return datetime_col.dt.week
 
 
-def current_year(datetime_col, min_year, max_year):
+def normalized_current_year(datetime_col, min_year, max_year):
 
     year = datetime_col.dt.year
     current_year = (year - min_year)/(max_year - min_year)
@@ -172,8 +172,8 @@ def same_week_day_hour_lag(datetime_col, value_col, n_years=3,
                            week_window=1, agg_func='mean',
                            output_colname='SameWeekHourLag'):
     """
-    Create a lag feature by averaging values of the same week, same day of
-    week, and same hour of day, of previous years.
+    Create a lag feature by averaging values of and around the same week,
+    same day of week, and same hour of day, of previous years.
     :param datetime_col: Datetime column
     :param value_col: Feature value column to create lag feature from
     :param n_years: Number of previous years data to use
@@ -222,8 +222,8 @@ def same_day_hour_lag(datetime_col, value_col, n_years=3,
                       day_window=1, agg_func='mean',
                       output_colname='SameDayHourLag'):
     """
-    Create a lag feature by averaging values of the same day of year, and same
-    hour of day, of previous years.
+    Create a lag feature by averaging values of and around the same day of
+    year, and same hour of day, of previous years.
     :param datetime_col: Datetime column
     :param value_col: Feature value column to create lag feature from
     :param n_years: Number of previous years data to use
@@ -284,7 +284,8 @@ def create_features(input_df, datetime_colname,
     output_df['Hour'] = hour_of_day(datetime_col)
     output_df['TimeOfYear'] = time_of_year(datetime_col)
     output_df['WeekOfYear'] = week_of_year(datetime_col)
-    output_df['CurrentYear'] = current_year(datetime_col, 2011, 2017)
+    output_df['CurrentYear'] = normalized_current_year(
+        datetime_col, 2011, 2017)
 
     # Fourier approximation features
     annual_fourier_approx = annual_fourier(datetime_col, n_harmonics=3)

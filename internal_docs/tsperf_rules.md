@@ -124,7 +124,7 @@ retail sales forecasting use case.
     instance, `/TSPerf/energy_load/GEFCom2014_Pt_1Month_Hourly/reference` includes the required submission files of the reference implementation for 
     GEFCom2014_Pt_1Month_Hourly.
 
-    * `/submissions` folder: This folder contains multiple subfolders with each subfolder including all the necessary scripts and 
+    * `/submissions` folder: This folder contains multiple subfolders where each subfolder includes all the necessary scripts and 
     the submission form for reproducing a certain submission. For instance, `/submission1` folder under 
     `/TSPerf/energy_load/GEFCom2014_Pt_1Month_Hourly/submissions` includes the required submission files of submission1.
     

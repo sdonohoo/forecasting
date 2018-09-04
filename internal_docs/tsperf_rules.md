@@ -147,10 +147,14 @@ benchmarks, as well as provides guidances for benchmark implementation, benchmar
 
 ## Benchmarks  
 
-| **Benchmark problem** | **Benchmark directory** |  
-| --------------------- | -------------------- |  
-| Probabilistic electricity load forecasting | TSPerf\energy_load\GEFCom2017-D_Prob_MT_Hourly |
-| Retail sales forecasting | TsPerf\retail_sales\OrangeJuice_Pt_3Weeks_Weekly |
+The following table summarizes benchmarks that are currently included in TSPerf:
+
+| **Benchmark** | **Dataset** | **Benchmark directory** |  
+| --------------------- | ----|---------------- |  
+| Probabilistic electricity load forecasting | GEFCom2017 |TSPerf\energy_load\GEFCom2017-D_Prob_MT_Hourly |
+| Retail sales forecasting | Orange Juice dataset | TSPerf\retail_sales\OrangeJuice_Pt_3Weeks_Weekly |
+
+Next sections provide a high-level description of the benchmarks. A more detailed description of the benchmarks is in README files in benchmark directories.
 
 ### Probabilistic electricity load forecasting
 

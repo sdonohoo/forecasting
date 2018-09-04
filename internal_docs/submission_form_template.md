@@ -12,7 +12,7 @@ Fill out this form before making a submission. Save it as README.md in the submi
 
 **Submission name** <*Can be any name up to a maximum of 24 characters. Good choices can be the surname of the submitter, an abbreviated name of the method used or a unique model code name*>
 
-**Submission date:** <MM/DD/YYYY>
+**Submission date:** <*MM/DD/YYYY*>
 
 **Submission branch/PR:** <*Name of the git branch or pull request of the submission*>
 
@@ -73,4 +73,4 @@ List the key packages, deep learning frameworks included in the docker image. On
 
 *median run time: 43 minutes*>
 
-**Cost:** <*Provide an estimate of the total cost to run your train_score.\* script using cloud-based resources.*>
+**Cost:** <*Provide an estimate of the total cost to run your train_score.\* script using cloud-based resources. Refer to the [performance measurement guide](/internal_docs/performance_measurement_guide.md) for how to measure the cloud cost*>

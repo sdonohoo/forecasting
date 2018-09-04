@@ -203,7 +203,7 @@ def same_week_day_hour_lag(datetime_col, value_col, n_years=3,
 
     week_lag_cols = []
     for w in week_lag_all:
-        if max_time_stamp - timedelta(weeks=w) >= min_time_stamp:
+        if (max_time_stamp - timedelta(weeks=w)) >= min_time_stamp:
             col_name = 'week_lag_' + str(w)
             week_lag_cols.append(col_name)
 
@@ -266,7 +266,7 @@ def same_day_hour_lag(datetime_col, value_col, n_years=3,
 
             df.loc[valid_lag_mask, col_name] = \
                 df.loc[lag_datetime[valid_lag_mask], 'value'].values
-            
+
     # Additional aggregation options will be added as needed
     if agg_func == 'mean':
         df[output_colname] = round(df[day_lag_cols].mean(axis=1))

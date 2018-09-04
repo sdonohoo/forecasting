@@ -80,7 +80,7 @@ initialization to the specified  quality target.
 
 A *run result* is the wallclock time and cost required for a run.
 
-A *benchmark result*  is the median of five run results.
+A *benchmark result*  is the median of five run results, whre median is taken over the quality of five models.
 
 A *benchmark submission* is a source code of benchmark implementation, along with declared benchmark 
 quality and  benchmark result.
@@ -189,29 +189,21 @@ Under `/TSPerf/common` folder, there are a Dockerfile and requirements.txt file 
 
 ### Guideline for measuring performance
 
-Each benchmark result is the median of five run results produced using the integer random number generator seeds 1 through 5. All five run results must also be reported. The following measurements should be included:
+A *benchmark result* is the median of five run results produced using the integer random number generator seeds 1 through 5.  All five run results must also be reported. The following measurements should be included:
   * quality of the model
-  * running time
-  * cloud cost 
+  * wall-clock running time
+  * cloud cost  
 
-#### Quality of the Model
+The median should be computed over 5 values of the quality of the model.
 
-The quality of the model is measured by a certain evaluation metric e.g. MAPE. Please use common utility script `evaluate.py` to get the benchmark quality value in each run
-```bash
-python <benchmark directory>/common/evaluate.py <submission directory>/submission_seed_<seed value>.csv
-``` 
+Submission guidelines for [Standalone VM](#standalone-vm) and [Batch AI](#batch-ai) have detailed instructions for measuing quality of the model and wall-clock running time. In the next section we provide instructions for measuring cloud costs.
 
-#### Running Time
+#### Measuring Cloud Cost
 
-The wallclock running time of each run should be measured by 
-```bash
-time -p python <submission directory>/train_score.py
-```
-
-#### Cloud Cost
-
-Include the total cost of obtaining the median run result using fixed prices for the general public at the time the result is collected. Do not use spot 
-pricing. If you use Azure, you can estimate the costs for Azure products using this [online pricing calculator](https://azure.microsoft.com/en-us/pricing/calculator/).  
+The cloud cost is the total cost of obtaining the benchmark result using fixed prices for the general public at the time the result is collected.  The total cost should be computed as the product of wall-clock time and the sum of the costs of all Azure services used by benchmark implementation. 
+The total cost can be computed using [Azure pricing calculator](https://azure.microsoft.com/en-us/pricing/calculator/).  When computing the costs, do not use spot pricing. Also, do not include in the cloud costs the
+* costs of uploading the data to the cloud  
+* costs of developing model and tuning hyperparameters
 
 ## Submission of benchmark implementation
 
@@ -331,6 +323,8 @@ here (TODO: Add link). Specifically, it should include
 
 11. Create pull request for review by following the process in the next section.
 
+#### Batch AI
+
 ### Pull request process
 
 This section describes the Pull Request Process that we (the framework team) would like to use for the TSPerf development process as well as for the benchmark implementation development. The process applies for both document and code development.
@@ -375,7 +369,7 @@ Since reviewing and approving PRs could be time consuming, it is important to pl
 The goal of the review is to validate the declared
 
 * quality of the model 
-* running time
+* wall-clock running time
 * cloud cost  
 
 We will explain below how to validate these quantities. Additionally the reviewer should check that the 
@@ -475,7 +469,7 @@ and storage account with file share and blob storage. When creating resources, p
 *storage account name*, *storage account key* and *file share name*. You will need to provide these parameters in the 
 later steps.
 
-5. Upload <submission directory>/train_score.py script to file share account by following the instructions in README 
+5. Upload \<submission directory\>/train_score.py script to file share account by following the instructions in README 
 file.
 
 6. Upload the dataset to blob storage by following the instructions in README file.

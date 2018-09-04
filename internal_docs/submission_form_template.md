@@ -20,6 +20,8 @@ Fill out this form before making a submission. Save it as README.md in the submi
 
 ## Implementation resources
 
+**Platform** <*e.g. Azure, AWS, Google Cloud, or On-Prem*>
+
 **Hardware** <*e.g. Standard NC6 (6 vcpus, 56 GB memory), 2xK80 GPUs, SSD* or *Batch AI cluster of 6x Standard NC6*>
 
 **Data storage:** <*e.g. Premium SSD, blob storage*>

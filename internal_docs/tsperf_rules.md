@@ -329,7 +329,7 @@ here (TODO: Add link). Specifically, it should include
     * running time in each run
     * cost in each run 
 
-11. Create pull request for review
+11. Create pull request for review by following the process in the next section.
 
 ### Pull request process
 
@@ -344,7 +344,7 @@ This section describes the Pull Request Process that we (the framework team) wou
 
 #### Pull Request PR Process
 
-1. Code/docs development is performed by the developers on a separated brancg outside of the master branch
+1. Code/docs development is performed by the developers on a separated branch outside of the master branch
 2. Upon completion of a given task the developer will issue a PR that includes the following elements:
    * Code/Doc to be reviewed
    * List of reviewers (at least one reviewer)
@@ -364,7 +364,7 @@ This section describes the Pull Request Process that we (the framework team) wou
 Since reviewing and approving PRs could be time consuming, it is important to plan and allocate resources in advance for that. Therefore, the following guidelines should be considered:
 
 * At the sprint planing, all expected PRs should be discussed based on inputs from all developers
-* At the sprint planning, the designated approver should be designated
+* At the sprint planning, the designated approver should be chosen
 * The designated approver should estimate the required effort for reviewing all PRs and allocate the required time for the next sprint accordingly
 * A 2nd approver should be assigned in case of possible conflicts or time constraints
 * Developers should notify the reviewers in advance at the sprint planning 
@@ -504,7 +504,7 @@ file.
     benchmark quality declared in the benchmark submission.
 
 ## Leaderboard
-Each benchmark will have a separate leaderboards. All leaderboards will have the following columns:
+Each benchmark will have a separate leaderboard. All leaderboards will have the following columns:
 * submission name
 * URL of submission folder in VSTS
 * benchmark quality (e.g. MAPE)

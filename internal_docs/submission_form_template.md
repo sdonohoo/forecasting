@@ -10,7 +10,7 @@ Fill out this form before making a submission. Save it as README.md in the submi
 
 **Submitter(s) email:**
 
-**Submission name** <*Can be any name up to a maximum of 24 characters. Good choices can be the surname of the submitter, an abbreviated name of the method used or a unique model code name*>
+**Submission name** <*An abbreviated name of the method or model used up to a maximum of 24 characters*>
 
 **Submission date:** <*MM/DD/YYYY*>
 

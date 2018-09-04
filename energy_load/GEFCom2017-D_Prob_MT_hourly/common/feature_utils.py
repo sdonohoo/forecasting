@@ -71,6 +71,8 @@ def day_type(datetime_col, holiday_col=None,
                            end=d + semi_holiday_offset,
                            freq='D')
              for d in holiday_dates]
+
+        # Flatten the list of lists
         semi_holiday_dates = [d for dates in semi_holiday_dates for d in dates]
 
         semi_holiday_dates = set(semi_holiday_dates)
@@ -187,6 +189,7 @@ def same_week_day_hour_lag(datetime_col, value_col, n_years=3,
     if not is_datetime_like(datetime_col):
         datetime_col = pd.to_datetime(datetime_col, format=DATETIME_FORMAT)
     min_time_stamp = min(datetime_col)
+    max_time_stamp = max(datetime_col)
 
     df = pd.DataFrame({'Datetime': datetime_col, 'value': value_col})
     df.set_index('Datetime', inplace=True)
@@ -200,20 +203,21 @@ def same_week_day_hour_lag(datetime_col, value_col, n_years=3,
 
     week_lag_cols = []
     for w in week_lag_all:
-        col_name = 'week_lag_' + str(w)
-        week_lag_cols.append(col_name)
+        if max_time_stamp - timedelta(weeks=w) >= min_time_stamp:
+            col_name = 'week_lag_' + str(w)
+            week_lag_cols.append(col_name)
 
-        lag_datetime = df.index.get_level_values(0) - timedelta(weeks=w)
-        valid_lag_mask = lag_datetime >= min_time_stamp
+            lag_datetime = df.index.get_level_values(0) - timedelta(weeks=w)
+            valid_lag_mask = lag_datetime >= min_time_stamp
 
-        df[col_name] = np.nan
+            df[col_name] = np.nan
 
-        df.loc[valid_lag_mask, col_name] = \
-            df.loc[lag_datetime[valid_lag_mask], 'value'].values
+            df.loc[valid_lag_mask, col_name] = \
+                df.loc[lag_datetime[valid_lag_mask], 'value'].values
 
     # Additional aggregation options will be added as needed
     if agg_func == 'mean':
-        df[output_colname] = df[week_lag_cols].mean(axis=1)
+        df[output_colname] = round(df[week_lag_cols].mean(axis=1))
 
     return df[[output_colname]]
 
@@ -237,6 +241,7 @@ def same_day_hour_lag(datetime_col, value_col, n_years=3,
     if not is_datetime_like(datetime_col):
         datetime_col = pd.to_datetime(datetime_col, format=DATETIME_FORMAT)
     min_time_stamp = min(datetime_col)
+    max_time_stamp = max(datetime_col)
 
     df = pd.DataFrame({'Datetime': datetime_col, 'value': value_col})
     df.set_index('Datetime', inplace=True)
@@ -250,20 +255,21 @@ def same_day_hour_lag(datetime_col, value_col, n_years=3,
 
     day_lag_cols = []
     for d in day_lag_all:
-        col_name = 'day_lag_' + str(d)
-        day_lag_cols.append(col_name)
+        if (max_time_stamp - timedelta(days=d)) >= min_time_stamp:
+            col_name = 'day_lag_' + str(d)
+            day_lag_cols.append(col_name)
 
-        lag_datetime = df.index.get_level_values(0) - timedelta(days=d)
-        valid_lag_mask = lag_datetime >= min_time_stamp
+            lag_datetime = df.index.get_level_values(0) - timedelta(days=d)
+            valid_lag_mask = lag_datetime >= min_time_stamp
 
-        df[col_name] = np.nan
+            df[col_name] = np.nan
 
-        df.loc[valid_lag_mask, col_name] = \
-            df.loc[lag_datetime[valid_lag_mask], 'value'].values
-
+            df.loc[valid_lag_mask, col_name] = \
+                df.loc[lag_datetime[valid_lag_mask], 'value'].values
+            
     # Additional aggregation options will be added as needed
     if agg_func == 'mean':
-        df[output_colname] = df[day_lag_cols].mean(axis=1)
+        df[output_colname] = round(df[day_lag_cols].mean(axis=1))
 
     return df[[output_colname]]
 

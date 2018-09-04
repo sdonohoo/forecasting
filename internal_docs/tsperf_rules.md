@@ -218,12 +218,12 @@ pricing. If you use Azure, you can estimate the costs for Azure products using t
 ### Guideline for submitting reproduction instructions
 
 #### System and framework availability
-This section is aligned with MLPerf.  
+This section is aligned with [MLPerf](https://mlperf.org/).  
 If you are using a publicly available system or framework, you must use publicly available and widely-used used versions of the system or framework.  
 If you are using an experimental framework or system, you must make the system and framework you use available upon request for replication.
 
 #### Benchmark implementation source code
-This section is aligned with MLPerf.  
+This section is aligned with [MLPerf](https://mlperf.org/).  
 Source code used for the benchmark implementations must be open-sourced under a license that permits a commercial entity to freely use the implementation for benchmarking. The code must be available as long as the results are actively used.
 
 #### Environment setup
@@ -237,8 +237,8 @@ If your implementation is light-weight and does not have any system dependency, 
 The submitter needs to submit a report summarizing all the framework and package versions used for producing the reported result. This is to prevent the newer version of a framework or package significantly changing the implementation result.
 
 #### Non-determinism restrictions
-This section is aligned with MLPerf. Some more detailed instructions are added.  
-The following forms of non-determinism are acceptable in MLPerf.
+This section is aligned with [MLPerf](https://mlperf.org/). Some more detailed instructions are added.  
+The following forms of non-determinism are acceptable in [MLPerf](https://mlperf.org/).
 - Floating point operation order. For example, certain functions in cuDNN do not guarantee reproducibility across runs.
 
 - Random initialization of the weights and/or biases.

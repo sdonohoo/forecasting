@@ -12,6 +12,8 @@ Fill out this form before making a submission. Save it as README.md in the submi
 
 **Submission name** <*Can be any name up to a maximum of 24 characters. Good choices can be the surname of the submitter, an abbreviated name of the method used or a unique model code name*>
 
+**Submission date:** <MM/DD/YYYY>
+
 **Submission branch/PR:** <*Name of the git branch or pull request of the submission*>
 
 **Submission path:** <*e.g. /energy_load/GEFCom2017-D_Prob_MT_hourly/submissions/submission1*>

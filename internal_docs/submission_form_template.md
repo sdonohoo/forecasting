@@ -14,7 +14,9 @@ Fill out this form before making a submission. Save it as README.md in the submi
 
 **Submission date:** <*MM/DD/YYYY*>
 
-**Submission branch/PR:** <*Name of the git branch or pull request of the submission*>
+**Submission branch:** <*Name of the git branch with the submission e.g. your_last_name_DDMMYY*>
+
+**Submission PR:** <*Name of the pull request of the submission e.g. your_last_name_DDMMYY*>
 
 **Submission path:** <*e.g. /energy_load/GEFCom2017-D_Prob_MT_hourly/submissions/submission1*>
 

@@ -10,13 +10,13 @@ Fill out this form before making a submission. Save it as README.md in the submi
 
 **Submitter(s) email:**
 
-**Submission name** <*An abbreviated name of the method or model used up to a maximum of 24 characters*>
+**Submission name** <*An abbreviated name of the method or model used up to a maximum of 24 characters e.g. LSTM_3layers*>
 
 **Submission date:** <*MM/DD/YYYY*>
 
-**Submission branch:** <*Name of the git branch with the submission e.g. your_last_name_DDMMYY*>
+**Submission branch:** <*Name of the git branch with the submission e.g. LSTM_3layers*>
 
-**Submission PR:** <*Name of the pull request of the submission e.g. your_last_name_DDMMYY*>
+**Submission PR:** <*Name of the pull request of the submission e.g. LSTM_3layers*>
 
 **Submission path:** <*e.g. /energy_load/GEFCom2017-D_Prob_MT_hourly/submissions/submission1*>
 

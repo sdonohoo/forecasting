@@ -39,9 +39,27 @@ List the key packages, deep learning frameworks included in the docker image. On
 
 ## Implementation description
 
-<*Describe the key elements of the implementation including the modelling approach and the algorithms used. Describe any feature engineering used to transform the data for you model. Provide values of the key hyperparameters of your final model. If a deep learning method was used, describe the network structure.*>
+### Modelling approach
+
+<*Give a brief description of the key elements of the implementation including the modelling approach and the algorithms used*>
 
 **Implentation diagram** <*Optional. Include if the description of the implementation would be clearer with a diagram*>
+
+### Feature engineering
+
+<*Describe any feature engineering used to transform the data for your model*>
+
+### Hyperparameter tuning
+
+<*Describe efforts to tune your model, the hyperparameter tuning approach taken and the set of key hyperparameters of your final model>
+
+### Description of implementation scripts
+
+<*Briefly describe the scripts in this submission and how they are related*>
+
+### Steps to reproduce
+
+<*Outline the detailed steps of how to reproduce the results of this benchmark implementation*>
 
 ## Implementation evaluation
 

@@ -18,27 +18,6 @@ Fill out this form before making a submission. Save it as README.md in the submi
 
 **Submission path:** <*e.g. /energy_load/GEFCom2017-D_Prob_MT_hourly/submissions/submission1*>
 
-## Implementation resources
-
-**Platform** <*e.g. Azure, AWS, Google Cloud, or On-Prem*>
-
-**Hardware** <*e.g. Standard NC6 (6 vcpus, 56 GB memory), 2xK80 GPUs, SSD* or *Batch AI cluster of 6x Standard NC6*>
-
-**Data storage:** <*e.g. Premium SSD, blob storage*>
-
-**Docker image:** <Name and location of the implementation docker image e.g. tsperf.azurecr.io/common/image:v1>
-
-**Key packages/dependencies:**
-List the key packages, deep learning frameworks included in the docker image. Only include the packages that are important for implementing the model. Exclude packages used for data manipulation, feature engineering etc. E.g.:
-    
-    - python==3.5
-    - keras==2.2.1
-    - tensorflow==1.0
-
-## Resource deployment instructions
-
-<*Provide detailed instructions on how to deploy the cloud resources to run your implementation. Ideally, this will include a script, using for example the Azure CLI, for automated deployment.*>
-
 ## Implementation description
 
 ### Modelling approach
@@ -62,6 +41,28 @@ List the key packages, deep learning frameworks included in the docker image. On
 ### Steps to reproduce
 
 <*Outline the detailed steps of how to reproduce the results of this benchmark implementation*>
+
+## Implementation resources
+
+**Platform** <*e.g. Azure, AWS, Google Cloud, or On-Prem*>
+
+**Hardware** <*e.g. Standard NC6 (6 vcpus, 56 GB memory), 2xK80 GPUs, SSD* or *Batch AI cluster of 6x Standard NC6*>
+
+**Data storage:** <*e.g. Premium SSD, blob storage*>
+
+**Docker image:** <Name and location of the implementation docker image e.g. tsperf.azurecr.io/common/image:v1>
+
+**Key packages/dependencies:**
+List the key packages, deep learning frameworks included in the docker image. Only include the packages that are important for implementing the model. Exclude packages used for data manipulation, feature engineering etc. E.g.:
+    
+    - python==3.5
+    - keras==2.2.1
+    - tensorflow==1.0
+
+## Resource deployment instructions
+
+<*Provide detailed instructions on how to deploy the cloud resources to run your implementation. Ideally, this will include a script, using for example the Azure CLI, for automated deployment.*>
+
 
 ## Implementation evaluation
 

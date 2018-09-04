@@ -170,7 +170,7 @@ The quality metric of this benchmark is the Pinball loss function.
 
 ### Retail sales forecasting
 
-Sales forecasting is a key task for the management of retail stores. With the projection of future sales, store managers will be able to optimize 
+Sales forecasting is a key objective for the management of retail stores. With the projection of future sales, store managers will be able to optimize 
 the inventory based on their business goals. This will generate more profitable order fulfillment and reduce the inventory cost. 
 
 The objective of this benchmark is to forecast orange juice sales of different brands for multiple stores with the Orange Juice dataset from R package 

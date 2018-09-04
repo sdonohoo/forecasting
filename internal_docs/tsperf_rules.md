@@ -158,7 +158,7 @@ Probabilistic load forecasting (PLF) has become increasingly important in
 power systems planning and operations in recent years. The applications of PLF
 include energy production planning, reliability analysis, probabilistic price
 forecasting, etc.
-The task of this benchmark is to generate probabilistic forecasting of
+The objective of this benchmark is to generate probabilistic forecasting of
 electricity load on the GEFCom2017 competition qualifying match data. We use
 about 6 years of data for training. Forecast is done at 6 time points, with
 horizon of 1 ~ 2 months and granularity of 1 hour. The forecasts should be in

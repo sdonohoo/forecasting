@@ -80,10 +80,9 @@ initialization to the specified  quality target.
 
 A **run result** is the wall-clock time and cost required for a run.
 
-A **benchmark result**  is the median of five run results, whre median is taken over the quality of five models.
+A **benchmark result**  is the median of five run results, where median is taken over the quality of five models.
 
-A **benchmark submission** is a source code of benchmark implementation, along with declared benchmark 
-quality and  benchmark result.
+A **benchmark submission** is a source code of benchmark implementation, declared benchmark result and corresponding run result, along with reproduction instructions. 
 
 A **validated benchmark submission** is a benchmark submission that passed review process.
 

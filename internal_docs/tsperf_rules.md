@@ -52,7 +52,7 @@ We adopt several definitions from [MLPerf](https://github.com/mlperf/policies/bl
 and also add a number of new ones:  
 
 A **use case** is a broad family of abstract problems in a specific vertical. Examples include energy 
-demand forecasting, retail sales forecasting, medical image classification, 
+demand forecasting, retail sales forecasting and medical image classification.
 
 A **benchmark** is a specific abstract problem that can be solved using ML by training a model based on a 
 specific dataset.

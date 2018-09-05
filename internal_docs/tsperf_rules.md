@@ -78,7 +78,7 @@ benchmark rules.
 A **run** is a complete execution of a benchmark implementation on a system, training a model from 
 initialization to the specified  quality target.
 
-A **run result** is the wall-clock time and cost required for a run.
+A **run result**  is a wall-clock time to execute a complete run and the cost of that execution.
 
 A **benchmark result**  is the median of five run results, where median is taken over the quality of five models.
 

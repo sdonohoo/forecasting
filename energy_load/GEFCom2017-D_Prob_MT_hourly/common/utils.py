@@ -12,9 +12,11 @@ ALLOWED_TIME_COLUMN_TYPES = [pd.Timestamp, pd.DatetimeIndex,
 #  at forecasting time
 DROP_COLUMNS = ['DEMAND', 'DewPnt', 'DryBulb']
 
+
 def is_datetime_like(x):
     return any(isinstance(x, col_type)
                for col_type in ALLOWED_TIME_COLUMN_TYPES)
+
 
 def split_train_test(full_df, output_dir,
                      train_base_file='train_base.csv',

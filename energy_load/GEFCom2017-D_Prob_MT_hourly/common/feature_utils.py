@@ -123,6 +123,24 @@ def normalized_current_year(datetime_col, min_year, max_year):
     return current_year
 
 
+def normalized_current_date(datetime_col, min_date, max_date):
+    date = datetime_col.dt.date
+    current_date = (date - min_date).apply(lambda x: x.days)
+
+    current_date = current_date/(max_date - min_date).days
+
+    return current_date
+
+
+def normalized_current_datehour(datetime_col, min_datehour, max_datehour):
+    current_datehour = (datetime_col - min_datehour)\
+        .apply(lambda x: x.seconds)
+
+    current_datehour = current_datehour/(max_datehour - min_datehour).seconds
+
+    return current_datehour
+
+
 def fourier_approximation(t, n, period):
     x = n * 2 * np.pi * t/period
     x_sin = np.sin(x)
@@ -274,10 +292,7 @@ def same_day_hour_lag(datetime_col, value_col, n_years=3,
     return df[[output_colname]]
 
 
-def create_features(input_df, datetime_colname,
-                    holiday_colname=None, one_hot_encode=False):
-
-    categorical_columns = ['DayType', 'Hour', 'WeekOfYear']
+def create_basic_features(input_df, datetime_colname):
 
     output_df = input_df.copy()
     if not is_datetime_like(output_df[datetime_colname]):
@@ -285,13 +300,9 @@ def create_features(input_df, datetime_colname,
             pd.to_datetime(output_df[datetime_colname], format=DATETIME_FORMAT)
     datetime_col = output_df[datetime_colname]
 
-    # Basic temporal features
-    output_df['DayType'] = day_type(datetime_col, output_df[holiday_colname])
     output_df['Hour'] = hour_of_day(datetime_col)
     output_df['TimeOfYear'] = time_of_year(datetime_col)
     output_df['WeekOfYear'] = week_of_year(datetime_col)
-    output_df['CurrentYear'] = normalized_current_year(
-        datetime_col, 2011, 2017)
 
     # Fourier approximation features
     annual_fourier_approx = annual_fourier(datetime_col, n_harmonics=3)
@@ -306,6 +317,33 @@ def create_features(input_df, datetime_colname,
 
     for k, v in daily_fourier_approx.items():
         output_df[k] = v
+
+    return output_df
+
+
+def create_advanced_features(train_df, test_df, datetime_colname,
+                             holiday_colname=None):
+
+    output_df = pd.concat([train_df, test_df])
+    if not is_datetime_like(output_df[datetime_colname]):
+        output_df[datetime_colname] = \
+            pd.to_datetime(output_df[datetime_colname], format=DATETIME_FORMAT)
+    datetime_col = output_df[datetime_colname]
+
+    min_date = min(datetime_col.dt.date)
+    max_date = max(datetime_col.dt.date)
+    output_df['CurrentDate'] = \
+        normalized_current_date(datetime_col, min_date, max_date)
+
+    min_datehour = min(datetime_col)
+    max_datehour = max(datetime_col)
+    output_df['CurrentDateHour'] = \
+        normalized_current_datehour(datetime_col, min_datehour, max_datehour)
+
+    # Basic temporal features
+    output_df['DayType'] = day_type(datetime_col, output_df[holiday_colname])
+    output_df['CurrentYear'] = normalized_current_year(
+        datetime_col, 2011, 2017)
 
     # Load lag
     same_week_day_hour_load_lag = \
@@ -332,12 +370,5 @@ def create_features(input_df, datetime_colname,
         lambda left, right: pd.merge(left, right, on=[datetime_colname, 'Zone']),
         [output_df, same_week_day_hour_load_lag,
          same_day_hour_drewpnt_lag, same_day_hour_drybulb_lag])
-
-    if one_hot_encode:
-        one_hot_encode = \
-            pd.get_dummies(output_df, columns=categorical_columns)
-
-        output_df = output_df.merge(one_hot_encode)
-        output_df.drop(categorical_columns, axis=1, inplace=True)
 
     return output_df

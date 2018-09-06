@@ -17,6 +17,7 @@ Arguments:
 import os
 import sys
 import pandas as pd
+import math
 sys.path.append('.')
 from common.metrics import MAPE
 from benchmark_settings import NUM_ROUNDS
@@ -46,7 +47,11 @@ def evaluate(submission_file):
 
     evaluation = pd.merge(submission, test, on=['round', 'store', 'brand', 'week'], how='left')
 
-    print("MAPE: ", MAPE(evaluation['prediction'], evaluation['logmove']))
+    # convert log sales to sales
+    evaluation['prediction'] = evaluation['prediction'].apply(lambda x: round(math.exp(x)))
+    evaluation['sales'] = evaluation['logmove'].apply(lambda x: round(math.exp(x)))
+
+    print("MAPE: ", MAPE(evaluation['prediction'], evaluation['sales']))
 
 
 

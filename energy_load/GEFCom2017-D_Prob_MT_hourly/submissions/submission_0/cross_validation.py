@@ -46,17 +46,29 @@ TARGET_COL = 'DEMAND'
 #                 'daily_cos_2', 'LoadLag', 'DewPntLag', 'DryBulbLag']
 
 FEATURE_COLS = ['Holiday', 'DayType', 'TimeOfYear', 'WeekOfYear',
-                'CurrentYear', 'LoadLag', 'DewPntLag', 'DryBulbLag']
+                'CurrentYear', 'LoadLag', 'DewPntLag', 'DryBulbLag',
+                'CurrentDate',
+                'annual_sin_1', 'annual_cos_1', 'annual_sin_2',
+                'annual_cos_2', 'annual_sin_3', 'annual_cos_3',
+                'weekly_sin_1', 'weekly_cos_1', 'weekly_sin_2',
+                'weekly_cos_2', 'weekly_sin_3', 'weekly_cos_3'
+                ]
+
 
 # Data paths
 TRAIN_DATA_DIR = os.path.join(BENCHMARK_DATA_DIR, 'features', 'train')
 TRAIN_DATA_FILE = os.path.join(TRAIN_DATA_DIR, 'train_base.csv')
 
-RUN_NUM = 2
-RUN_COMMENT = 'One model per zone per hour'
+RUN_NUM = 11
+RUN_COMMENT = 'Added time trend'
 RESULT_DIR = os.path.join(SUBMISSIONS_DIR, 'submission_0', 'results', 'cross_validation')
 RESULT_FILE = os.path.join(RESULT_DIR, 'cv_result_' + str(RUN_NUM) + '.csv')
 CONFIG_FILE = os.path.join(RESULT_DIR, 'config_' + str(RUN_NUM) + '.json')
+
+whole_df = pd.read_csv(TRAIN_DATA_FILE, parse_dates=[DATETIME_COL])
+# all_columns = set(whole_df.columns)
+# columns_to_exclude = set(['Datetime', 'DewPnt', 'DryBulb', 'Zone', 'DEMAND'])
+# FEATURE_COLS = list(all_columns - columns_to_exclude)
 
 def preprocess():
     # place holder for log transformation, box-jenkins transformation, etc.
@@ -71,7 +83,8 @@ def construct_config():
                    'grain_cols': GRAIN_COLS,
                    'group_cols': GROUP_COLS,
                    'datetime_col': DATETIME_COL,
-                   'quant_reg_max_iter': QUANT_REG_MAX_ITER}
+                   'quant_reg_max_iter': QUANT_REG_MAX_ITER,
+                   'quant_reg_kernel': 'gau'}
 
     return config_dict
 
@@ -79,7 +92,6 @@ def construct_config():
 def main():
     start_time = datetime.now()
     config = construct_config()
-    whole_df = pd.read_csv(TRAIN_DATA_FILE, parse_dates=[DATETIME_COL])
     train_validation_split = split_train_validation(whole_df, FCT_HORIZON_ALL, DATETIME_COL)
     predictions_all = []
 

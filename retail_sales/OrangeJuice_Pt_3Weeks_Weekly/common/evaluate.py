@@ -18,7 +18,7 @@ import os
 import sys
 import pandas as pd
 sys.path.append('.')
-from common.metrics import sMAPE
+from common.metrics import MAPE
 from benchmark_settings import NUM_ROUNDS
 
 def read_test_files(benchmark_dir):
@@ -46,7 +46,7 @@ def evaluate(submission_file):
 
     evaluation = pd.merge(submission, test, on=['round', 'store', 'brand', 'week'], how='left')
 
-    print("sMAPE: ", sMAPE(evaluation['prediction'], evaluation['logmove']))
+    print("MAPE: ", MAPE(evaluation['prediction'], evaluation['logmove']))
 
 
 

@@ -229,8 +229,10 @@ def main(preprocess_flag):
     """
     :param preprocess_flag: A boolean flag that determines whether data '
           'preprocessing should be applied to the extracted data. If True, '
-          'zero values will be filled by linearly interpolation, outliers '
+          'zero values will be filled by linear interpolation, outliers '
           'caused by end of Daylight Saving Time will be divided by 2. '
+          'This step is recommended, but you can also set this flag to False '
+          'and preprocess the data use your own code.'
           'Default: True.'
     :type preprocess_flag: bool
     """

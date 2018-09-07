@@ -115,6 +115,10 @@ def week_of_year(datetime_col):
     return datetime_col.dt.week
 
 
+def month_of_year(date_time_col):
+    return date_time_col.dt.month
+
+
 def normalized_current_year(datetime_col, min_year, max_year):
 
     year = datetime_col.dt.year
@@ -134,9 +138,11 @@ def normalized_current_date(datetime_col, min_date, max_date):
 
 def normalized_current_datehour(datetime_col, min_datehour, max_datehour):
     current_datehour = (datetime_col - min_datehour)\
-        .apply(lambda x: x.seconds)
+        .apply(lambda x: x.days*24 + x.seconds/3600)
 
-    current_datehour = current_datehour/(max_datehour - min_datehour).seconds
+    max_min_diff = max_datehour - min_datehour
+
+    current_datehour = current_datehour/(max_min_diff.days * 24 + max_min_diff.seconds/3600)
 
     return current_datehour
 
@@ -292,6 +298,32 @@ def same_day_hour_lag(datetime_col, value_col, n_years=3,
     return df[[output_colname]]
 
 
+def same_day_hour_moving_average(datetime_col, value_col, window_size,
+                                 start_week, average_count,
+                                 output_col_prefix='moving_average_lag_'):
+
+    df = pd.DataFrame({'Datetime': datetime_col, 'value': value_col})
+    df.set_index('Datetime', inplace=True)
+
+    if not df.index.is_monotonic:
+        df.sort_index(inplace=True)
+
+    for i in range(average_count):
+        output_col = output_col_prefix + str(start_week+i)
+        week_lag_start = start_week + i
+        hour_lags = [(week_lag_start + w) * 24 for w in range(window_size)]
+        tmp_df = df.copy()
+        tmp_col_all = []
+        for h in hour_lags:
+            tmp_col = 'tmp_lag_' + str(h)
+            tmp_col_all.append(tmp_col)
+            tmp_df[tmp_col] = tmp_df['value'].shift(h)
+
+        df[output_col] = round(tmp_df[tmp_col_all].mean(axis=1))
+
+    return df
+
+
 def create_basic_features(input_df, datetime_colname):
 
     output_df = input_df.copy()
@@ -303,6 +335,7 @@ def create_basic_features(input_df, datetime_colname):
     output_df['Hour'] = hour_of_day(datetime_col)
     output_df['TimeOfYear'] = time_of_year(datetime_col)
     output_df['WeekOfYear'] = week_of_year(datetime_col)
+    output_df['MonthOfYear'] = month_of_year(datetime_col)
 
     # Fourier approximation features
     annual_fourier_approx = annual_fourier(datetime_col, n_harmonics=3)
@@ -324,11 +357,41 @@ def create_basic_features(input_df, datetime_colname):
 def create_advanced_features(train_df, test_df, datetime_colname,
                              holiday_colname=None):
 
-    output_df = pd.concat([train_df, test_df])
+    output_df = pd.concat([train_df, test_df], sort=True)
     if not is_datetime_like(output_df[datetime_colname]):
         output_df[datetime_colname] = \
             pd.to_datetime(output_df[datetime_colname], format=DATETIME_FORMAT)
     datetime_col = output_df[datetime_colname]
+
+    load_moving_average = \
+        output_df[[datetime_colname, 'DEMAND', 'Zone']].groupby('Zone').apply(
+            lambda g: same_day_hour_moving_average(g[datetime_colname],
+                                                   g['DEMAND'],
+                                                   start_week=9,
+                                                   window_size=4,
+                                                   average_count=8,
+                                                   output_col_prefix='RecentLoad_'))
+    load_moving_average.reset_index(inplace=True)
+
+    dewpnt_moving_average = \
+        output_df[[datetime_colname, 'DewPnt', 'Zone']].groupby('Zone').apply(
+            lambda g: same_day_hour_moving_average(g[datetime_colname],
+                                                   g['DewPnt'],
+                                                   start_week=9,
+                                                   window_size=4,
+                                                   average_count=8,
+                                                   output_col_prefix='RecentDewPnt_'))
+    dewpnt_moving_average.reset_index(inplace=True)
+
+    drybulb_moving_average = \
+        output_df[[datetime_colname, 'DryBulb', 'Zone']].groupby('Zone').apply(
+            lambda g: same_day_hour_moving_average(g[datetime_colname],
+                                                   g['DryBulb'],
+                                                   start_week=9,
+                                                   window_size=4,
+                                                   average_count=8,
+                                                   output_col_prefix='RecentDryBulb_'))
+    drybulb_moving_average.reset_index(inplace=True)
 
     min_date = min(datetime_col.dt.date)
     max_date = max(datetime_col.dt.date)
@@ -369,6 +432,11 @@ def create_advanced_features(train_df, test_df, datetime_colname,
     output_df = reduce(
         lambda left, right: pd.merge(left, right, on=[datetime_colname, 'Zone']),
         [output_df, same_week_day_hour_load_lag,
-         same_day_hour_drewpnt_lag, same_day_hour_drybulb_lag])
+         same_day_hour_drewpnt_lag, same_day_hour_drybulb_lag,
+         load_moving_average, drybulb_moving_average, dewpnt_moving_average])
 
-    return output_df
+    train_end = max(train_df[datetime_colname])
+    output_df_train = output_df.loc[output_df[datetime_colname] <= train_end, ]
+    output_df_test = output_df.loc[output_df[datetime_colname] > train_end, ]
+
+    return output_df_train, output_df_test

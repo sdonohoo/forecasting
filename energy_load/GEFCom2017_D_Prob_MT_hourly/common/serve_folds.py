@@ -2,10 +2,7 @@ import os, sys, inspect
 import pandas as pd
 
 def serve_folds():
-    SCRIPT_PATH = os.path.dirname(os.path.abspath(inspect.getfile(
-        inspect.currentframe())))
-    DATA_DIR_LEVEL = os.path.dirname(SCRIPT_PATH)
-    DATA_DIR = os.path.join(DATA_DIR_LEVEL, 'data')
+    from benchmark_paths import DATA_DIR
     TRAIN_DATA_DIR = DATA_DIR + '/train'
     TEST_DATA_DIR = DATA_DIR + '/test'
     # This file stores all the data before 2016-12-01
@@ -33,13 +30,13 @@ def serve_folds():
 
         yield train_round_df, test_round_df
 
-# Test serve_folds
-for train, test in serve_folds():
-    print('Training data size: {}'.format(train.shape))
-    print('Testing data size: {}'.format(test.shape))
-    print('Minimum training timestamp: {}'.format(min(train['Datetime'])))
-    print('Maximum training timestamp: {}'.format(max(train['Datetime'])))
-    print('Minimum testing timestamp: {}'.format(min(test['Datetime'])))
-    print('Maximum testing timestamp: {}'.format(max(test['Datetime'])))
-    print('')
+# # Test serve_folds
+# for train, test in serve_folds():
+#     print('Training data size: {}'.format(train.shape))
+#     print('Testing data size: {}'.format(test.shape))
+#     print('Minimum training timestamp: {}'.format(min(train['Datetime'])))
+#     print('Maximum training timestamp: {}'.format(max(train['Datetime'])))
+#     print('Minimum testing timestamp: {}'.format(min(test['Datetime'])))
+#     print('Maximum testing timestamp: {}'.format(max(test['Datetime'])))
+#     print('')
 

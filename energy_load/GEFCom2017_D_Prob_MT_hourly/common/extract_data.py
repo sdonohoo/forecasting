@@ -8,19 +8,19 @@ The downloaded data is stored in
 
 This script parses the excel files and creates training and testing data files.
 After running this script, the following files are generated:
-data/train/train_base.csv   : 2011-01-01 01:00:00 - 2016-12-01 00:00:00
-data/train/train_round_1.csv: 2016-12-01 01:00:00 - 2016-12-15 00:00:00
-data/train/train_round_2.csv: 2016-12-01 01:00:00 - 2016-12-31 00:00:00
-data/train/train_round_3.csv: 2016-12-01 01:00:00 - 2017-01-15 00:00:00
-data/train/train_round_4.csv: 2016-12-01 01:00:00 - 2017-01-31 00:00:00
-data/train/train_round_5.csv: 2016-12-01 01:00:00 - 2017-02-14 00:00:00
-data/train/train_round_6.csv: 2016-12-01 01:00:00 - 2017-02-28 00:00:00
-data/test/test_round_1.csv  : 2017-01-01 01:00:00 - 2017-02-01 00:00:00
-data/test/test_round_2.csv  : 2017-02-01 01:00:00 - 2017-03-01 00:00:00
-data/test/test_round_3.csv  : 2017-02-01 01:00:00 - 2017-03-01 00:00:00
-data/test/test_round_4.csv  : 2017-03-01 01:00:00 - 2017-04-01 00:00:00
-data/test/test_round_5.csv  : 2017-03-01 01:00:00 - 2017-04-01 00:00:00
-data/test/test_round_6.csv  : 2017-04-01 01:00:00 - 2017-05-01 00:00:00
+data/train/train_base.csv   : 2011-01-01 00:00:00 - 2016-11-30 23:00:00
+data/train/train_round_1.csv: 2016-12-01 00:00:00 - 2016-12-14 23:00:00
+data/train/train_round_2.csv: 2016-12-01 00:00:00 - 2016-12-30 23:00:00
+data/train/train_round_3.csv: 2016-12-01 00:00:00 - 2017-01-14 23:00:00
+data/train/train_round_4.csv: 2016-12-01 00:00:00 - 2017-01-30 23:00:00
+data/train/train_round_5.csv: 2016-12-01 00:00:00 - 2017-02-13 23:00:00
+data/train/train_round_6.csv: 2016-12-01 00:00:00 - 2017-02-27 23:00:00
+data/test/test_round_1.csv  : 2017-01-01 00:00:00 - 2017-01-31 23:00:00
+data/test/test_round_2.csv  : 2017-02-01 00:00:00 - 2017-02-28 23:00:00
+data/test/test_round_3.csv  : 2017-02-01 00:00:00 - 2017-02-28 23:00:00
+data/test/test_round_4.csv  : 2017-03-01 00:00:00 - 2017-03-31 23:00:00
+data/test/test_round_5.csv  : 2017-03-01 00:00:00 - 2017-03-31 23:00:00
+data/test/test_round_6.csv  : 2017-04-01 00:00:00 - 2017-04-30 23:00:00
 Concatenating train_base.csv and train_round_n.csv give the training data
 of round n. The script serve_folds.py does this automatically.
 
@@ -61,26 +61,19 @@ Holiday:
     10: Christmas Day
 """
 
-import os, sys, getopt, inspect
+import os, sys, getopt
 from datetime import timedelta
 
 import pandas as pd
 import numpy as np
 
+from utils import split_train_test
+from benchmark_paths import DATA_DIR, HOLIDAY_DATA_PATH
+from benchmark_settings import TEST_STARTS_ENDS
+
 # This assumes that the script is stored in a directory of the same level
 # as the data directory
-SCRIPT_PATH = os.path.dirname(os.path.abspath(inspect.getfile(
-    inspect.currentframe())))
-DATA_DIR_LEVEL = os.path.dirname(SCRIPT_PATH)
-DATA_DIR = os.path.join(DATA_DIR_LEVEL, 'data')
-TRAIN_DATA_DIR = DATA_DIR + '/train'
-TEST_DATA_DIR = DATA_DIR + '/test'
-# This file stores all the data before 2016-12-01
-TRAIN_BASE_FILE = 'train_base.csv'
-# These files contain data to be added to train_base.csv to form the training
-# data of a particular round
-TRAIN_ROUND_FILE_PREFIX = 'train_round_'
-TEST_ROUND_FILE_PREFIX = 'test_round_'
+FULL_OUTPUT_FILE = 'full_data.csv'
 
 DATA_FILE_LIST = ['2011_smd_hourly.xls', '2012_smd_hourly.xls',
                   '2013_smd_hourly.xls', '2014_smd_hourly.xls',
@@ -94,18 +87,6 @@ MA_ZONE_LIST = ['SEMA', 'WCMA', 'NEMA']
 COLUMN_LIST = ['Date', 'Hour', 'DEMAND', 'DryBulb', 'DewPnt']
 COLUMN_LIST_NEW = ['Date', 'Hr_End', 'RT_Demand', 'Dry_Bulb', 'Dew_Point']
 
-TRAIN_BASE_END = pd.to_datetime('2016-12-01')
-TRAIN_ROUNDS_ENDS = pd.to_datetime(['2016-12-15', '2016-12-31',
-                                    '2017-01-15', '2017-01-31',
-                                    '2017-02-14', '2017-02-28'])
-
-TEST_STARTS_ENDS = [pd.to_datetime(('2017-01-01', '2017-02-01')),
-                    pd.to_datetime(('2017-02-01', '2017-03-01')),
-                    pd.to_datetime(('2017-02-01', '2017-03-01')),
-                    pd.to_datetime(('2017-03-01', '2017-04-01')),
-                    pd.to_datetime(('2017-03-01', '2017-04-01')),
-                    pd.to_datetime(('2017-04-01', '2017-05-01'))]
-
 # These dates are used to correct doubled demand values at the end of DST
 # every year. The problem is fixed starting from 2016. It doesn't worth
 # doing outlier detection for these 5 data points.
@@ -114,11 +95,6 @@ DST_END_DATETIME = pd.to_datetime(['2011-11-06 02:00:00',
                                    '2013-11-03 02:00:00',
                                    '2014-11-02 02:00:00',
                                    '2015-11-01 02:00:00'])
-# Holiday data file path
-HOLIDAY_DATA_DIR_LEVEL = os.path.dirname(os.path.dirname(os.path.dirname(
-    SCRIPT_PATH)))
-HOLIDAY_DATA_FILE = \
-    os.path.join(HOLIDAY_DATA_DIR_LEVEL, 'common', 'us_holidays.csv')
 
 # Holiday dictionary used to map holidays to integers
 HOLIDAY_TO_INT_DICT = {"New Year's Day": 1,
@@ -131,6 +107,11 @@ HOLIDAY_TO_INT_DICT = {"New Year's Day": 1,
                        "Veterans Day": 8,
                        "Thanksgiving Day": 9,
                        "Christmas Day": 10}
+
+# These columns need to be set to nan in the test period of FULL_OUTPUT_FILE
+# to avoid data leakage
+TEST_START_DATE = TEST_STARTS_ENDS[0][0]
+ERASE_TEST_COLUMNS = ['DEMAND', 'DewPnt', 'DryBulb']
 
 def check_data_exist(data_dir):
     """
@@ -173,9 +154,10 @@ def parse_excel(file_name):
         # make sure zone names are unified
         df['Zone'] = SHEET_LIST_NEW[i]
 
-        # combine date and hour column to get timestamp
+        # Combine date and hour column to get timestamp
+        # Subtract 1 from Hour to avoid date change at the end of the day
         df['Datetime'] = df.apply(
-            lambda row: row.Date + timedelta(hours=row.Hour), axis=1)
+            lambda row: row.Date + timedelta(hours=row.Hour-1), axis=1)
         df.drop(['Date', 'Hour'], axis=1, inplace=True)
 
         df_list.append(df)
@@ -218,12 +200,12 @@ def parse_excel(file_name):
     return df_final
 
 def preprocess_holiday_data():
-    holidays = pd.read_csv(HOLIDAY_DATA_FILE)
+    holidays = pd.read_csv(HOLIDAY_DATA_PATH)
     holidays['Date'] = pd.to_datetime(holidays['Date'])
     # Map holiday names to integers
     holidays = holidays.replace({'Holiday': HOLIDAY_TO_INT_DICT})
     # Create a holiday record for each hour
-    hours = pd.DataFrame({'hour': list(range(1, 25))})
+    hours = pd.DataFrame({'hour': list(range(0, 24))})
     holidays['key'] = 1
     hours['key'] = 1
     holidays_with_hours = pd.merge(holidays, hours, on='key')
@@ -247,8 +229,10 @@ def main(preprocess_flag):
     """
     :param preprocess_flag: A boolean flag that determines whether data '
           'preprocessing should be applied to the extracted data. If True, '
-          'zero values will be filled by linearly interpolation, outliers '
+          'zero values will be filled by linear interpolation, outliers '
           'caused by end of Daylight Saving Time will be divided by 2. '
+          'This step is recommended, but you can also set this flag to False '
+          'and preprocess the data use your own code.'
           'Default: True.'
     :type preprocess_flag: bool
     """
@@ -257,13 +241,6 @@ def main(preprocess_flag):
 
     # preprocess the holiday data
     holiday_df = preprocess_holiday_data()
-
-    # Create train and test data directories
-    if not os.path.isdir(TRAIN_DATA_DIR):
-        os.mkdir(TRAIN_DATA_DIR)
-
-    if not os.path.isdir(TEST_DATA_DIR):
-        os.mkdir(TEST_DATA_DIR)
 
     file_df_list = []
     for file_name in DATA_FILE_LIST:
@@ -288,46 +265,19 @@ def main(preprocess_flag):
         dst_end_datetime_mask = \
             file_df_final['Datetime'].isin(DST_END_DATETIME)
         file_df_final.loc[dst_end_datetime_mask,'DEMAND'] = \
-            round(file_df_final.loc[dst_end_datetime_mask,'DEMAND']/2)
+            round(file_df_final.loc[dst_end_datetime_mask, 'DEMAND']/2)
 
     file_df_final.set_index('Datetime', inplace=True)
     file_df_final = merge_with_holiday_data(file_df_final, holiday_df)
 
-    index_value = file_df_final.index.get_level_values(0)
-    train_base_df = file_df_final.loc[index_value <= TRAIN_BASE_END]
-    train_base_df.to_csv(os.path.join(TRAIN_DATA_DIR, TRAIN_BASE_FILE))
-    print('Base training data frame size: {}'.format(train_base_df.shape))
+    file_df_test_demand_erased = file_df_final.copy()
+    file_df_test_demand_erased.loc[
+        file_df_test_demand_erased.index.get_level_values(0) >=
+        TEST_START_DATE, ERASE_TEST_COLUMNS] = np.nan
 
-    for i in range(len(TRAIN_ROUNDS_ENDS)):
-        file_name = os.path.join(TRAIN_DATA_DIR,
-                                 TRAIN_ROUND_FILE_PREFIX + str(i+1) + '.csv')
-        train_round_delta_df = file_df_final.loc[
-            (index_value > TRAIN_BASE_END)
-            & (index_value <= TRAIN_ROUNDS_ENDS[i])]
-        print('Round {0} additional training data size: {1}'.format(i+1,
-            train_round_delta_df.shape))
-        print('Minimum timestamp: {0}'
-              .format(min(train_round_delta_df.index.get_level_values(0))))
-        print('Maximum timestamp: {0}'
-              .format(max(train_round_delta_df.index.get_level_values(0))))
-        print('')
-        train_round_delta_df.to_csv(file_name)
+    file_df_test_demand_erased.to_csv(os.path.join(DATA_DIR, FULL_OUTPUT_FILE))
 
-    for i in range(len(TEST_STARTS_ENDS)):
-        file_name = os.path.join(TEST_DATA_DIR,
-                                 TEST_ROUND_FILE_PREFIX + str(i+1) + '.csv')
-        start_end = TEST_STARTS_ENDS[i]
-        test_round_df = file_df_final.loc[
-            ((index_value > start_end[0]) & (index_value <= start_end[1]))
-        ]
-        print('Round {0} testing data size: {1}'
-              .format(i+1, test_round_df.shape))
-        print('Minimum timestamp: {0}'
-        .format(min(test_round_df.index.get_level_values(0))))
-        print('Maximum timestamp: {0}'
-        .format(max(test_round_df.index.get_level_values(0))))
-        print('')
-        test_round_df.to_csv(file_name)
+    split_train_test(file_df_final, DATA_DIR)
 
 def usage():
     print('usage: python extract_data.py [--preprocess]\n'

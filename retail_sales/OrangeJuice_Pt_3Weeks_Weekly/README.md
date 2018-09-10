@@ -4,7 +4,7 @@ Sales forecasting is a key task for the management of retail stores. With the pr
 the inventory based on their business goals. This will generate more profitable order fulfillment and reduce the inventory cost. 
 
 The task of this benchmark is to forecast orange juice sales of different brands for multiple stores with the Orange Juice (OJ) dataset from R package 
-`bayesm`. The forecast type is point forecasting. The forecast horizon is 3 weeks ahead and granularity is weekly. There are 12 forecasting rounds, each of 
+`bayesm`. The forecast type is point forecasting. The forecast horizon is 3 weeks ahead and granularity is weekly. There are 12 forecast rounds, each of 
 which involves forecasting the sales during a target period. The training and test data in each round are specified in the subsection [Training and test data 
 separation](#training-and-test-data-separation). The table below summarizes the characteristics of this benchmark
 
@@ -25,41 +25,55 @@ The OJ dataset is from R package [`bayesm`](https://cran.r-project.org/web/packa
 
 This dataset contains the following two tables:
 
-1. Weekly sales of refrigerated orange juice at 83 stores. This table has 106139 rows and 19 columns. It includes weekly sales and prices of 11 orange juice brands as well as information about profit, deal, and advertisement for each brand. 
+1. Weekly sales of refrigerated orange juice at 83 stores. This table has 106139 rows and 19 columns. It includes weekly sales and prices of 11 orange juice 
+brands as well as information about profit, deal, and advertisement for each brand. 
 
-2. Demographic information on those stores. This table has 83 rows and 13 columns. For every store, the table describes demographic information of its consumers, distance to the nearest warehouse store, average distance to the nearest 5 supermarkets, ratio of its sales to the nearest warehouse store, and ratio of its sales to the average of the nearest 5 stores.
+2. Demographic information on those stores. This table has 83 rows and 13 columns. For every store, the table describes demographic information of its consumers, 
+distance to the nearest warehouse store, average distance to the nearest 5 supermarkets, ratio of its sales to the nearest warehouse store, and ratio of its sales 
+to the average of the nearest 5 stores.
 
 Please see pages 40 and 41 of the [bayesm reference manual](https://cran.r-project.org/web/packages/bayesm/bayesm.pdf) for more details about each data column. 
  
 
 ## Training and test data separation
 
-For this benchmark, you are provided successive folds of training data in 12 forecasting rounds. The goal is to generate forecasts for the forecast periods listed in the table below, using the available training data:
+For this benchmark, you are provided successive folds of training data in 12 forecast rounds. The goal is to generate forecasts for the forecast periods listed 
+in the table below, using the available training data:
 
 | **Round** | **Train period start week** | **Train period end week** | **Forecast period start week** | **Forecast period end week** |
 | -------- | --------------- | ------------------ | ------------------------- | ----------------------- |
-| 1 | 40 | 95 | 97 | 98 |
-| 2 | 40 | 97 | 99 | 100 |
-| 3 | 40 | 99 | 101 | 102 |
-| 4 | 40 | 101 | 103 | 104 |
-| 5 | 40 | 103 | 105 | 106 |
-| 6 | 40 | 105 | 107 | 108 |
-| 7 | 40 | 107 | 109 | 110 |
-| 8 | 40 | 109 | 111 | 112 |
-| 9 | 40 | 111 | 113 | 114 |
-| 10 | 40 | 113 | 115 | 116 |
-| 11 | 40 | 115 | 117 | 118 |
-| 12 | 40 | 117 | 119 | 120 |
+| 1 | 40 | 135 | 137 | 138 |
+| 2 | 40 | 137 | 139 | 140 |
+| 3 | 40 | 139 | 141 | 142 |
+| 4 | 40 | 141 | 143 | 144 |
+| 5 | 40 | 143 | 145 | 146 |
+| 6 | 40 | 145 | 147 | 148 |
+| 7 | 40 | 147 | 149 | 150 |
+| 8 | 40 | 149 | 151 | 152 |
+| 9 | 40 | 151 | 153 | 154 |
+| 10 | 40 | 153 | 155 | 156 |
+| 11 | 40 | 155 | 157 | 158 |
+| 12 | 40 | 157 | 159 | 160 |
 
-
+Note that week 40 is the first week in the dataset. The gap of one week between training period and forecasting period allows the store managers to prepare the 
+stock to meet the forecasted demand.
 
 # Format of Forecasts
 
 The forecasts should be in the following format
 
-| round | store | brand | week | prediction | 
-| --------- | ---------- | ---------- | ---------- | ---------- |
-| ... | ... | ... | ... | ... |
+| round | store | brand | week | weeks_ahead | prediction | 
+| --------- | ---------- | ---------- | ---------- | ---------- | ---------- |
+| ... | ... | ... | ... | ... | ... |
+
+with each of the columns explained below 
+* round: index of the forecast round
+* store: store number
+* brand: brand indicator
+* week: week of the sales that we forecast
+* weeks_ahead: number of weeks ahead that we forecast
+* prediction: predicted number of units sold 
+ 
 
 
 # Quality

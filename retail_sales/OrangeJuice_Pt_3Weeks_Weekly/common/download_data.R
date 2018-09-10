@@ -1,8 +1,7 @@
 # Retrieves the orangeJuice dataset from the bayesm R package
 # and saves as csv
 
-# TODO: include this package in docker image
-# install.packages("bayesm")
+install.packages("bayesm")
 
 library(bayesm)
 

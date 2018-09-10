@@ -6,9 +6,11 @@ import numpy as np
 from joblib import Parallel
 import json
 
-import localpath_tmp
-from benchmark_paths_tmp import BENCHMARK_DATA_DIR, SUBMISSIONS_DIR
-from utils_tmp import get_month_day_range, train, predict, split_train_validation
+import localpath
+from energy_load.GEFCom2017_D_Prob_MT_hourly.common.benchmark_paths import DATA_DIR
+from utils import get_month_day_range, train, predict, split_train_validation
+
+SUBMISSION_DIR = os.path.dirname(__file__)
 
 
 def pinball_loss(predictions, actuals, q):
@@ -40,7 +42,6 @@ TARGET_COL = 'DEMAND'
 
 # FEATURE_COLS = ['Holiday', 'DayType', 'TimeOfYear', 'WeekOfYear',
 #                 'CurrentYear', 'LoadLag', 'DewPntLag', 'DryBulbLag',
-#                 'CurrentDate',
 #                 'annual_sin_1', 'annual_cos_1', 'annual_sin_2',
 #                 'annual_cos_2', 'annual_sin_3', 'annual_cos_3',
 #                 'weekly_sin_1', 'weekly_cos_1', 'weekly_sin_2',
@@ -58,7 +59,6 @@ TARGET_COL = 'DEMAND'
 
 FEATURE_COLS = ['Holiday', 'DayType', 'TimeOfYear', 'WeekOfYear',
                 'CurrentYear', 'LoadLag', 'DewPntLag', 'DryBulbLag',
-                'CurrentDate',
                 'annual_sin_1', 'annual_cos_1', 'annual_sin_2',
                 'annual_cos_2', 'annual_sin_3', 'annual_cos_3',
                 'weekly_sin_1', 'weekly_cos_1', 'weekly_sin_2',
@@ -67,15 +67,24 @@ FEATURE_COLS = ['Holiday', 'DayType', 'TimeOfYear', 'WeekOfYear',
                 'RecentLoad_12', 'RecentLoad_13', 'RecentLoad_14',
                 'RecentLoad_15', 'RecentLoad_16'
                 ]
-
+#
+# FEATURE_COLS = ['Holiday', 'DayType', 'TimeOfYear', 'WeekOfYear',
+#                 'CurrentYear', 'LoadLag', 'DewPntLag', 'DryBulbLag',
+#                 'annual_sin_1', 'annual_cos_1', 'annual_sin_2',
+#                 'annual_cos_2', 'annual_sin_3', 'annual_cos_3',
+#                 'weekly_sin_1', 'weekly_cos_1', 'weekly_sin_2',
+#                 'weekly_cos_2', 'weekly_sin_3', 'weekly_cos_3'
+#                 ]
 
 # Data paths
-TRAIN_DATA_DIR = os.path.join(BENCHMARK_DATA_DIR, 'features', 'train')
+TRAIN_DATA_DIR = os.path.join(DATA_DIR, 'features', 'train')
 TRAIN_DATA_FILE = os.path.join(TRAIN_DATA_DIR, 'train_round_1.csv')
 
 RUN_NUM = 11
-RUN_COMMENT = 'Added time trend'
-RESULT_DIR = os.path.join(SUBMISSIONS_DIR, 'submission_0', 'results', 'cross_validation')
+RUN_COMMENT = 'Added recent load features'
+RESULT_DIR = os.path.join(SUBMISSION_DIR, 'data', 'results', 'cross_validation')
+if not os.path.isdir(RESULT_DIR):
+    os.mkdir(RESULT_DIR)
 RESULT_FILE = os.path.join(RESULT_DIR, 'cv_result_' + str(RUN_NUM) + '.csv')
 CONFIG_FILE = os.path.join(RESULT_DIR, 'config_' + str(RUN_NUM) + '.json')
 

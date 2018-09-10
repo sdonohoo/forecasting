@@ -12,21 +12,21 @@ def serve_folds():
     TRAIN_ROUND_FILE_PREFIX = 'train_round_'
     TEST_ROUND_FILE_PREFIX = 'test_round_'
 
-NUM_FOLDS = 6
+    NUM_FOLDS = 6
 
     train_base = pd.read_csv(os.path.join(TRAIN_DATA_DIR, TRAIN_BASE_FILE))
 
     for i in range(NUM_FOLDS):
         train_round_file_name = TRAIN_ROUND_FILE_PREFIX + str(i+1) + '.csv'
         train_round_delta = \
-            pd.read_csv(os.path.join(train_data_dir, train_round_file_name))
+            pd.read_csv(os.path.join(TRAIN_DATA_DIR, train_round_file_name))
 
         train_round_df = pd.concat([train_base, train_round_delta])
 
         test_round_file_name = TEST_ROUND_FILE_PREFIX + str(i+1) + '.csv'
 
         test_round_df = \
-            pd.read_csv(os.path.join(test_data_dir, test_round_file_name))
+            pd.read_csv(os.path.join( TEST_DATA_DIR, test_round_file_name))
 
         yield train_round_df, test_round_df, i+1
 

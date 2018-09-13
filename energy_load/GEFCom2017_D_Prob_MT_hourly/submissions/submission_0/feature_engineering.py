@@ -7,13 +7,14 @@ calling the feature_utils functions with alternative parameters.
 import os, sys, getopt
 from functools import reduce
 
-from benchmark_paths import DATA_DIR, SUBMISSIONS_DIR
+import localpath
+from energy_load.GEFCom2017_D_Prob_MT_hourly.common.benchmark_paths\
+    import DATA_DIR, SUBMISSIONS_DIR
 from common.feature_utils import *
 from common.utils import is_datetime_like
 
 print('Data directory used: {}'.format(DATA_DIR))
 
-OUTPUT_DIR = os.path.join(DATA_DIR, 'features')
 TRAIN_DATA_DIR = os.path.join(DATA_DIR, 'train')
 TEST_DATA_DIR = os.path.join(DATA_DIR, 'test')
 
@@ -43,22 +44,16 @@ def create_basic_features(input_df, datetime_colname):
 
     # Basic temporal features
     output_df['Hour'] = hour_of_day(datetime_col)
-    output_df['TimeOfYear'] = time_of_year(datetime_col)
-    output_df['WeekOfYear'] = week_of_year(datetime_col)
     output_df['MonthOfYear'] = month_of_year(datetime_col)
 
     # Fourier approximation features
     annual_fourier_approx = annual_fourier(datetime_col, n_harmonics=3)
     weekly_fourier_approx = weekly_fourier(datetime_col, n_harmonics=3)
-    daily_fourier_approx = daily_fourier(datetime_col, n_harmonics=2)
 
     for k, v in annual_fourier_approx.items():
         output_df[k] = v
 
     for k, v in weekly_fourier_approx.items():
-        output_df[k] = v
-
-    for k, v in daily_fourier_approx.items():
         output_df[k] = v
 
     return output_df
@@ -74,7 +69,7 @@ def create_advanced_features(train_df, test_df, datetime_colname,
     2) Normalized features depend on the value range of the entire feature
     column.
     Therefore, the train_df and test_df are concatenated to create these
-    fetures.
+    features.
     NOTE: test_df can not contain any values that are unknown at
     forecasting creation time to avoid data leakage from the future. For
     example, it can contain the timestamps, zone, holiday, forecasted
@@ -85,31 +80,6 @@ def create_advanced_features(train_df, test_df, datetime_colname,
     if not is_datetime_like(output_df[datetime_colname]):
         output_df[datetime_colname] = \
             pd.to_datetime(output_df[datetime_colname], format=DATETIME_FORMAT)
-    datetime_col = output_df[datetime_colname]
-
-    # Temporal features indicating the position of a record in the entire
-    # time period under consideration.
-    # For example, if the first date in training data is 2011-01-01 and the
-    # last date in testing data is 2017-02-28. The 'CurrentDate' feature
-    # for 2011-01-01 is 0, and for 2017-02-28 is 1.
-    min_date = min(datetime_col.dt.date)
-    max_date = max(datetime_col.dt.date)
-    output_df['CurrentDate'] = \
-        normalized_current_date(datetime_col, min_date, max_date)
-
-    # 'CurrentDateHour' is similar to 'CurrentDate', and at hour level.
-    min_datehour = min(datetime_col)
-    max_datehour = max(datetime_col)
-    output_df['CurrentDateHour'] = \
-        normalized_current_datehour(datetime_col, min_datehour, max_datehour)
-
-    # 'CurrentYear' is similar to 'CurrentDate', and at year level.
-    min_year = min(datetime_col.dt.year)
-    max_year = max(datetime_col.dt.year)
-    output_df['CurrentYear'] = normalized_current_year(
-        datetime_col, min_year, max_year)
-
-    output_df['DayType'] = day_type(datetime_col, output_df[holiday_colname])
 
     # Load lag feature based on previous years' load
     same_week_day_hour_load_lag = \
@@ -119,62 +89,16 @@ def create_advanced_features(train_df, test_df, datetime_colname,
                                              output_colname='LoadLag'))
     same_week_day_hour_load_lag.reset_index(inplace=True)
 
-    # Temperature lag features based on previous years' temperature
-    same_day_hour_drewpnt_lag = \
-        output_df[[datetime_colname, 'DewPnt', 'Zone']].groupby('Zone').apply(
-            lambda g: same_day_hour_lag(g[datetime_colname], g['DewPnt'],
-                                        output_colname='DewPntLag'))
-    same_day_hour_drewpnt_lag.reset_index(inplace=True)
-
     same_day_hour_drybulb_lag = \
         output_df[[datetime_colname, 'DryBulb', 'Zone']].groupby('Zone').apply(
             lambda g: same_day_hour_lag(g[datetime_colname], g['DryBulb'],
                                         output_colname='DryBulbLag'))
     same_day_hour_drybulb_lag.reset_index(inplace=True)
 
-    # Moving average features of load of recent weeks
-    load_moving_average = \
-        output_df[[datetime_colname, 'DEMAND', 'Zone']].groupby('Zone').apply(
-            lambda g: same_day_hour_moving_average(g[datetime_colname],
-                                                   g['DEMAND'],
-                                                   start_week=9,
-                                                   window_size=4,
-                                                   average_count=8,
-                                                   output_col_prefix='RecentLoad_'))
-    load_moving_average.reset_index(inplace=True)
-
-    # Moving average features of dew point of recent weeks
-    dewpnt_moving_average = \
-        output_df[[datetime_colname, 'DewPnt', 'Zone']].groupby('Zone').apply(
-            lambda g: same_day_hour_moving_average(g[datetime_colname],
-                                                   g['DewPnt'],
-                                                   start_week=9,
-                                                   window_size=4,
-                                                   average_count=8,
-                                                   output_col_prefix='RecentDewPnt_'))
-    dewpnt_moving_average.reset_index(inplace=True)
-
-    # Moving average features of dry bulb of recent weeks
-    drybulb_moving_average = \
-        output_df[[datetime_colname, 'DryBulb', 'Zone']].groupby('Zone').apply(
-            lambda g: same_day_hour_moving_average(g[datetime_colname],
-                                                   g['DryBulb'],
-                                                   start_week=9,
-                                                   window_size=4,
-                                                   average_count=8,
-                                                   output_col_prefix='RecentDryBulb_'))
-    drybulb_moving_average.reset_index(inplace=True)
     # Put everything together
     output_df = reduce(
         lambda left, right: pd.merge(left, right, on=[datetime_colname, 'Zone']),
-        [output_df, same_week_day_hour_load_lag,
-         same_day_hour_drewpnt_lag, same_day_hour_drybulb_lag,
-         load_moving_average, drybulb_moving_average, dewpnt_moving_average])
-
-    # output_df = reduce(
-    #     lambda left, right: pd.merge(left, right, on=[datetime_colname, 'Zone']),
-    #     [output_df, same_week_day_hour_load_lag,
-    #      same_day_hour_drewpnt_lag, same_day_hour_drybulb_lag])
+        [output_df, same_week_day_hour_load_lag, same_day_hour_drybulb_lag])
 
     # Split train and test data and return separately
     train_end = max(train_df[datetime_colname])
@@ -204,10 +128,6 @@ def main(train_dir, test_dir, output_dir, datetime_colname, holiday_colname):
     train_base_basic_features = \
         create_basic_features(train_base_df,
                               datetime_colname=datetime_colname)
-
-    # #TODO: Finalize this list after experimenting
-    # normalize_columns = ['DayType', 'WeekOfYear', 'LoadLag', 'DewPntLag',
-    #                      'DryBulbLag']
 
     for i in range(1, NUM_ROUND+1):
         train_file = os.path.join(train_dir, TRAIN_FILE_PREFIX + str(i) + '.csv')
@@ -262,17 +182,13 @@ def main(train_dir, test_dir, output_dir, datetime_colname, holiday_colname):
         test_all_features.drop(['DewPnt', 'DryBulb', 'DEMAND'],
                                inplace=True, axis=1)
 
-        # for c in normalize_columns:
-        #     min_value = np.nanmin(train_all_features[c].values)
-        #     max_value = np.nanmax(train_all_features[c].values)
-        #     train_all_features[c] = \
-        #         (train_all_features[c] - min_value)/(max_value - min_value)
-        #     test_all_features[c] = \
-        #         (test_all_features[c] - min_value)/(max_value - min_value)
+        test_month = test_basic_features['MonthOfYear'].values[0]
+        train_all_features = train_all_features.loc[
+            train_all_features['MonthOfYear'] == test_month, ].copy()
 
-        train_output_file = os.path.join(output_dir, 'train',
+        train_output_file = os.path.join(output_train_dir,
                                          TRAIN_FILE_PREFIX + str(i) + '.csv')
-        test_output_file = os.path.join(output_dir, 'test',
+        test_output_file = os.path.join(output_test_dir,
                                         TEST_FILE_PREFIX + str(i) + '.csv')
 
         train_all_features.to_csv(train_output_file, index=False)

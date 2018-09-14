@@ -14,9 +14,9 @@
 
 **Submission branch:** [hlu/energy_forecast_baseline_model](https://msdata.visualstudio.com/AlgorithmsAndDataScience/_git/TSPerf?version=GBhlu%2Fenergy_forecast_baseline_model)
 
-**Pull request:** []()
+**Pull request:** [GEFCom2017_D_Prob_MT_hourly - baseline submission](https://msdata.visualstudio.com/AlgorithmsAndDataScience/_git/TSPerf/pullrequest/150805?_a=overview)
 
-**Submission path:** [energy_load/GEFCom2017_D_Prob_MT_hourly/submissions/baseline]()
+**Submission path:** energy_load/GEFCom2017_D_Prob_MT_hourly/submissions/baseline
 
 
 ## Implementation description
@@ -47,7 +47,7 @@ No parameter tuning was done.
 ### Steps to reproduce results
 
 0. Follow the instructions [here](#resource-deployment-instructions) to provision a Linux virtual machine and log into the provisioned
-VM. 
+VM.
 
 1. Clone the TSPerf repo to the home directory of your machine and check out the baseline model branch
 

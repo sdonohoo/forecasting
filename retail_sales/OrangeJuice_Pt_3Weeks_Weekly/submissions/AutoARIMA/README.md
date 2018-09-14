@@ -163,17 +163,17 @@ We use Azure Linux VM to develop the baseline methods. Please follow the instruc
 
 **Quality:** 
 
-*MAPE run 1: 72.05%*
+*MAPE run 1: 77.66%*
 
-*MAPE run 2: 72.05%*
+*MAPE run 2: 77.66%*
 
-*MAPE run 3: 72.05%*
+*MAPE run 3: 77.66%*
 
-*MAPE run 4: 72.05%*
+*MAPE run 4: 77.66%*
 
-*MAPE run 5: 72.05%*
+*MAPE run 5: 77.66%*
 
-*median MAPE: 72.05%*
+*median MAPE: 77.66%*
 
 **Time:** 
 

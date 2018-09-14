@@ -14,9 +14,9 @@
 
 **Submission branch:** [chenhui/naive](https://msdata.visualstudio.com/AlgorithmsAndDataScience/_git/TSPerf?version=GBchenhui%2Fnaive)
 
-**Pull request:** [Added naive baseline method for retail sales forecasting](https://msdata.visualstudio.com/AlgorithmsAndDataScience/_git/TSPerf/pullrequest/150386?_a=overview)
+**Pull request:** [Added naive baseline method for retail sales forecasting](https://msdata.visualstudio.com/AlgorithmsAndDataScience/_git/TSPerf/pullrequest/150660?_a=overview)
 
-**Submission path:** [/retail_sales/OrangeJuice_Pt_3Weeks_Weekly/baseline/Naive](https://msdata.visualstudio.com/AlgorithmsAndDataScience/_git/TSPerf?path=%2Fretail_sales%2FOrangeJuice_Pt_3Weeks_Weekly%2Fsubmissions%2FSeasonalNaive&version=GBchenhui%2Fseasonal_naive)
+**Submission path:** [/retail_sales/OrangeJuice_Pt_3Weeks_Weekly/baseline/Naive](https://msdata.visualstudio.com/AlgorithmsAndDataScience/_git/TSPerf?path=%2Fretail_sales%2FOrangeJuice_Pt_3Weeks_Weekly%2Fbaseline%2FNaive&version=GBchenhui%2Fnaive)
 
 
 ## Implementation description

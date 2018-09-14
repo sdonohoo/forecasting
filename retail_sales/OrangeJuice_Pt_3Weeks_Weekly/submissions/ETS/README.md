@@ -51,7 +51,7 @@ VM.
    cd ~
    git clone https://msdata.visualstudio.com/DefaultCollection/AlgorithmsAndDataScience/_git/TSPerf
    cd ~/TSPerf
-   git checkout chenhui/seasonal_naive
+   git checkout chenhui/ets
    ```
 
    Please use the recommended [Git Credential Managers](https://docs.microsoft.com/en-us/vsts/repos/git/set-up-credential-managers?view=vsts) or [Personal Access Tokens](https://docs.microsoft.com/en-us/vsts/organizations/accounts/use-personal-access-tokens-to-authenticate?view=vsts) to securely 
@@ -163,17 +163,17 @@ We use Azure Linux VM to develop the baseline methods. Please follow the instruc
 
 **Quality:** 
 
-*MAPE run 1: 70.94%*
+*MAPE run 1: 70.99%*
 
-*MAPE run 2: 70.94%*
+*MAPE run 2: 70.99%*
 
-*MAPE run 3: 70.94%*
+*MAPE run 3: 70.99%*
 
-*MAPE run 4: 70.94%*
+*MAPE run 4: 70.99%*
 
-*MAPE run 5: 70.94%*
+*MAPE run 5: 70.99%*
 
-*median MAPE: 70.94%*
+*median MAPE: 70.99%*
 
 **Time:** 
 

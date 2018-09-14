@@ -14,9 +14,9 @@
 
 **Submission branch:** [chenhui/mean_forecast](https://msdata.visualstudio.com/AlgorithmsAndDataScience/_git/TSPerf?version=GBchenhui%2Fmean_forecast)
 
-**Pull request:** [Added mean forecast method for retail sales forecasting](https://msdata.visualstudio.com/AlgorithmsAndDataScience/_git/TSPerf/pullrequest/150386?_a=overview)
+**Pull request:** [Added mean forecast method for retail sales forecasting](https://msdata.visualstudio.com/AlgorithmsAndDataScience/_git/TSPerf/pullrequest/150726?_a=overview)
 
-**Submission path:** [/retail_sales/OrangeJuice_Pt_3Weeks_Weekly/submissions/SeasonalNaive](https://msdata.visualstudio.com/AlgorithmsAndDataScience/_git/TSPerf?path=%2Fretail_sales%2FOrangeJuice_Pt_3Weeks_Weekly%2Fsubmissions%2FSeasonalNaive&version=GBchenhui%2Fseasonal_naive)
+**Submission path:** [/retail_sales/OrangeJuice_Pt_3Weeks_Weekly/submissions/MeanForecast](https://msdata.visualstudio.com/AlgorithmsAndDataScience/_git/TSPerf?path=%2Fretail_sales%2FOrangeJuice_Pt_3Weeks_Weekly%2Fsubmissions%2FMeanForecast&version=GBchenhui%2Fmean_forecast)
 
 
 ## Implementation description

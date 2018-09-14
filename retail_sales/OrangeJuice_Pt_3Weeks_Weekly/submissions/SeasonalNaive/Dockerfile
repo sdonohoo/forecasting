@@ -43,9 +43,9 @@ RUN apt-get update && apt-get install -y \
     liblapack-dev 
 # Use a MRAN snapshot URL to download packages archived on a specific date
 RUN echo 'options(repos = list(CRAN = "http://mran.revolutionanalytics.com/snapshot/2018-08-27/"))' >> /etc/R/Rprofile.site
-ADD ./install_R_dependencies.R /tmp
-RUN Rscript install_R_dependencies.R
-RUN rm ./install_R_dependencies.R
+ADD ./install_R_dependencies.r /tmp
+RUN Rscript install_R_dependencies.r
+RUN rm ./install_R_dependencies.r
 
 WORKDIR /
 ENTRYPOINT ["/bin/bash"]

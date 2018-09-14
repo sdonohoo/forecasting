@@ -25,7 +25,7 @@ TEST_DIR = file.path(dirname(dirname(SCRIPT_PATH)), 'data', 'test')
 ```
 
 ```{r}
-#### Test baseline method on a subset of the data  ####
+#### Test snaive method on a subset of the data  ####
 ## Import data
 r <- 1
 train_df <- read.csv(file.path(TRAIN_DIR, paste0('train_round_', as.character(r), '.csv')))
@@ -58,6 +58,9 @@ print('Number of rows with missing values after filling:')
 print(sum(!complete.cases(train_filled)))
 
 ## Seasonal naive method
+train_sub <- filter(train_filled, store=='2', brand=='1')
+train_ts <- ts(train_sub[c('logmove')], frequency = 52)
+horizon <- TEST_END_WEEK_LIST[r] - TRAIN_END_WEEK_LIST[r]
 pred_snaive <- snaive(train_ts, h=horizon)
 print('Seasonal naive forecasts:')
 pred_snaive$mean[2:horizon]
@@ -65,35 +68,35 @@ plot(pred_snaive, main='Seasonal Naive')
 ```
 
 ```{r}
-#### Implement baseline methods on all the data  ####
-baseline_method <- 'snaive'
-pred_baseline_all <- list()
-print(paste0('Using ', baseline_method))
+#### Implement snaive method on all the data  ####
+basic_method <- 'snaive'
+pred_basic_all <- list()
+print(paste0('Using ', basic_method))
 
-## Baseline methods 
-apply_baseline_methods <- function(train_sub, method) {
+## Basic methods 
+apply_basic_methods <- function(train_sub, method) {
   cur_store <- train_sub$store[1]
   cur_brand <- train_sub$brand[1]
   train_ts <- ts(train_sub[c('logmove')], frequency = 52)
   if (method == 'naive'){
-    pred_baseline <- naive(train_ts, h=pred_horizon)
+    pred_basic <- naive(train_ts, h=pred_horizon)
   } else if (method == 'snaive'){
-    pred_baseline <- snaive(train_ts, h=pred_horizon)
+    pred_basic <- snaive(train_ts, h=pred_horizon)
   } else if (method == 'meanf'){
-    pred_baseline <- meanf(train_ts, h=pred_horizon)
+    pred_basic <- meanf(train_ts, h=pred_horizon)
   } else if (method == 'ets') {
     fit_ets <- ets(train_ts)
-    pred_baseline <- forecast(fit_ets, h=pred_horizon)
+    pred_basic <- forecast(fit_ets, h=pred_horizon)
   } else if (method == 'arima'){
     fit_arima <- auto.arima(train_ts)
-    pred_baseline <- forecast(fit_arima, h=pred_horizon)
+    pred_basic <- forecast(fit_arima, h=pred_horizon)
   }
-  pred_baseline_df <- data.frame(round = rep(r, pred_steps),
+  pred_basic_df <- data.frame(round = rep(r, pred_steps),
                               store = rep(cur_store, pred_steps),
                               brand = rep(cur_brand, pred_steps),
                               week = pred_weeks,
                               weeks_ahead = pred_weeks_ahead,
-                              prediction = round(exp(pred_baseline$mean[2:pred_horizon])))
+                              prediction = round(exp(pred_basic$mean[2:pred_horizon])))
 }
 
 for (r in 1:NUM_ROUNDS) { 
@@ -129,16 +132,16 @@ for (r in 1:NUM_ROUNDS) {
   print('Number of rows with missing values after filling:')
   print(sum(!complete.cases(train_filled)))
   
-  # Apply baseline method
-  pred_baseline_all[[paste0('Round', r)]] <- 
+  # Apply basic method
+  pred_basic_all[[paste0('Round', r)]] <- 
     train_filled %>%
     group_by(store, brand) %>%
-    do(apply_baseline_methods(., baseline_method))
+    do(apply_basic_methods(., basic_method))
 }
 
-pred_baseline_all <- do.call(rbind, pred_baseline_all)
+pred_basic_all <- do.call(rbind, pred_basic_all)
 # Save forecast results
-write.csv(pred_baseline_all, file.path(SCRIPT_PATH, 'submission.csv'), row.names = FALSE)
+write.csv(pred_basic_all, file.path(SCRIPT_PATH, 'submission.csv'), row.names = FALSE)
 
 ## Evaluate forecast performance
 # Get the true value dataframe
@@ -155,7 +158,7 @@ for (r in 1:NUM_ROUNDS){
 true_sales_all <- do.call(rbind, true_sales_all)
 
 # Merge prediction and true sales
-merged_df <- merge(pred_baseline_all, true_sales_all, 
+merged_df <- merge(pred_basic_all, true_sales_all, 
                   by = c('round', 'store', 'brand', 'week'), 
                   all.y = TRUE)
 

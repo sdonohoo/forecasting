@@ -46,22 +46,22 @@ if (is.null(opt$seed)){
         as.character(opt$seed) , '.csv.'))
 }
 
-#### Implement baseline method on all the data  ####
-pred_baseline_all <- list()
+#### Implement snaive method on all the data  ####
+pred_snaive_all <- list()
 print('Using Seasonal Naive Method')
 
-## Baseline method 
-apply_baseline_method <- function(train_sub, method) {
+## snaive method 
+apply_snaive_method <- function(train_sub) {
   cur_store <- train_sub$store[1]
   cur_brand <- train_sub$brand[1]
   train_ts <- ts(train_sub[c('logmove')], frequency = 52)
-  pred_baseline <- snaive(train_ts, h=pred_horizon)
-  pred_baseline_df <- data.frame(round = rep(r, pred_steps),
+  pred_snaive <- snaive(train_ts, h=pred_horizon)
+  pred_snaive_df <- data.frame(round = rep(r, pred_steps),
                                  store = rep(cur_store, pred_steps),
                                  brand = rep(cur_brand, pred_steps),
                                  week = pred_weeks,
                                  weeks_ahead = pred_weeks_ahead,
-                                 prediction = round(exp(pred_baseline$mean[2:pred_horizon])))
+                                 prediction = round(exp(pred_snaive$mean[2:pred_horizon])))
 }
 
 for (r in 1:NUM_ROUNDS) { 
@@ -90,13 +90,13 @@ for (r in 1:NUM_ROUNDS) {
     arrange(week) %>%
     fill(logmove) %>%
     fill(logmove, .direction = 'up')
-  # Apply baseline method
-  pred_baseline_all[[paste0('Round', r)]] <- 
+  # Apply snaive method
+  pred_snaive_all[[paste0('Round', r)]] <- 
     train_filled %>%
     group_by(store, brand) %>%
-    do(apply_baseline_method(., baseline_method))
+    do(apply_snaive_method(.))
 }
 # Combine and save forecast results
-pred_baseline_all <- do.call(rbind, pred_baseline_all)
-write.csv(pred_baseline_all, output_file_name, row.names = FALSE)
+pred_snaive_all <- do.call(rbind, pred_snaive_all)
+write.csv(pred_snaive_all, output_file_name, row.names = FALSE)
 

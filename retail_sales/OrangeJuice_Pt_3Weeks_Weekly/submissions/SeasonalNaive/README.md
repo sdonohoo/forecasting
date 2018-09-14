@@ -27,7 +27,7 @@ In this submission, we implement seasonal naive forecast method using R package 
 
 ### Feature engineering
 
-Only the weekly sales of each orange juice has been used in the implementation of the baseline methods.
+Only the weekly sales of each orange juice has been used in the implementation of the forecast method.
 
 ### Hyperparameter tuning
 
@@ -71,7 +71,7 @@ to check if conda has been installed by runnning command `conda -V`. If it is in
 3. Activate the conda environment and download the Orange Juice dataset. Use command `source activate tsperf` to activate the conda environment. Then, download the Orange Juice dataset by running the following command from `/TSPerf` directory 
 
    ```bash
-   Rscript ./retail_sales/OrangeJuice_Pt_3Weeks_Weekly/common/download_data.R
+   Rscript ./retail_sales/OrangeJuice_Pt_3Weeks_Weekly/common/download_data.r
    ```
 
    This will create a data directory `./retail_sales/OrangeJuice_Pt_3Weeks_Weekly/data` and store the dataset in this directory. The dataset has two csv files - `yx.csv` and `storedemo.csv` which contain the sales information and store demographic information, respectively. 
@@ -100,13 +100,13 @@ to check if conda has been installed by runnning command `conda -V`. If it is in
 6. Pull a Docker image from ACR using the following command   
 
    ```bash
-   docker pull tsperf.azurecr.io/retail_sales/orangejuice_pt_3weeks_weekly/snaive_image:v1
+   docker pull tsperf.azurecr.io/retail_sales/orangejuice_pt_3weeks_weekly/baseline_image:v1
    ```
 
 7. Choose a name for a new Docker container (e.g. snaive_container) and create it using command:   
    
    ```bash
-   docker run -it -v ~/TSPerf:/TSPerf --name snaive_container tsperf.azurecr.io/retail_sales/orangejuice_pt_3weeks_weekly/snaive_image:v1
+   docker run -it -v ~/TSPerf:/TSPerf --name snaive_container tsperf.azurecr.io/retail_sales/orangejuice_pt_3weeks_weekly/baseline_image:v1
    ```
    
    Note that option `-v ~/TSPerf:/TSPerf` allows you to mount `/TSPerf` folder (the one you cloned) to the container so that you will have 
@@ -143,7 +143,7 @@ to check if conda has been installed by runnning command `conda -V`. If it is in
 
 **Data storage:** Premium SSD
 
-**Docker image:** tsperf.azurecr.io/retail_sales/orangejuice_pt_3weeks_weekly/snaive_image:v1
+**Docker image:** tsperf.azurecr.io/retail_sales/orangejuice_pt_3weeks_weekly/baseline_image:v1
 
 **Key packages/dependencies:**  
   * R 

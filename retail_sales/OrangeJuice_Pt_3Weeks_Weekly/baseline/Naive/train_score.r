@@ -51,7 +51,7 @@ pred_baseline_all <- list()
 print('Using Naive Method')
 
 ## Baseline method 
-apply_baseline_method <- function(train_sub, method) {
+apply_baseline_method <- function(train_sub) {
   cur_store <- train_sub$store[1]
   cur_brand <- train_sub$brand[1]
   train_ts <- ts(train_sub[c('logmove')], frequency = 52)
@@ -94,7 +94,7 @@ for (r in 1:NUM_ROUNDS) {
   pred_baseline_all[[paste0('Round', r)]] <- 
     train_filled %>%
     group_by(store, brand) %>%
-    do(apply_baseline_method(., baseline_method))
+    do(apply_baseline_method(.))
 }
 # Combine and save forecast results
 pred_baseline_all <- do.call(rbind, pred_baseline_all)

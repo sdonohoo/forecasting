@@ -68,35 +68,35 @@ plot(pred_naive, main='Naive')
 ```
 
 ```{r}
-#### Implement baseline methods on all the data  ####
+#### Implement baseline method on all the data  ####
 baseline_method <- 'naive'
 pred_baseline_all <- list()
 print(paste0('Using ', baseline_method))
 
-## Baseline methods 
-apply_baseline_methods <- function(train_sub, method) {
+## Basic methods 
+apply_basic_methods <- function(train_sub, method) {
   cur_store <- train_sub$store[1]
   cur_brand <- train_sub$brand[1]
   train_ts <- ts(train_sub[c('logmove')], frequency = 52)
   if (method == 'naive'){
-    pred_baseline <- naive(train_ts, h=pred_horizon)
+    pred_basic <- naive(train_ts, h=pred_horizon)
   } else if (method == 'snaive'){
-    pred_baseline <- snaive(train_ts, h=pred_horizon)
+    pred_basic <- snaive(train_ts, h=pred_horizon)
   } else if (method == 'meanf'){
-    pred_baseline <- meanf(train_ts, h=pred_horizon)
+    pred_basic <- meanf(train_ts, h=pred_horizon)
   } else if (method == 'ets') {
     fit_ets <- ets(train_ts)
-    pred_baseline <- forecast(fit_ets, h=pred_horizon)
+    pred_basic <- forecast(fit_ets, h=pred_horizon)
   } else if (method == 'arima'){
     fit_arima <- auto.arima(train_ts)
-    pred_baseline <- forecast(fit_arima, h=pred_horizon)
+    pred_basic <- forecast(fit_arima, h=pred_horizon)
   }
-  pred_baseline_df <- data.frame(round = rep(r, pred_steps),
+  pred_basic_df <- data.frame(round = rep(r, pred_steps),
                               store = rep(cur_store, pred_steps),
                               brand = rep(cur_brand, pred_steps),
                               week = pred_weeks,
                               weeks_ahead = pred_weeks_ahead,
-                              prediction = round(exp(pred_baseline$mean[2:pred_horizon])))
+                              prediction = round(exp(pred_basic$mean[2:pred_horizon])))
 }
 
 for (r in 1:NUM_ROUNDS) { 
@@ -136,7 +136,7 @@ for (r in 1:NUM_ROUNDS) {
   pred_baseline_all[[paste0('Round', r)]] <- 
     train_filled %>%
     group_by(store, brand) %>%
-    do(apply_baseline_methods(., baseline_method))
+    do(apply_basic_methods(., baseline_method))
 }
 
 pred_baseline_all <- do.call(rbind, pred_baseline_all)

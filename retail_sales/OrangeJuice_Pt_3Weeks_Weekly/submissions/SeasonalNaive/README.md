@@ -37,8 +37,8 @@ since there are approximately 52 weeks in a year.
 ### Description of implementation scripts
 
 * `train_score.r`: R script that trains the model and evaluate its performance
-* `baseline_methods.Rmd` (optional): R markdown that trains the model and visualizes the results
-* `baseline_methods.nb.html` (optional): Html file associated with the R markdown file
+* `seasonal_naive.Rmd` (optional): R markdown that trains the model and visualizes the results
+* `seasonal_naive.nb.html` (optional): Html file associated with the R markdown file
 
 ### Steps to reproduce results
 

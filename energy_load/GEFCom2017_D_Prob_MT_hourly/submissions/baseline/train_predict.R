@@ -24,10 +24,6 @@ for (iR in 1:6){
   train_df = fread(train_file)
   test_df = fread(test_file)
   
-  # month = unique(test_df$MonthOfYear)
-  #
-  # train_df = train_df[MonthOfYear == month]
-  
   zones = unique(train_df[, Zone])
   hours = unique(train_df[, Hour])
   

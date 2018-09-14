@@ -10,8 +10,6 @@ do
     echo 'Training and predicting...'
     Rscript $path/submissions/baseline/train_predict.R $i
 
-    # echo 'Evaluating model quality...'
-    # python $path/common/evaluate.py submissions/baseline/submission_seed_$i.csv
     end=`date +%s`
     echo 'Running time '$((end-start))' seconds'
 done

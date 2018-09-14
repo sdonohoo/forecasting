@@ -14,7 +14,7 @@
 
 **Submission branch:** [chenhui/ets](https://msdata.visualstudio.com/AlgorithmsAndDataScience/_git/TSPerf?version=GBchenhui%2Fets)
 
-**Pull request:** [Added ETS method for retail sales forecasting](https://msdata.visualstudio.com/AlgorithmsAndDataScience/_git/TSPerf/pullrequest/150726?_a=overview)
+**Pull request:** [Added ETS method for retail sales forecasting](https://msdata.visualstudio.com/AlgorithmsAndDataScience/_git/TSPerf/pullrequest/150743?_a=overview)
 
 **Submission path:** [/retail_sales/OrangeJuice_Pt_3Weeks_Weekly/submissions/ETS](https://msdata.visualstudio.com/AlgorithmsAndDataScience/_git/TSPerf?path=%2Fretail_sales%2FOrangeJuice_Pt_3Weeks_Weekly%2Fsubmissions%2FETS&version=GBchenhui%2Fets)
 

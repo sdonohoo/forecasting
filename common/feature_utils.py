@@ -328,7 +328,7 @@ def same_day_hour_moving_average(datetime_col, value_col, window_size,
     for i in range(average_count):
         output_col = output_col_prefix + str(start_week+i)
         week_lag_start = start_week + i
-        hour_lags = [(week_lag_start + w) * 24 for w in range(window_size)]
+        hour_lags = [(week_lag_start + w) * 24 * 7 for w in range(window_size)]
         tmp_df = df.copy()
         tmp_col_all = []
         for h in hour_lags:

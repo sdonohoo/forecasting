@@ -9,6 +9,8 @@ test_file_prefix = 'test_round_'
 
 output_file = file.path('energy_load/GEFCom2017_D_Prob_MT_hourly/submissions/baseline/submission.csv')
 
+normalize_columns = list( 'LoadLag', 'DryBulbLag')
+
 quantiles = seq(0.1, 0.9, by = 0.1)
 
 result_all = list()
@@ -22,12 +24,21 @@ for (iR in 1:6){
   train_df = fread(train_file)
   test_df = fread(test_file)
   
-  # month = unique(test_df$MonthOfYear)
-  #
-  # train_df = train_df[MonthOfYear == month]
+  for (c in normalize_columns){
+    min_c = min(train_df[, ..c])
+    max_c = max(train_df[, ..c])
+    train_df[, c] = (train_df[, ..c] - min_c)/(max_c - min_c)
+    test_df[, c] = (test_df[, ..c] - min_c)/(max_c - min_c)
+  }
   
   zones = unique(train_df[, Zone])
   hours = unique(train_df[, Hour])
+  
+  test_df$AverageLoadRatio = rowMeans(test_df[,c('LoadRatio_10', 'LoadRatio_11', 'LoadRatio_12', 
+                                                 'LoadRatio_13', 'LoadRatio_14', 'LoadRatio_15', 'LoadRatio_16')], na.rm=TRUE)
+  
+  
+  test_df[, LoadRatio:=mean(AverageLoadRatio), by=list(Hour, MonthOfYear)]
   
   
   for (z in zones) {
@@ -45,7 +56,7 @@ for (iR in 1:6){
                       weekly_sin_1 + weekly_cos_1 + weekly_sin_2 + weekly_cos_2 + weekly_sin_3 + weekly_cos_3,
                     data=train_df_sub, tau = tau)
         
-        result$Prediction = predict(model, test_df_sub)
+        result$Prediction = predict(model, test_df_sub) * test_df_sub$LoadRatio
         result$q = tau
         
         result_all[[counter]] = result

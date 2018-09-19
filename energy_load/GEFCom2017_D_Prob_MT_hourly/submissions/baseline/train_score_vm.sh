@@ -8,10 +8,8 @@ do
     python $path/submissions/baseline/feature_engineering.py --submission baseline
 
     echo 'Training and predicting...'
-    Rscript $path/submissions/baseline/train_predict.R
+    Rscript $path/submissions/baseline/train_predict.R $i
 
-    echo 'Evaluating model quality...'
-    python $path/common/evaluate.py submissions/baseline/submission.csv
     end=`date +%s`
     echo 'Running time '$((end-start))' seconds'
 done

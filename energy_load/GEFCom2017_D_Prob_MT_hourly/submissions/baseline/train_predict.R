@@ -1,3 +1,5 @@
+args = commandArgs(trailingOnly=TRUE)
+seed_value = args[1]
 library('data.table')
 library('quantreg')
 data_dir = 'energy_load/GEFCom2017_D_Prob_MT_hourly/submissions/baseline/data/features'
@@ -7,7 +9,7 @@ test_dir = file.path(data_dir, 'test')
 train_file_prefix = 'train_round_'
 test_file_prefix = 'test_round_'
 
-output_file = file.path('energy_load/GEFCom2017_D_Prob_MT_hourly/submissions/baseline/submission.csv')
+output_file = file.path(paste('energy_load/GEFCom2017_D_Prob_MT_hourly/submissions/baseline/submission_seed_', seed_value, '.csv', sep=""))
 
 normalize_columns = list( 'LoadLag', 'DryBulbLag')
 
@@ -31,6 +33,7 @@ for (iR in 1:6){
     test_df[, c] = (test_df[, ..c] - min_c)/(max_c - min_c)
   }
   
+
   zones = unique(train_df[, Zone])
   hours = unique(train_df[, Hour])
   

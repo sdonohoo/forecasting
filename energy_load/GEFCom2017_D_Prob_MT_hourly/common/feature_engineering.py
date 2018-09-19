@@ -86,6 +86,7 @@ def create_advanced_features(train_df, test_df, datetime_colname,
         output_df[datetime_colname] = \
             pd.to_datetime(output_df[datetime_colname], format=DATETIME_FORMAT)
     datetime_col = output_df[datetime_colname]
+    forecast_creation_time = max(train_df[datetime_colname])
 
     # Temporal features indicating the position of a record in the entire
     # time period under consideration.
@@ -137,9 +138,10 @@ def create_advanced_features(train_df, test_df, datetime_colname,
         output_df[[datetime_colname, 'DEMAND', 'Zone']].groupby('Zone').apply(
             lambda g: same_day_hour_moving_average(g[datetime_colname],
                                                    g['DEMAND'],
-                                                   start_week=9,
+                                                   start_week=10,
                                                    window_size=4,
-                                                   average_count=8,
+                                                   average_count=7,
+                                                   forecast_creation_time=forecast_creation_time,
                                                    output_col_prefix='RecentLoad_'))
     load_moving_average.reset_index(inplace=True)
 

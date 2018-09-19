@@ -202,6 +202,121 @@ def same_day_hour_lag(datetime_col, value_col, n_years=3,
     return df[[output_colname]]
 
 
+def same_week_day_hour_lag(datetime_col, value_col, n_years=3,
+                           week_window=1, agg_func='mean',
+                           output_colname='SameWeekHourLag'):
+    """
+    Create a lag feature by averaging values of and around the same week,
+    same day of week, and same hour of day, of previous years.
+    :param datetime_col: Datetime column
+    :param value_col: Feature value column to create lag feature from
+    :param n_years: Number of previous years data to use
+    :param week_window:
+        Number of weeks before and after the same week to
+        use, which should help reduce noise in the data
+    :param agg_func: aggregation function to apply on multiple previous values
+    :param output_colname: name of the output lag feature column
+    """
+
+    if not is_datetime_like(datetime_col):
+        datetime_col = pd.to_datetime(datetime_col, format=DATETIME_FORMAT)
+    min_time_stamp = min(datetime_col)
+    max_time_stamp = max(datetime_col)
+
+    df = pd.DataFrame({'Datetime': datetime_col, 'value': value_col})
+    df.set_index('Datetime', inplace=True)
+
+    week_lag_base = 52
+    week_lag_last_year = list(range(week_lag_base - week_window,
+                              week_lag_base + week_window + 1))
+    week_lag_all = []
+    for y in range(n_years):
+        week_lag_all += [x + y * 52 for x in week_lag_last_year]
+
+    week_lag_cols = []
+    for w in week_lag_all:
+        if (max_time_stamp - timedelta(weeks=w)) >= min_time_stamp:
+            col_name = 'week_lag_' + str(w)
+            week_lag_cols.append(col_name)
+
+            lag_datetime = df.index.get_level_values(0) - timedelta(weeks=w)
+            valid_lag_mask = lag_datetime >= min_time_stamp
+
+            df[col_name] = np.nan
+
+            df.loc[valid_lag_mask, col_name] = \
+                df.loc[lag_datetime[valid_lag_mask], 'value'].values
+
+    # Additional aggregation options will be added as needed
+    if agg_func == 'mean':
+        df[output_colname] = round(df[week_lag_cols].mean(axis=1))
+
+    return df[[output_colname]]
+
+
+def same_day_hour_moving_average(datetime_col, value_col, window_size,
+                                 start_week, average_count, forecast_creation_time,
+                                 output_col_prefix='moving_average_lag_'):
+    """
+    Create a moving average features by averaging values of the same day of
+    week and same hour of day of previous weeks.
+
+    :param datetime_col: Datetime column
+    :param value_col:
+        Feature value column to create moving average features
+        from.
+    :param window_size: Number of weeks used to compute the average.
+    :param start_week: First week of the first moving average feature.
+    :param average_count: Number of moving average features to create.
+    :param forecast_creation_time:
+        The time point when the feature is created. This value is used to prevent
+        using data that are not available at forecast creation time to compute
+        features.
+    :param output_col_prefix:
+        Prefix of the output columns. The start week of each moving average
+        feature is added at the end.
+
+    For example, start_week = 9, window_size=4, and average_count = 3 will
+    create three moving average features.
+    1) moving_average_lag_9: average the same day and hour values of the 9th,
+    10th, 11th, and 12th weeks before the current week.
+    2) moving_average_lag_10: average the same day and hour values of the
+    10th, 11th, 12th, and 13th weeks before the current week.
+    3) moving_average_lag_11: average the same day and hour values of the
+    11th, 12th, 13th, and 14th weeks before the current week.
+    """
+
+    df = pd.DataFrame({'Datetime': datetime_col, 'value': value_col})
+    df.set_index('Datetime', inplace=True)
+
+    df = df.asfreq('H')
+
+    if not df.index.is_monotonic:
+        df.sort_index(inplace=True)
+
+    df['fct_diff'] = df.index - forecast_creation_time
+    df['fct_diff'] = df['fct_diff'].apply(lambda x: x.days*24 + x.seconds/3600)
+    max_diff = max(df['fct_diff'])
+
+    for i in range(average_count):
+        output_col = output_col_prefix + str(start_week+i)
+        week_lag_start = start_week + i
+        hour_lags = [(week_lag_start + w) * 24 * 7 for w in range(window_size)]
+        hour_lags = [h for h in hour_lags if h > max_diff]
+        if len(hour_lags) > 0:
+            tmp_df = df[['value']].copy()
+            tmp_col_all = []
+            for h in hour_lags:
+                tmp_col = 'tmp_lag_' + str(h)
+                tmp_col_all.append(tmp_col)
+                tmp_df[tmp_col] = tmp_df['value'].shift(h)
+
+            df[output_col] = round(tmp_df[tmp_col_all].mean(axis=1))
+    df.drop('value', inplace=True, axis=1)
+
+    return df
+
+
 def create_basic_features(input_df, datetime_colname):
     """
     This helper function uses the functions in common.feature_utils to
@@ -253,6 +368,7 @@ def create_advanced_features(train_df, test_df, datetime_colname,
     if not is_datetime_like(output_df[datetime_colname]):
         output_df[datetime_colname] = \
             pd.to_datetime(output_df[datetime_colname], format=DATETIME_FORMAT)
+    forecast_creation_time = max(train_df[datetime_colname])
 
     # Load lag feature based on previous years' load
     same_week_day_hour_load_lag = \
@@ -268,10 +384,97 @@ def create_advanced_features(train_df, test_df, datetime_colname,
                                         output_colname='DryBulbLag'))
     same_day_hour_drybulb_lag.reset_index(inplace=True)
 
+    # Moving average features of load of recent weeks
+    load_moving_average = \
+        output_df[[datetime_colname, 'DEMAND', 'Zone']].groupby('Zone').apply(
+            lambda g: same_day_hour_moving_average(g[datetime_colname],
+                                                   g['DEMAND'],
+                                                   start_week=10,
+                                                   window_size=4,
+                                                   average_count=7,
+                                                   forecast_creation_time=forecast_creation_time,
+                                                   output_col_prefix='RecentLoad_'))
+    load_moving_average.reset_index(inplace=True)
+
     # Put everything together
     output_df = reduce(
         lambda left, right: pd.merge(left, right, on=[datetime_colname, 'Zone']),
-        [output_df, same_week_day_hour_load_lag, same_day_hour_drybulb_lag])
+        [output_df, same_week_day_hour_load_lag, same_day_hour_drybulb_lag,
+         load_moving_average])
+
+    same_week_day_hour_load_lag_10 = \
+        output_df[[datetime_colname, 'RecentLoad_10', 'Zone']].groupby('Zone').apply(
+            lambda g: same_week_day_hour_lag(g[datetime_colname],
+                                             g['RecentLoad_10'],
+                                             output_colname='LoadLag_10',
+                                             week_window=0))
+    same_week_day_hour_load_lag_10.reset_index(inplace=True)
+
+    same_week_day_hour_load_lag_11 = \
+        output_df[[datetime_colname, 'RecentLoad_11', 'Zone']].groupby('Zone').apply(
+            lambda g: same_week_day_hour_lag(g[datetime_colname],
+                                             g['RecentLoad_11'],
+                                             output_colname='LoadLag_11',
+                                             week_window=0))
+    same_week_day_hour_load_lag_11.reset_index(inplace=True)
+
+    same_week_day_hour_load_lag_12 = \
+        output_df[[datetime_colname, 'RecentLoad_12', 'Zone']].groupby('Zone').apply(
+            lambda g: same_week_day_hour_lag(g[datetime_colname],
+                                             g['RecentLoad_12'],
+                                             output_colname='LoadLag_12',
+                                             week_window=0))
+    same_week_day_hour_load_lag_12.reset_index(inplace=True)
+
+    same_week_day_hour_load_lag_13 = \
+        output_df[[datetime_colname, 'RecentLoad_13', 'Zone']].groupby('Zone').apply(
+            lambda g: same_week_day_hour_lag(g[datetime_colname],
+                                             g['RecentLoad_13'],
+                                             output_colname='LoadLag_13',
+                                             week_window=0))
+    same_week_day_hour_load_lag_13.reset_index(inplace=True)
+
+    same_week_day_hour_load_lag_14 = \
+        output_df[[datetime_colname, 'RecentLoad_14', 'Zone']].groupby('Zone').apply(
+            lambda g: same_week_day_hour_lag(g[datetime_colname],
+                                             g['RecentLoad_14'],
+                                             output_colname='LoadLag_14',
+                                             week_window=0))
+    same_week_day_hour_load_lag_14.reset_index(inplace=True)
+
+    same_week_day_hour_load_lag_15 = \
+        output_df[[datetime_colname, 'RecentLoad_15', 'Zone']].groupby('Zone').apply(
+            lambda g: same_week_day_hour_lag(g[datetime_colname],
+                                             g['RecentLoad_15'],
+                                             output_colname='LoadLag_15',
+                                             week_window=0))
+    same_week_day_hour_load_lag_15.reset_index(inplace=True)
+
+    same_week_day_hour_load_lag_16 = \
+        output_df[[datetime_colname, 'RecentLoad_16', 'Zone']].groupby('Zone').apply(
+            lambda g: same_week_day_hour_lag(g[datetime_colname],
+                                             g['RecentLoad_16'],
+                                             output_colname='LoadLag_16',
+                                             week_window=0))
+    same_week_day_hour_load_lag_16.reset_index(inplace=True)
+
+    # Put everything together
+    output_df = reduce(
+        lambda left, right: pd.merge(left, right, on=[datetime_colname, 'Zone']),
+        [output_df, same_week_day_hour_load_lag_10,
+         same_week_day_hour_load_lag_11, same_week_day_hour_load_lag_12,
+         same_week_day_hour_load_lag_13, same_week_day_hour_load_lag_14,
+         same_week_day_hour_load_lag_15, same_week_day_hour_load_lag_16])
+
+    columns_to_drop = []
+    for i in range(10, 17):
+        output_colname = 'LoadRatio_' + str(i)
+        recent_colname = 'RecentLoad_' + str(i)
+        lag_colname = 'LoadLag_' + str(i)
+        columns_to_drop += [recent_colname, lag_colname]
+        output_df[output_colname] = output_df[recent_colname]/output_df[lag_colname]
+
+    output_df.drop(columns_to_drop, inplace=True, axis=1)
 
     # Split train and test data and return separately
     train_end = max(train_df[datetime_colname])
@@ -351,7 +554,7 @@ def main(train_dir, test_dir, output_dir, datetime_colname, holiday_colname):
                                      test_advanced_features,
                                      on=['Zone', 'Datetime'])
 
-        train_all_features.dropna(inplace=True)
+        train_all_features.dropna(inplace=True, subset=['LoadLag', 'DryBulbLag'])
         test_all_features.drop(['DewPnt', 'DryBulb', 'DEMAND'],
                                inplace=True, axis=1)
 

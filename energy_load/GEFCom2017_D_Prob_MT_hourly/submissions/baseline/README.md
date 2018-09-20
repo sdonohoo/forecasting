@@ -150,32 +150,32 @@ Please follow the instructions below to deploy the Linux DSVM.
 **Quality:**  
 Note there is no randomness in this baseline model, so the model quality is the same for all five runs.
 
-* Pinball loss run 1: 98.01
+* Pinball loss run 1: 84.66
 
-* Pinball loss run 2: 98.01
+* Pinball loss run 2: 84.66
 
-* Pinball loss run 3: 98.01
+* Pinball loss run 3: 84.66
 
-* Pinball loss run 4: 98.01
+* Pinball loss run 4: 84.66
 
-* Pinball loss run 5: 98.01
+* Pinball loss run 5: 84.66
 
-* Median Pinball loss: 98.01
+* Median Pinball loss: 84.66
 
 **Time:**
 
-* Run time 1: 166 seconds
+* Run time 1: 434 seconds
 
-* Run time 2: 168 seconds
+* Run time 2: 444 seconds
 
-* Run time 3: 160 seconds
+* Run time 3: 446 seconds
 
-* Run time 4: 166 seconds
+* Run time 4: 454 seconds
 
-* Run time 5: 165 seconds
+* Run time 5: 464 seconds
 
-* Median run time: 166 seconds
+* Median run time:  446seconds
 
 **Cost:**  
 The hourly cost of the Standard D8s DSVM is 0.3840 USD based on the price at the submission date.   
-Thus, the total cost is 166/3600 * 0.3840 = $0.0177.
+Thus, the total cost is 446/3600 * 0.3840 = $0.0476.

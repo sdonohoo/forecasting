@@ -407,6 +407,7 @@ def create_advanced_features(train_df, test_df, datetime_colname,
             lambda g: same_week_day_hour_lag(g[datetime_colname],
                                              g['RecentLoad_10'],
                                              output_colname='LoadLag_10',
+                                             n_years=5,
                                              week_window=0))
     same_week_day_hour_load_lag_10.reset_index(inplace=True)
 
@@ -415,6 +416,7 @@ def create_advanced_features(train_df, test_df, datetime_colname,
             lambda g: same_week_day_hour_lag(g[datetime_colname],
                                              g['RecentLoad_11'],
                                              output_colname='LoadLag_11',
+                                             n_years=5,
                                              week_window=0))
     same_week_day_hour_load_lag_11.reset_index(inplace=True)
 
@@ -423,6 +425,7 @@ def create_advanced_features(train_df, test_df, datetime_colname,
             lambda g: same_week_day_hour_lag(g[datetime_colname],
                                              g['RecentLoad_12'],
                                              output_colname='LoadLag_12',
+                                             n_years=5,
                                              week_window=0))
     same_week_day_hour_load_lag_12.reset_index(inplace=True)
 
@@ -431,6 +434,7 @@ def create_advanced_features(train_df, test_df, datetime_colname,
             lambda g: same_week_day_hour_lag(g[datetime_colname],
                                              g['RecentLoad_13'],
                                              output_colname='LoadLag_13',
+                                             n_years=5,
                                              week_window=0))
     same_week_day_hour_load_lag_13.reset_index(inplace=True)
 
@@ -439,6 +443,7 @@ def create_advanced_features(train_df, test_df, datetime_colname,
             lambda g: same_week_day_hour_lag(g[datetime_colname],
                                              g['RecentLoad_14'],
                                              output_colname='LoadLag_14',
+                                             n_years=5,
                                              week_window=0))
     same_week_day_hour_load_lag_14.reset_index(inplace=True)
 
@@ -447,6 +452,7 @@ def create_advanced_features(train_df, test_df, datetime_colname,
             lambda g: same_week_day_hour_lag(g[datetime_colname],
                                              g['RecentLoad_15'],
                                              output_colname='LoadLag_15',
+                                             n_years=5,
                                              week_window=0))
     same_week_day_hour_load_lag_15.reset_index(inplace=True)
 
@@ -455,6 +461,7 @@ def create_advanced_features(train_df, test_df, datetime_colname,
             lambda g: same_week_day_hour_lag(g[datetime_colname],
                                              g['RecentLoad_16'],
                                              output_colname='LoadLag_16',
+                                             n_years=5,
                                              week_window=0))
     same_week_day_hour_load_lag_16.reset_index(inplace=True)
 

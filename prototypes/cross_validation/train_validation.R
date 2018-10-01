@@ -124,7 +124,7 @@ average_PL = round(colMeans(result_final[, 'loss'], na.rm = TRUE), 2)
 print(paste('Average Pinball Loss:', average_PL))
 
 output_file_name = paste(output_file_name, 'APL', average_PL, sep="_")
-output_file_name = paset(output_file_name, '.csv', sep="")
+output_file_name = paste(output_file_name, '.csv', sep="")
 
 fwrite(result_final, output_file_name)
 

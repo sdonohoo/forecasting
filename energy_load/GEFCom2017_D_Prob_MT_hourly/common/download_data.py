@@ -11,7 +11,6 @@ from benchmark_paths import DATA_DIR
 DATA_FILE_LIST_NEW_FORMAT= ['2016_smd_hourly.xls', '2017_smd_hourly.xlsx']
 SHEET_LIST = ['ME', 'NH', 'VT', 'CT', 'RI', 'SEMASS', 'WCMASS', 'NEMASSBOST']
 SHEET_LIST_NEW = ['ME', 'NH', 'VT', 'CT', 'RI', 'SEMA', 'WCMA', 'NEMA']
-MA_ZONE_LIST = ['SEMA', 'WCMA', 'NEMA']
 COLUMN_LIST = ['Date', 'Hour', 'DEMAND', 'DryBulb', 'DewPnt']
 COLUMN_LIST_NEW = ['Date', 'Hr_End', 'RT_Demand', 'Dry_Bulb', 'Dew_Point']
 
@@ -38,7 +37,6 @@ def validate_file(fpath, fname):
                 return False
 
     return True
-
 
 
 def download_data():

@@ -162,7 +162,7 @@ def annual_fourier(datetime_col, n_harmonics):
 
 
 def weekly_fourier(datetime_col, n_harmonics):
-    day_of_week = datetime_col.dt.dayofweek
+    day_of_week = datetime_col.dt.dayofweek + 1
 
     output_dict = {}
     for n in range(1, n_harmonics+1):
@@ -292,7 +292,8 @@ def same_day_hour_lag(datetime_col, value_col, n_years=3,
 
 
 def same_day_hour_moving_average(datetime_col, value_col, window_size,
-                                 start_week, average_count, forecast_creation_time,
+                                 start_week, average_count,
+                                 forecast_creation_time,
                                  output_col_prefix='moving_average_lag_'):
     """
     Create a moving average features by averaging values of the same day of
@@ -306,9 +307,9 @@ def same_day_hour_moving_average(datetime_col, value_col, window_size,
     :param start_week: First week of the first moving average feature.
     :param average_count: Number of moving average features to create.
     :param forecast_creation_time:
-        The time point when the feature is created. This value is used to prevent
-        using data that are not available at forecast creation time to compute
-        features.
+        The time point when the feature is created. This value is used to
+        prevent using data that are not available at forecast creation time
+        to compute features.
     :param output_col_prefix:
         Prefix of the output columns. The start week of each moving average
         feature is added at the end.

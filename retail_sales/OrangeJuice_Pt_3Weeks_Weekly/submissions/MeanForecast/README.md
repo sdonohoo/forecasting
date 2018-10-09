@@ -56,7 +56,7 @@ VM.
 
    Please use the recommended [Git Credential Managers](https://docs.microsoft.com/en-us/vsts/repos/git/set-up-credential-managers?view=vsts) or [Personal Access Tokens](https://docs.microsoft.com/en-us/vsts/organizations/accounts/use-personal-access-tokens-to-authenticate?view=vsts) to securely 
    connect to Git repos via HTTPS authentication. If these don't work, you can try to [connect through SSH](https://docs.microsoft.com/en-us/vsts/repos/git/use-ssh-keys-to-authenticate?view=vsts). The above commands will download the 
-   source code of the submission branch into a local folder named TSPerf.
+   source code of the submission branch into a local folder named TSPerf. Note that you will not need to run `git checkout chenhui/mean_forecast` once the submission branch is merged into master branch.
 
 2. Create a conda environment for running the scripts of data downloading, data preparation, and result evaluation. To do this, you need 
 to check if conda has been installed by runnning command `conda -V`. If it is installed, you will see the conda version in the terminal. Otherwise, please follow the instructions [here](https://conda.io/docs/user-guide/install/linux.html) to install conda. Then, you can go to `TSPerf` directory in the VM and create a conda environment named `tsperf` by
@@ -106,10 +106,10 @@ to check if conda has been installed by runnning command `conda -V`. If it is in
 7. Choose a name for a new Docker container (e.g. meanf_container) and create it using command:   
    
    ```bash
-   docker run -it -v ~/TSPerf:/TSPerf --name meanf_container tsperf.azurecr.io/retail_sales/orangejuice_pt_3weeks_weekly/baseline_image:v1
+   docker run -it -v $(pwd):/TSPerf --name meanf_container tsperf.azurecr.io/retail_sales/orangejuice_pt_3weeks_weekly/baseline_image:v1
    ```
    
-   Note that option `-v ~/TSPerf:/TSPerf` allows you to mount `/TSPerf` folder (the one you cloned) to the container so that you will have 
+   Note that option `-v $(pwd):/TSPerf` allows you to mount `/TSPerf` folder (the one you cloned) to the container so that you will have 
    access to the source code in the container. 
 
 8. Inside `/TSPerf` folder, train the model and make predictions by running
@@ -139,7 +139,7 @@ to check if conda has been installed by runnning command `conda -V`. If it is in
 
 **Resource location:** West US 2
 
-**Hardware:** Standard D16s v3 (16 vcpus, 64 GB memory, 128 GB temporary storage) Ubuntu Linux VM
+**Hardware:** Standard D2s v3 (2 vcpus, 8 GB memory, 16 GB temporary storage) Ubuntu Linux VM
 
 **Data storage:** Premium SSD
 
@@ -189,7 +189,7 @@ We use Azure Linux VM to develop the baseline methods. Please follow the instruc
 
 *median run time: 68.88 seconds*
 
-**Cost:** The total cost is 68.88/3600 $\times$ 0.768 = $0.0147.
+**Cost:** The total cost is 68.88/3600 $\times$ 0.096 = $0.0018.
 
 Note that there is no randomness in the forecasts obtained by the above method. Thus, quality values do not change over 
 different runs.

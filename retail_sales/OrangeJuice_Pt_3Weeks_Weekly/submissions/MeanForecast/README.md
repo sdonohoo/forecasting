@@ -56,7 +56,7 @@ VM.
 
    Please use the recommended [Git Credential Managers](https://docs.microsoft.com/en-us/vsts/repos/git/set-up-credential-managers?view=vsts) or [Personal Access Tokens](https://docs.microsoft.com/en-us/vsts/organizations/accounts/use-personal-access-tokens-to-authenticate?view=vsts) to securely 
    connect to Git repos via HTTPS authentication. If these don't work, you can try to [connect through SSH](https://docs.microsoft.com/en-us/vsts/repos/git/use-ssh-keys-to-authenticate?view=vsts). The above commands will download the 
-   source code of the submission branch into a local folder named TSPerf. Note that you will not need to run `git checkout chenhui/mean_forecast` once the submission branch is merged into master branch.
+   source code of the submission branch into a local folder named TSPerf. Note that you will not need to run `git checkout chenhui/mean_forecast` once the submission branch is merged into the master branch.
 
 2. Create a conda environment for running the scripts of data downloading, data preparation, and result evaluation. To do this, you need 
 to check if conda has been installed by runnning command `conda -V`. If it is installed, you will see the conda version in the terminal. Otherwise, please follow the instructions [here](https://conda.io/docs/user-guide/install/linux.html) to install conda. Then, you can go to `TSPerf` directory in the VM and create a conda environment named `tsperf` by

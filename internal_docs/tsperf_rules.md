@@ -91,7 +91,7 @@ A **benchmark leaderboard** is a table of validated benchmark submissions.
 A **benchmark reference implementation** is a specific validated benchmark submission chosen from the 
 leaderboard. 
 
-The following diagram summarizes the relations betwwen different terms:
+The following diagram summarizes the relations between different terms and the workflow:
 
 <img src="./images/definitions.png" alt="drawing" heigh="300px" width="600px"/>
 

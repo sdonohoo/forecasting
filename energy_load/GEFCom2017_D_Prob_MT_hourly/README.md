@@ -21,7 +21,9 @@ The table below summarizes the benchmark problem definition:
 | **Forecast frequency**   | twice every month, mid and end of month |
 | **Forecast granularity**         | hourly |
 | **Forecast type**                   | probabilistic, 9 quantiles: 10th, 20th, ...90th percentiles|
-**TODO: create template of output file**
+
+A template of the submission file can be found [here](https://github.com/Microsoft/Forecasting/blob/master/energy_load/GEFCom2017_D_Prob_MT_hourly/reference/submission.csv)
+
 # Data  
 ### Dataset attribution
 [ISO New England](https://www.iso-ne.com/isoexpress/web/reports/load-and-demand/-/tree/zone-info)
@@ -34,12 +36,23 @@ The table below summarizes the benchmark problem definition:
 are outside United States, you may need a VPN to access the data. Use columns
 A, B, D, M and N in the worksheets of "YYYY SMD Hourly Data" files, where YYYY
 represents the year. Detailed information of each column can be found in the
-"Notes" sheet of the data files.
+"Notes" sheet of the data files.  
+The script energy_load/GEFCom2017_D_Prob_MT_hourly/common/download_data.py downloads the load data to energy_load/GEFCom2017_D_Prob_MT_hourly/data/.
 
-2. US Federal Holidays as published via [US Office of Personnel Management](https://www.opm.gov/policy-data-oversight/snow-dismissal-procedures/federal-holidays/).
+2. US Federal Holidays as published via [US Office of Personnel Management](https://www.opm.gov/policy-data-oversight/snow-dismissal-procedures/federal-holidays/).  
+This data can be found [here](https://github.com/Microsoft/Forecasting/blob/master/common/us_holidays.csv).
 
 ### Data preprocessing (TBD)
-**TODO: Scripts for reading data, aggregating time series, and extract basic features.**
+The script energy_load/GEFCom2017_D_Prob_MT_hourly/common/extract_data.py
+parses the excel files and creates training and testing csv load files. The
+following preprocessing steps are performed by this script:  
+* Map the holiday names to integers and join holiday data with load data.  
+* When the --preprocess argument is True, zero load values are filled by
+the values of the same hour of the previous day, outliers caused by end of
+Daylight Saving Time are divided by 2.
+* In addition to the eight zones in the excel files, 'SEMA', 'WCMA', and 'NEMA'
+are aggregated to generate the MA_TOTAL zone and all eight zones are aggregated
+to generate the TOTAL zone.
 
 ### Training and test data separation
 For this problem, you are provided successive folds of training data. The goal
@@ -58,11 +71,4 @@ using the available training data:
 # Model Evaluation
 
 **Evaluation metric**: Pinball loss  
-**Minimum performance**: TBD  
-**Evaluation frequency**: TBD  
-**Evaluation thoroughness**: TBD  
-
-**TODO: Write script to compute pinball losses over 6 rounds and computes the
-final metric.**
-
-
+**Minimum performance**: 81  

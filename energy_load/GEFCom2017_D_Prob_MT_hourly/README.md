@@ -42,7 +42,7 @@ The script energy_load/GEFCom2017_D_Prob_MT_hourly/common/download_data.py downl
 2. US Federal Holidays as published via [US Office of Personnel Management](https://www.opm.gov/policy-data-oversight/snow-dismissal-procedures/federal-holidays/).  
 This data can be found [here](https://github.com/Microsoft/Forecasting/blob/master/common/us_holidays.csv).
 
-### Data preprocessing (TBD)
+### Data preprocessing
 The script energy_load/GEFCom2017_D_Prob_MT_hourly/common/extract_data.py
 parses the excel files and creates training and testing csv load files. The
 following preprocessing steps are performed by this script:  

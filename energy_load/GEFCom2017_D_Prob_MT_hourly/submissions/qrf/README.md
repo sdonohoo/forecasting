@@ -52,16 +52,16 @@ We used 2 validation time frames, the first one in January-April 2015, the secon
 
 1. Clone the Forecasting repo to the home directory of your machine
 
-  ```bash
-  cd ~
-  git clone https://github.com/Microsoft/Forecasting.git
-  ```
+    ```bash
+    cd ~
+    git clone https://github.com/Microsoft/Forecasting.git
+    ```
   Use one of the following options to securely connect to the Git repo:
   * [Personal Access Tokens](https://help.github.com/articles/creating-a-personal-access-token-for-the-command-line/)  
   For this method, the clone command becomes
-  ```bash
-  git clone https://<username>:<personal access token>@github.com/Microsoft/Forecasting.git
-  ```
+    ```bash
+    git clone https://<username>:<personal access token>@github.com/Microsoft/Forecasting.git
+    ```
   * [Git Credential Managers](https://github.com/Microsoft/Git-Credential-Manager-for-Windows)
   * [Authenticate with SSH](https://help.github.com/articles/connecting-to-github-with-ssh/)
 
@@ -77,11 +77,11 @@ Then, you can go to `~/Forecasting` directory in the VM and create a conda envir
 
 3. Download and extract data **on the VM**.
 
-  ```bash
-  source activate tsperf
-  python energy_load/GEFCom2017_D_Prob_MT_hourly/common/download_data.py
-  python energy_load/GEFCom2017_D_Prob_MT_hourly/common/extract_data.py
-  ```
+    ```bash
+    source activate tsperf
+    python energy_load/GEFCom2017_D_Prob_MT_hourly/common/download_data.py
+    python energy_load/GEFCom2017_D_Prob_MT_hourly/common/extract_data.py
+    ```
 
 4. Prepare Docker container for model training and predicting.  
    4.1 Log into Azure Container Registry (ACR)
@@ -128,11 +128,11 @@ Then, you can go to `~/Forecasting` directory in the VM and create a conda envir
 
 6. Model evaluation **on the VM**
 
-  ```bash
-  source activate tsperf
-  cd ~/Forecasting
-  bash ./common/evaluate submissions/qrf energy_load/GEFCom2017_D_Prob_MT_hourly
-  ```
+    ```bash
+    source activate tsperf
+    cd ~/Forecasting
+    bash ./common/evaluate submissions/qrf energy_load/GEFCom2017_D_Prob_MT_hourly
+    ```
 
 ## Implementation resources
 

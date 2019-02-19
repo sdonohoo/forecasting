@@ -41,27 +41,28 @@ since there are approximately 52 weeks in a year.
 0. Follow the instructions [here](#resource-deployment-instructions) to provision a Linux virtual machine and log into the provisioned
 VM.
 
-1. Clone the Forecasting repo to the home directory of your machine
+1. Clone the Forecasting repo to the home directory of your machine 
 
-  ```bash
-  cd ~
-  git clone https://github.com/Microsoft/Forecasting.git
-  ```
+    ```bash
+    cd ~
+    git clone https://github.com/Microsoft/Forecasting.git
+    ```
+  
   Use one of the following options to securely connect to the Git repo:
   * [Personal Access Tokens](https://help.github.com/articles/creating-a-personal-access-token-for-the-command-line/)  
   For this method, the clone command becomes
-  ```bash
-  git clone https://<username>:<personal access token>@github.com/Microsoft/Forecasting.git
-  ```
+    ```bash
+    git clone https://<username>:<personal access token>@github.com/Microsoft/Forecasting.git
+    ```
   * [Git Credential Managers](https://github.com/Microsoft/Git-Credential-Manager-for-Windows)
   * [Authenticate with SSH](https://help.github.com/articles/connecting-to-github-with-ssh/)
 
 2. Create a conda environment for running the scripts of data downloading, data preparation, and result evaluation. To do this, you need
 to check if conda has been installed by runnning command `conda -V`. If it is installed, you will see the conda version in the terminal. Otherwise, please follow the instructions [here](https://conda.io/docs/user-guide/install/linux.html) to install conda. Then, you can go to `~/Forecasting` directory in the VM and create a conda environment named `tsperf` by
 
-   ```bash
-   conda env create --file ./common/conda_dependencies.yml
-   ```
+    ```bash
+    conda env create --file ./common/conda_dependencies.yml
+    ```
 
    This will create a conda environment with the Python and R packages listed in `conda_dependencies.yml` being installed. The conda
   environment name is also defined in the yml file.

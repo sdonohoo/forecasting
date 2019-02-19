@@ -46,16 +46,16 @@ VM.
 
 1. Clone the Forecasting repository to the home directory of your machine
 
-  ```bash
-  cd ~
-  git clone https://github.com/Microsoft/Forecasting.git
-  ```
+    ```bash
+    cd ~
+    git clone https://github.com/Microsoft/Forecasting.git
+    ```
   Use one of the following options to securely connect to the Git repo:
   * [Personal Access Tokens](https://help.github.com/articles/creating-a-personal-access-token-for-the-command-line/)  
   For this method, the clone command becomes
-  ```bash
-  git clone https://<username>:<personal access token>@github.com/Microsoft/Forecasting.git
-  ```
+    ```bash
+    git clone https://<username>:<personal access token>@github.com/Microsoft/Forecasting.git
+    ```
   * [Git Credential Managers](https://github.com/Microsoft/Git-Credential-Manager-for-Windows)
   * [Authenticate with SSH](https://help.github.com/articles/connecting-to-github-with-ssh/)
 

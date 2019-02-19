@@ -72,11 +72,11 @@ Then, you can go to `~/Forecasting` directory in the VM and create a conda envir
 
 3. Download and extract data **on the VM**.
 
-  ```bash
-  source activate tsperf
-  python energy_load/GEFCom2017_D_Prob_MT_hourly/common/download_data.py
-  python energy_load/GEFCom2017_D_Prob_MT_hourly/common/extract_data.py
-  ```
+    ```bash
+    source activate tsperf
+    python energy_load/GEFCom2017_D_Prob_MT_hourly/common/download_data.py
+    python energy_load/GEFCom2017_D_Prob_MT_hourly/common/extract_data.py
+    ```
 
 4. Prepare Docker container for model training and predicting.  
    4.1 Log into Azure Container Registry (ACR)
@@ -115,11 +115,11 @@ Then, you can go to `~/Forecasting` directory in the VM and create a conda envir
    After generating the forecast results, you can exit the Docker container by command `exit`.
 6. Model evaluation **on the VM**
 
-  ```bash
-  source activate tsperf
-  cd ~/Forecasting
-  bash ./common/evaluate submissions/baseline energy_load/GEFCom2017_D_Prob_MT_hourly
-  ```
+    ```bash
+    source activate tsperf
+    cd ~/Forecasting
+    bash ./common/evaluate submissions/baseline energy_load/GEFCom2017_D_Prob_MT_hourly
+    ```
 
 ## Implementation resources
 

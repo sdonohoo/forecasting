@@ -81,4 +81,3 @@ with each of the columns explained below
 # Quality
 
 **Evaluation metric**: Mean Absolute Percentage Error (MAPE)  
-**Minimum performance**: TBD  

@@ -71,4 +71,3 @@ using the available training data:
 # Model Evaluation
 
 **Evaluation metric**: Pinball loss  
-**Minimum performance**: 81  

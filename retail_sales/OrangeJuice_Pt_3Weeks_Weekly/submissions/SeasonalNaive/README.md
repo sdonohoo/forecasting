@@ -87,7 +87,7 @@ to check if conda has been installed by runnning command `conda -V`. If it is in
 5. Log into Azure Container Registry (ACR):
 
    ```bash
-   docker login --username tsperf --password <ACR Access Key> tsperf.azurecr.io
+   sudo docker login --username tsperf --password <ACR Access Key> tsperf.azurecr.io
    ```
 
    The `<ACR Acccess Key>` can be found [here](https://github.com/Microsoft/Forecasting/blob/master/common/key.txt). If want to execute docker commands without
@@ -98,13 +98,13 @@ to check if conda has been installed by runnning command `conda -V`. If it is in
 6. Pull a Docker image from ACR using the following command   
 
    ```bash
-   docker pull tsperf.azurecr.io/retail_sales/orangejuice_pt_3weeks_weekly/baseline_image:v1
+   sudo docker pull tsperf.azurecr.io/retail_sales/orangejuice_pt_3weeks_weekly/baseline_image:v1
    ```
 
 7. Choose a name for a new Docker container (e.g. snaive_container) and create it using command:   
 
    ```bash
-   docker run -it -v ~/Forecasting:/Forecasting --name snaive_container tsperf.azurecr.io/retail_sales/orangejuice_pt_3weeks_weekly/baseline_image:v1
+   sudo docker run -it -v ~/Forecasting:/Forecasting --name snaive_container tsperf.azurecr.io/retail_sales/orangejuice_pt_3weeks_weekly/baseline_image:v1
    ```
 
    Note that option `-v ~/Forecasting:/Forecasting` allows you to mount `~/Forecasting` folder (the one you cloned) to the container so that you will have
@@ -113,6 +113,7 @@ to check if conda has been installed by runnning command `conda -V`. If it is in
 8. Inside `/Forecasting` folder, train the model and make predictions by running
 
    ```bash
+   cd /Forecasting
    source ./common/train_score_vm ./retail_sales/OrangeJuice_Pt_3Weeks_Weekly/submissions/SeasonalNaive R
    ```
 

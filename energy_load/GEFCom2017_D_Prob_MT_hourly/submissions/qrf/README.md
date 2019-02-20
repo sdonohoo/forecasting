@@ -115,7 +115,8 @@ Then, you can go to `~/Forecasting` directory in the VM and create a conda envir
 
    ```
    source activate tsperf
-   nohup bash /Forecasting/energy_load/GEFCom2017_D_Prob_MT_hourly/submissions/qrf/train_score_vm.sh >& out.txt &
+   cd /Forecasting
+   nohup bash ./energy_load/GEFCom2017_D_Prob_MT_hourly/submissions/qrf/train_score_vm.sh >& out.txt &
    ```
    The last command will take about 31 hours to complete. You can monitor its progress by checking out.txt file. Also during the run you can disconnect from VM. After reconnecting to VM, use the command  
 

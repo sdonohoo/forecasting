@@ -83,7 +83,7 @@ From the `~/Forecasting` directory on the VM create a conda environment named `t
    4.1 Log into Azure Container Registry (ACR)
 
    ```bash
-   docker login --username tsperf --password <ACR Access Key> tsperf.azurecr.io
+   sudo docker login --username tsperf --password <ACR Access Key> tsperf.azurecr.io
    ```
 
    The `<ACR Acccess Key>` can be found [here](https://github.com/Microsoft/Forecasting/blob/master/common/key.txt).   
@@ -91,7 +91,7 @@ From the `~/Forecasting` directory on the VM create a conda environment named `t
    4.2 Pull the Docker image from ACR to your VM
 
    ```bash
-   docker pull tsperf.azurecr.io/energy_load/gefcom2017_d_prob_mt_hourly/gbm_image:v1
+   sudo docker pull tsperf.azurecr.io/energy_load/gefcom2017_d_prob_mt_hourly/gbm_image:v1
    ```
 
 5. Train and predict **within Docker container**
@@ -99,7 +99,7 @@ From the `~/Forecasting` directory on the VM create a conda environment named `t
     5.1 Start a Docker container from the image  
 
    ```bash
-   docker run -it -v ~/Forecasting:/Forecasting --name gbm_container tsperf.azurecr.io/energy_load/gefcom2017_d_prob_mt_hourly/gbm_image:v1
+   sudo docker run -it -v ~/Forecasting:/Forecasting --name gbm_container tsperf.azurecr.io/energy_load/gefcom2017_d_prob_mt_hourly/gbm_image:v1
    ```
 
    Note that option `-v ~/Forecasting:/Forecasting` mounts the `~/Forecasting` folder (the one you cloned) to the container so that you can access the code and data on your VM within the container.
@@ -108,7 +108,8 @@ From the `~/Forecasting` directory on the VM create a conda environment named `t
 
    ```
    source activate tsperf
-   bash ~/Forecasting/energy_load/GEFCom2017_D_Prob_MT_hourly/submissions/GBM/train_score_vm.sh > out.txt &
+   cd /Forecasting
+   bash ./energy_load/GEFCom2017_D_Prob_MT_hourly/submissions/GBM/train_score_vm.sh > out.txt &
    ```
    After generating the forecast results, you can exit the Docker container with command `exit`.
 

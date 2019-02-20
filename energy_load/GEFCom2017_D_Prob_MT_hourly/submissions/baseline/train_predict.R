@@ -2,14 +2,14 @@ args = commandArgs(trailingOnly=TRUE)
 seed_value = args[1]
 library('data.table')
 library('quantreg')
-data_dir = 'energy_load/GEFCom2017_D_Prob_MT_hourly/submissions/baseline/data/features'
+data_dir = 'C:/Users/honglu/OneDrive - Microsoft/Projects/ForecastBenchmark/Forecasting/energy_load/GEFCom2017_D_Prob_MT_hourly/submissions/baseline/data/features'
 train_dir = file.path(data_dir, 'train')
 test_dir = file.path(data_dir, 'test')
 
 train_file_prefix = 'train_round_'
 test_file_prefix = 'test_round_'
 
-output_file = file.path(paste('energy_load/GEFCom2017_D_Prob_MT_hourly/submissions/baseline/submission_seed_', seed_value, '.csv', sep=""))
+output_file = file.path(paste('C:/Users/honglu/OneDrive - Microsoft/Projects/ForecastBenchmark/Forecasting/energy_load/GEFCom2017_D_Prob_MT_hourly/submissions/baseline/submission_seed_', seed_value, '.csv', sep=""))
 
 normalize_columns = list( 'LoadLag', 'DryBulbLag')
 
@@ -70,5 +70,8 @@ for (iR in 1:6){
 }
 
 result_final = rbindlist(result_all)
+# Sort the quantiles
+result_final = result_final[order(Prediction), q:=quantiles, by=c('Zone', 'Datetime', 'Round')]
+result_final$Prediction = round(result_final$Prediction)
 
 fwrite(result_final, output_file)

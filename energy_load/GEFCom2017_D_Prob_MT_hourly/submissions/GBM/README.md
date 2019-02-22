@@ -146,34 +146,34 @@ Please follow the instructions below to deploy the Linux DSVM.
 **Quality:**  
 Note there is no randomness in this baseline model, so the model quality is the same for all five runs.
 
-* Pinball loss run 1: 78.72
-* Pinball loss run 2: 78.73
-* Pinball loss run 3: 78.73
-* Pinball loss run 4: 78.74
-* Pinball loss run 5: 78.73
+* Pinball loss run 1: 78.71
+* Pinball loss run 2: 78.72
+* Pinball loss run 3: 78.69
+* Pinball loss run 4: 78.71
+* Pinball loss run 5: 78.71
 
-Median Pinball loss: **78.73**
+Median Pinball loss: **78.71**
 
 **Time:**
 
-* Run time 1: 1063 seconds
-* Run time 2: 1048 seconds
-* Run time 3: 1043 seconds
-* Run time 4: 1065 seconds
-* Run time 5: 1055 seconds
+* Run time 1: 878 seconds
+* Run time 2: 888 seconds
+* Run time 3: 894 seconds
+* Run time 4: 894 seconds
+* Run time 5: 878 seconds
 
-Median run time: **1055 seconds**
+Median run time: **888 seconds**
 
 **Cost:**  
-The hourly cost of the Standard D8s Ubuntu Linux VM in East US Azure region is 0.3840 USD, based on the price at the submission date. Thus, the total cost is `1055/3600 * 0.3840 = $0.113`.
+The hourly cost of the Standard D8s Ubuntu Linux VM in East US Azure region is 0.3840 USD, based on the price at the submission date. Thus, the total cost is `888/3600 * 0.3840 = $0.0947`.
 
 **Average relative improvement (in %) over GEFCom2017 benchmark model**  (measured over the first run)  
-Round 1: 9.55  
-Round 2: 18.15  
-Round 3: 17.84   
-Round 4: 8.54  
-Round 5: 7.53  
-Round 6: 6.89  
+Round 1: 9.57  
+Round 2: 18.17  
+Round 3: 17.83   
+Round 4: 8.58  
+Round 5: 7.54  
+Round 6: 6.96  
 
 **Ranking in the qualifying round of GEFCom2017 competition**  
 4

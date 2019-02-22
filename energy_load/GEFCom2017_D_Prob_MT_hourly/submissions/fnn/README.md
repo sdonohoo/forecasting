@@ -12,10 +12,6 @@
 
 **Submission name:** Quantile Regression Neural Network
 
-**Submission branch:** [zhouf/energy_forecast_fnn_model_v1](https://msdata.visualstudio.com/AlgorithmsAndDataScience/_git/TSPerf?version=GBzhouf%2Fenergy_forecast_fnn_model_v1) and [zhouf/energy_forecast_fnn_cv_v1](https://msdata.visualstudio.com/AlgorithmsAndDataScience/_git/TSPerf?path=%2F&version=GBzhouf%2Fenergy_forecast_fnn_cv_v1)
-
-**Pull request:** [GEFCom2017_D_Prob_MT_hourly - fnn submission](https://msdata.visualstudio.com/AlgorithmsAndDataScience/_git/TSPerf/pullrequest/181524?_a=overview)
-
 **Submission path:** energy_load/GEFCom2017_D_Prob_MT_hourly/submissions/fnn
 
 
@@ -44,15 +40,15 @@ Train and Predict:
 * `train_predict.R`: R script that trains Quantile Regression Neural Network models and predicts on each round of test data.
 * `train_score_vm.sh`: Bash script that runs `feature_engineering.py` and `train_predict.R` five times to generate five submission files and measure model running time.
 
-Tune hyperparameters using R: 
+Tune hyperparameters using R:
 * `cv_settings.json`: JSON script that sets cross validation folds.
 * `train_validate.R`: R script that trains Quantile Regression Neural Network models and evaluate the loss on validation data of each cross validation round and forecast round with a set of hyperparameters and calculate the average loss. This script is used for grid search on vm.
 * `train_validate_vm.sh`: Bash script that runs `feature_engineering.py` and `train_validate.R` multiple times to generate cross validation result files and measure model tuning time.
 
 Tune hyperparameters using AzureML HyperDrive:
 * `cv_settings.json`: JSON script that sets cross validation folds.
-* `train_validate_aml.R`: R script that trains Quantile Regression Neural Network models and evaluate the loss on validation data of each cross validation round and forecast round with a set of hyperparameters and calculate the average loss. This script is used as the entry script for hyperdrive. 
-* `aml_estimator.py`: Python script that passes the inputs and outputs between hyperdrive and the entry script `train_validate_aml.R`. 
+* `train_validate_aml.R`: R script that trains Quantile Regression Neural Network models and evaluate the loss on validation data of each cross validation round and forecast round with a set of hyperparameters and calculate the average loss. This script is used as the entry script for hyperdrive.
+* `aml_estimator.py`: Python script that passes the inputs and outputs between hyperdrive and the entry script `train_validate_aml.R`.
 * `hyperparameter_tuning.ipynb`: Jupyter notebook that does hyperparameter tuning with azureml hyperdrive.
 
 ### Steps to reproduce results
@@ -60,18 +56,18 @@ Tune hyperparameters using AzureML HyperDrive:
 0. Follow the instructions [here](#resource-deployment-instructions) to provision a Linux virtual machine and log into the provisioned
 VM.
 
-1. Clone the TSPerf repo to the home directory of your machine and check out the fnn model branch
+1. Clone the Forecasting repo to the home directory of your machine
 
    ```bash
    cd ~
-   git clone https://msdata.visualstudio.com/DefaultCollection/AlgorithmsAndDataScience/_git/TSPerf
-   cd TSPerf
+   git clone https://github.com/Microsoft/Forecasting.git
+   cd Forecasting
    ```
    Use one of the following options to securely connect to the Git repo:
    * [Personal Access Tokens](https://docs.microsoft.com/en-us/vsts/organizations/accounts/use-personal-access-tokens-to-authenticate?view=vsts)  
    For this method, the clone command becomes
    ```bash
-   git clone https://<username>:<personal access token>@msdata.visualstudio.com/DefaultCollection/AlgorithmsAndDataScience/_git/TSPerf
+   git clone https://<username>:<personal access token>@github.com/Microsoft/Forecasting.git
    ```
    * [Git Credential Managers](https://docs.microsoft.com/en-us/vsts/repos/git/set-up-credential-managers?view=vsts)
    * [Authenticate with SSH](https://docs.microsoft.com/en-us/vsts/repos/git/use-ssh-keys-to-authenticate?view=vsts)
@@ -79,10 +75,10 @@ VM.
 
 2. Create a conda environment for running the scripts of data downloading, data preparation, and result evaluation.   
 To do this, you need to check if conda has been installed by runnning command `conda -V`. If it is installed, you will see the conda version in the terminal. Otherwise, please follow the instructions [here](https://conda.io/docs/user-guide/install/linux.html) to install conda.  
-Then, you can go to `TSPerf` directory in the VM and create a conda environment named `tsperf` by running
+Then, you can go to `~/Forecasting` directory in the VM and create a conda environment named `tsperf` by running
 
    ```bash
-   cd ~/TSPerf
+   cd ~/Forecasting
    conda env create --file ./common/conda_dependencies.yml
    ```
 
@@ -103,15 +99,15 @@ Then, you can go to `TSPerf` directory in the VM and create a conda environment 
    4.1 Log into Azure Container Registry (ACR)
 
    ```bash
-   docker login --username tsperf --password <ACR Access Key> tsperf.azurecr.io
+   sudo docker login --username tsperf --password <ACR Access Key> tsperf.azurecr.io
    ```
 
-   The `<ACR Acccess Key>` can be found [here](https://msdata.visualstudio.com/AlgorithmsAndDataScience/_git/TSPerf?path=%2Fcommon%2Fkey.txt&version=GBmaster).   
+   The `<ACR Acccess Key>` can be found [here](https://github.com/Microsoft/Forecasting/blob/master/common/key.txt).   
 
    4.2 Pull the Docker image from ACR to your VM
 
    ```bash
-   docker pull tsperf.azurecr.io/energy_load/gefcom2017_d_prob_mt_hourly/fnn_image:v1
+   sudo docker pull tsperf.azurecr.io/energy_load/gefcom2017_d_prob_mt_hourly/fnn_image:v1
    ```
 
 5. Tune Hyperparameters **within Docker container** or **with AzureML hyperdrive**.
@@ -119,25 +115,26 @@ Then, you can go to `TSPerf` directory in the VM and create a conda environment 
    5.1.1 Start a Docker container from the image  
 
    ```bash
-   docker run -it -v ~/TSPerf:/TSPerf --name fnn_cv_container tsperf.azurecr.io/energy_load/gefcom2017_d_prob_mt_hourly/fnn_image:v1
+   sudo docker run -it -v ~/Forecasting:/Forecasting --name fnn_cv_container tsperf.azurecr.io/energy_load/gefcom2017_d_prob_mt_hourly/fnn_image:v1
    ```
 
-   Note that option `-v ~/TSPerf:/TSPerf` mounts the `~/TSPerf` folder (the one you cloned) to the container so that you can access the code and data on your VM within the container.
+   Note that option `-v ~/Forecasting:/Forecasting` mounts the `~/Forecasting` folder (the one you cloned) to the container so that you can access the code and data on your VM within the container.
 
    5.1.2 Train and validate
 
    ```
    source activate tsperf
+   cd /Forecasting
    nohup bash ./energy_load/GEFCom2017_D_Prob_MT_hourly/submissions/fnn/train_validate_vm.sh >& cv_out.txt &
    ```
-   After generating the cross validation results, you can exit the Docker container by command `exit`. 
+   After generating the cross validation results, you can exit the Docker container by command `exit`.
 
    5.2 Do hyperparameter tuning with AzureML hyperdrive
-   
+
    To tune hyperparameters with AzureML hyperdrive, you don't need to create a local Docker container. You can do feature engineering on the VM by the command
 
    ```
-   cd ~/TSPerf
+   cd ~/Forecasting
    source activate tsperf
    python energy_load/GEFCom2017_D_Prob_MT_hourly/submissions/fnn/feature_engineering.py
    ```
@@ -150,21 +147,22 @@ Then, you can go to `TSPerf` directory in the VM and create a conda environment 
    6.1 Start a Docker container from the image  
 
    ```bash
-   docker run -it -v ~/TSPerf:/TSPerf --name fnn_container tsperf.azurecr.io/energy_load/gefcom2017_d_prob_mt_hourly/fnn_image:v1
+   sudo docker run -it -v ~/Forecasting:/Forecasting --name fnn_container tsperf.azurecr.io/energy_load/gefcom2017_d_prob_mt_hourly/fnn_image:v1
    ```
 
-   Note that option `-v ~/TSPerf:/TSPerf` mounts the `~/TSPerf` folder (the one you cloned) to the container so that you can access the code and data on your VM within the container.
+   Note that option `-v ~/Forecasting:/Forecasting` mounts the `~/Forecasting` folder (the one you cloned) to the container so that you can access the code and data on your VM within the container.
 
    6.2 Train and predict  
 
    ```
    source activate tsperf
+   cd /Forecasting
    nohup bash ./energy_load/GEFCom2017_D_Prob_MT_hourly/submissions/fnn/train_score_vm.sh >& out.txt &
    ```
    The last command will take about 7 hours to complete. You can monitor its progress by checking out.txt file. Also during the run you can disconnect from VM. After reconnecting to VM, use the command  
 
    ```
-   docker exec -it fnn_container /bin/bash
+   sudo docker exec -it fnn_container /bin/bash
    tail out.txt
    ```
    to connect to the running container and check the status of the run.  
@@ -174,7 +172,7 @@ Then, you can go to `TSPerf` directory in the VM and create a conda environment 
 
    ```bash
    source activate tsperf
-   cd ~/TSPerf
+   cd ~/Forecasting
    bash ./common/evaluate submissions/fnn energy_load/GEFCom2017_D_Prob_MT_hourly
    ```
 
@@ -203,34 +201,44 @@ Please follow the instructions below to deploy the Linux DSVM.
 
 ## Implementation evaluation
 **Quality:**  
-Note there is randomness in this quantile regression neural network model, so the model quality is slightly different for each run.
 
-* Pinball loss run 1: 80.27
+* Pinball loss run 1: 79.27
 
-* Pinball loss run 2: 80.24
+* Pinball loss run 2: 79.32
 
-* Pinball loss run 3: 80.25
+* Pinball loss run 3: 79.25
 
-* Pinball loss run 4: 80.24
+* Pinball loss run 4: 79.24
 
-* Pinball loss run 5: 80.22
+* Pinball loss run 5: 79.32
 
-* Median Pinball loss: 80.24
+* Median Pinball loss: 79.27
 
 **Time:**
 
-* Run time 1: 5187 seconds
+* Run time 1: 4611 seconds
 
-* Run time 2: 5132 seconds
+* Run time 2: 4604 seconds
 
-* Run time 3: 5046 seconds
+* Run time 3: 4587 seconds
 
-* Run time 4: 5048 seconds
+* Run time 4: 4630 seconds
 
-* Run time 5: 5095 seconds
+* Run time 5: 4583 seconds
 
-* Median run time: 5095 seconds
+* Median run time: 4604 seconds
 
 **Cost:**  
 The hourly cost of the Standard D8s Ubuntu Linux VM in East US Azure region is 0.3840 USD, based on the price at the submission date.   
-Thus, the total cost is 5095/3600 * 0.3840 = $0.5435.
+Thus, the total cost is 4604/3600 * 0.3840 = $0.4911.
+
+**Average relative improvement (in %) over GEFCom2017 benchmark model**  (measured over the first run)  
+Round 1: 6.64  
+Round 2: 20.13  
+Round 3: 19.75   
+Round 4: 5.01  
+Round 5: 4.21  
+Round 6: 10.68  
+
+**Ranking in the qualifying round of GEFCom2017 competition**  
+4

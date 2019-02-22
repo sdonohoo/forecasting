@@ -12,10 +12,6 @@
 
 **Submission name:** Quantile Random Forest
 
-**Submission branch:** [dmitry/qrf](https://msdata.visualstudio.com/AlgorithmsAndDataScience/_git/TSPerf?path=%2Fenergy_load%2FGEFCom2017_D_Prob_MT_hourly%2Fsubmissions&version=GBdmitry%2Fqrf)
-
-**Pull request:** [QRF model for energy benchmark](https://msdata.visualstudio.com/AlgorithmsAndDataScience/_git/TSPerf/pullrequest/181012?_a=overview)
-
 **Submission path:** energy_load/GEFCom2017_D_Prob_MT_hourly/submissions/qrf
 
 
@@ -41,7 +37,7 @@ week and same hour of day of at the window of 4 weeks. We use 8 windows, the fir
 
 ### Model tuning
 
-We chose hyperparameter values that minimize average pinball loss over validation folds. 
+We chose hyperparameter values that minimize average pinball loss over validation folds.
 We used 2 validation time frames, the first one in January-April 2015, the second one at the same months in 2016. Each validation timeframe was partitioned into 6 folds, each one spanning entire month. The training set of each fold ends one or two months before the first date of validation fold.
 
 ### Description of implementation scripts
@@ -54,39 +50,38 @@ We used 2 validation time frames, the first one in January-April 2015, the secon
 
 0. Follow the instructions [here](#resource-deployment-instructions) to provision a Linux Data Science Virtual Machine and log into it.
 
-1. Clone the TSPerf repo to the home directory of your machine and check out the baseline model branch
+1. Clone the Forecasting repo to the home directory of your machine
 
-   ```bash
-   cd ~
-   git clone https://msdata.visualstudio.com/DefaultCollection/AlgorithmsAndDataScience/_git/TSPerf
-   cd TSPerf
-   ```
-   Use one of the following options to securely connect to the Git repo:
-   * [Personal Access Tokens](https://docs.microsoft.com/en-us/vsts/organizations/accounts/use-personal-access-tokens-to-authenticate?view=vsts)  
-   For this method, the clone command becomes
-   ```bash
-   git clone https://<username>:<personal access token>@msdata.visualstudio.com/DefaultCollection/AlgorithmsAndDataScience/_git/TSPerf
-   ```
-   * [Git Credential Managers](https://docs.microsoft.com/en-us/vsts/repos/git/set-up-credential-managers?view=vsts)
-   * [Authenticate with SSH](https://docs.microsoft.com/en-us/vsts/repos/git/use-ssh-keys-to-authenticate?view=vsts)
+    ```bash
+    cd ~
+    git clone https://github.com/Microsoft/Forecasting.git
+    ```
+  Use one of the following options to securely connect to the Git repo:
+  * [Personal Access Tokens](https://help.github.com/articles/creating-a-personal-access-token-for-the-command-line/)  
+  For this method, the clone command becomes
+    ```bash
+    git clone https://<username>:<personal access token>@github.com/Microsoft/Forecasting.git
+    ```
+  * [Git Credential Managers](https://github.com/Microsoft/Git-Credential-Manager-for-Windows)
+  * [Authenticate with SSH](https://help.github.com/articles/connecting-to-github-with-ssh/)
 
 
 2. Create a conda environment for running the scripts of data downloading, data preparation, and result evaluation.   
 To do this, you need to check if conda has been installed by runnning command `conda -V`. If it is installed, you will see the conda version in the terminal. Otherwise, please follow the instructions [here](https://conda.io/docs/user-guide/install/linux.html) to install conda.  
-Then, you can go to `TSPerf` directory in the VM and create a conda environment named `tsperf` by running
+Then, you can go to `~/Forecasting` directory in the VM and create a conda environment named `tsperf` by running
 
    ```bash
-   cd ~/TSPerf
+   cd ~/Forecasting
    conda env create --file ./common/conda_dependencies.yml
    ```
 
 3. Download and extract data **on the VM**.
 
-  ```bash
-  source activate tsperf
-  python energy_load/GEFCom2017_D_Prob_MT_hourly/common/download_data.py
-  python energy_load/GEFCom2017_D_Prob_MT_hourly/common/extract_data.py
-  ```
+    ```bash
+    source activate tsperf
+    python energy_load/GEFCom2017_D_Prob_MT_hourly/common/download_data.py
+    python energy_load/GEFCom2017_D_Prob_MT_hourly/common/extract_data.py
+    ```
 
 4. Prepare Docker container for model training and predicting.  
    4.1 Log into Azure Container Registry (ACR)
@@ -95,7 +90,7 @@ Then, you can go to `TSPerf` directory in the VM and create a conda environment 
    sudo docker login --username tsperf --password <ACR Access Key> tsperf.azurecr.io
    ```
 
-   The `<ACR Acccess Key>` can be found [here](https://msdata.visualstudio.com/AlgorithmsAndDataScience/_git/TSPerf?path=%2Fcommon%2Fkey.txt&version=GBmaster).   
+   The `<ACR Acccess Key>` can be found [here](https://github.com/Microsoft/Forecasting/blob/master/common/key.txt).   
    If want to execute docker commands without
    sudo as a non-root user, you need to create a
    Unix group and add users to it by following the instructions
@@ -111,16 +106,17 @@ Then, you can go to `TSPerf` directory in the VM and create a conda environment 
   5.1 Start a Docker container from the image  
 
    ```bash
-   sudo docker run -it -v ~/TSPerf:/TSPerf --name qrf_container tsperf.azurecr.io/energy_load/gefcom2017_d_prob_mt_hourly/qrf_image:v1
+   sudo docker run -it -v ~/Forecasting:/Forecasting --name qrf_container tsperf.azurecr.io/energy_load/gefcom2017_d_prob_mt_hourly/qrf_image:v1
    ```
 
-   Note that option `-v ~/TSPerf:/TSPerf` mounts the `~/TSPerf` folder (the one you cloned) to the container so that you can access the code and data on your VM within the container.
+   Note that option `-v ~/Forecasting:/Forecasting` mounts the `~/Forecasting` folder (the one you cloned) to the container so that you can access the code and data on your VM within the container.
 
    5.2 Train and predict  
 
    ```
    source activate tsperf
-   nohup bash /TSPerf/energy_load/GEFCom2017_D_Prob_MT_hourly/submissions/qrf/train_score_vm.sh >& out.txt &
+   cd /Forecasting
+   nohup bash ./energy_load/GEFCom2017_D_Prob_MT_hourly/submissions/qrf/train_score_vm.sh >& out.txt &
    ```
    The last command will take about 31 hours to complete. You can monitor its progress by checking out.txt file. Also during the run you can disconnect from VM. After reconnecting to VM, use the command  
 
@@ -133,11 +129,11 @@ Then, you can go to `TSPerf` directory in the VM and create a conda environment 
 
 6. Model evaluation **on the VM**
 
-  ```bash
-  source activate tsperf
-  cd ~/TSPerf
-  bash ./common/evaluate submissions/qrf energy_load/GEFCom2017_D_Prob_MT_hourly
-  ```
+    ```bash
+    source activate tsperf
+    cd ~/Forecasting
+    bash ./common/evaluate submissions/qrf energy_load/GEFCom2017_D_Prob_MT_hourly
+    ```
 
 ## Implementation resources
 

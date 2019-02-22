@@ -5,6 +5,7 @@
 
 args = commandArgs(trailingOnly=TRUE)
 seed_value = args[1]
+set.seed(seed_value)
 
 library('data.table')
 library('qrnn')
@@ -89,6 +90,9 @@ for (iR in 1:6){
 }
 
 result_final = rbindlist(result_all)
+# Sort the quantiles
+result_final = result_final[order(Prediction), q:=quantiles, by=c('Zone', 'Datetime', 'Round')]
+result_final$Prediction = round(result_final$Prediction)
 
 fwrite(result_final, output_file)
 

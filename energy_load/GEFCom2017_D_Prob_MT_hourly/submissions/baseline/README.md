@@ -12,10 +12,6 @@
 
 **Submission name:** baseline
 
-**Submission branch:** [hlu/energy_forecast_baseline_model](https://msdata.visualstudio.com/AlgorithmsAndDataScience/_git/TSPerf?version=GBhlu%2Fenergy_forecast_baseline_model)
-
-**Pull request:** [GEFCom2017_D_Prob_MT_hourly - baseline submission](https://msdata.visualstudio.com/AlgorithmsAndDataScience/_git/TSPerf/pullrequest/150805?_a=overview)
-
 **Submission path:** energy_load/GEFCom2017_D_Prob_MT_hourly/submissions/baseline
 
 
@@ -49,47 +45,47 @@ No parameter tuning was done.
 0. Follow the instructions [here](#resource-deployment-instructions) to provision a Linux virtual machine and log into the provisioned
 VM.
 
-1. Clone the TSPerf repo to the home directory of your machine and check out the baseline model branch
+1. Clone the Forecasting repo to the home directory of your machine
 
    ```bash
    cd ~
-   git clone https://msdata.visualstudio.com/DefaultCollection/AlgorithmsAndDataScience/_git/TSPerf
+   git clone https://github.com/Microsoft/Forecasting.git
    ```
    Use one of the following options to securely connect to the Git repo:
-   * [Personal Access Tokens](https://docs.microsoft.com/en-us/vsts/organizations/accounts/use-personal-access-tokens-to-authenticate?view=vsts)  
+   * [Personal Access Tokens](https://help.github.com/articles/creating-a-personal-access-token-for-the-command-line/)  
    For this method, the clone command becomes
    ```bash
-   git clone https://<username>:<personal access token>@msdata.visualstudio.com/DefaultCollection/AlgorithmsAndDataScience/_git/TSPerf
+   git clone https://<username>:<personal access token>@github.com/Microsoft/Forecasting.git
    ```
-   * [Git Credential Managers](https://docs.microsoft.com/en-us/vsts/repos/git/set-up-credential-managers?view=vsts)
-   * [Authenticate with SSH](https://docs.microsoft.com/en-us/vsts/repos/git/use-ssh-keys-to-authenticate?view=vsts)
+   * [Git Credential Managers](https://github.com/Microsoft/Git-Credential-Manager-for-Windows)
+   * [Authenticate with SSH](https://help.github.com/articles/connecting-to-github-with-ssh/)
 
 
 2. Create a conda environment for running the scripts of data downloading, data preparation, and result evaluation.   
 To do this, you need to check if conda has been installed by runnning command `conda -V`. If it is installed, you will see the conda version in the terminal. Otherwise, please follow the instructions [here](https://conda.io/docs/user-guide/install/linux.html) to install conda.  
-Then, you can go to `TSPerf` directory in the VM and create a conda environment named `tsperf` by running
+Then, you can go to `~/Forecasting` directory in the VM and create a conda environment named `tsperf` by running
 
    ```bash
-   cd ~/TSPerf
+   cd ~/Forecasting
    conda env create --file ./common/conda_dependencies.yml
    ```
 
 3. Download and extract data **on the VM**.
 
-  ```bash
-  source activate tsperf
-  python energy_load/GEFCom2017_D_Prob_MT_hourly/common/download_data.py
-  python energy_load/GEFCom2017_D_Prob_MT_hourly/common/extract_data.py
-  ```
+    ```bash
+    source activate tsperf
+    python energy_load/GEFCom2017_D_Prob_MT_hourly/common/download_data.py
+    python energy_load/GEFCom2017_D_Prob_MT_hourly/common/extract_data.py
+    ```
 
 4. Prepare Docker container for model training and predicting.  
    4.1 Log into Azure Container Registry (ACR)
 
    ```bash
-   docker login --username tsperf --password <ACR Access Key> tsperf.azurecr.io
+   sudo docker login --username tsperf --password <ACR Access Key> tsperf.azurecr.io
    ```
 
-   The `<ACR Acccess Key>` can be found [here](https://ms.portal.azure.com/#@microsoft.onmicrosoft.com/resource/subscriptions/ff18d7a8-962a-406c-858f-49acd23d6c01/resourceGroups/tsperf/providers/Microsoft.ContainerRegistry/registries/tsperf/accessKey).   
+   The `<ACR Acccess Key>` can be found [here](https://github.com/Microsoft/Forecasting/blob/master/common/key.txt).   
    If want to execute docker commands without
    sudo as a non-root user, you need to create a
    Unix group and add users to it by following the instructions
@@ -98,32 +94,33 @@ Then, you can go to `TSPerf` directory in the VM and create a conda environment 
    4.2 Pull the Docker image from ACR to your VM
 
    ```bash
-   docker pull tsperf.azurecr.io/energy_load/gefcom2017_d_prob_mt_hourly/baseline_image
+   sudo docker pull tsperf.azurecr.io/energy_load/gefcom2017_d_prob_mt_hourly/baseline_image
    ```
 
 5. Train and predict **within Docker container**
   5.1 Start a Docker container from the image  
 
    ```bash
-   docker run -it -v ~/TSPerf:/TSPerf --name baseline_container tsperf.azurecr.io/energy_load/gefcom2017_d_prob_mt_hourly/baseline_image
+   sudo docker run -it -v ~/Forecasting:/Forecasting --name baseline_container tsperf.azurecr.io/energy_load/gefcom2017_d_prob_mt_hourly/baseline_image
    ```
 
-   Note that option `-v ~/TSPerf:/TSPerf` mounts the `~/TSPerf` folder (the one you cloned) to the container so that you can access the code and data on your VM within the container.
+   Note that option `-v ~/Forecasting:/Forecasting` mounts the `~/Forecasting` folder (the one you cloned) to the container so that you can access the code and data on your VM within the container.
 
    5.2 Train and predict  
 
    ```
    source activate tsperf
-   bash /TSPerf/energy_load/GEFCom2017_D_Prob_MT_hourly/submissions/baseline/train_score_vm.sh
+   cd /Forecasting
+   bash ./energy_load/GEFCom2017_D_Prob_MT_hourly/submissions/baseline/train_score_vm.sh
    ```
    After generating the forecast results, you can exit the Docker container by command `exit`.
 6. Model evaluation **on the VM**
 
-  ```bash
-  source activate tsperf
-  cd ~/TSPerf
-  bash ./common/evaluate submissions/baseline energy_load/GEFCom2017_D_Prob_MT_hourly
-  ```
+    ```bash
+    source activate tsperf
+    cd ~/Forecasting
+    bash ./common/evaluate submissions/baseline energy_load/GEFCom2017_D_Prob_MT_hourly
+    ```
 
 ## Implementation resources
 
@@ -150,43 +147,43 @@ Please follow the instructions below to deploy the Linux DSVM.
 **Quality:**  
 Note there is no randomness in this baseline model, so the model quality is the same for all five runs.
 
-* Pinball loss run 1: 84.66
+* Pinball loss run 1: 84.11
 
-* Pinball loss run 2: 84.66
+* Pinball loss run 2: 84.11
 
-* Pinball loss run 3: 84.66
+* Pinball loss run 3: 84.11
 
-* Pinball loss run 4: 84.66
+* Pinball loss run 4: 84.11
 
-* Pinball loss run 5: 84.66
+* Pinball loss run 5: 84.11
 
-* Median Pinball loss: 84.66
+* Median Pinball loss: 84.11
 
 **Time:**
 
-* Run time 1: 434 seconds
+* Run time 1: 425 seconds
 
-* Run time 2: 444 seconds
+* Run time 2: 462 seconds
 
-* Run time 3: 446 seconds
+* Run time 3: 441 seconds
 
-* Run time 4: 454 seconds
+* Run time 4: 458 seconds
 
-* Run time 5: 464 seconds
+* Run time 5: 444 seconds
 
-* Median run time:  446seconds
+* Median run time:  **444 seconds**
 
 **Cost:**  
 The hourly cost of the Standard D8s Ubuntu Linux VM in East US Azure region is 0.3840 USD, based on the price at the submission date.   
-Thus, the total cost is 446/3600 * 0.3840 = $0.0476.
+Thus, the total cost is 444/3600 * 0.3840 = $0.0474.
 
 **Average relative improvement (in %) over GEFCom2017 benchmark model**  (measured over the first run)  
-Round 1: -7.28  
-Round 2: 19.46  
-Round 3: 19.25  
-Round 4: -6.09  
-Round 5: -6.93  
-Round 6: 10.56  
+Round 1: -6.67  
+Round 2: 20.25  
+Round 3: 20.04  
+Round 4: -5.61  
+Round 5: -6.45  
+Round 6: 11.22  
 
 **Ranking in the qualifying round of GEFCom2017 competition**  
 10

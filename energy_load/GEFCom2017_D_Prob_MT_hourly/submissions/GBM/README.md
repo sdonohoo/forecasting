@@ -144,7 +144,6 @@ Please follow the instructions below to deploy the Linux DSVM.
 
 ## Implementation evaluation
 **Quality:**  
-Note there is no randomness in this baseline model, so the model quality is the same for all five runs.
 
 * Pinball loss run 1: 78.71
 * Pinball loss run 2: 78.72

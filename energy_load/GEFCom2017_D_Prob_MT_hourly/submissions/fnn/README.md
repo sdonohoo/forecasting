@@ -201,7 +201,6 @@ Please follow the instructions below to deploy the Linux DSVM.
 
 ## Implementation evaluation
 **Quality:**  
-Note there is randomness in this quantile regression neural network model, so the model quality is slightly different for each run.
 
 * Pinball loss run 1: 79.27
 
@@ -237,7 +236,7 @@ Thus, the total cost is 4604/3600 * 0.3840 = $0.4911.
 Round 1: 6.64  
 Round 2: 20.13  
 Round 3: 19.75   
-Round 4: 5.01 
+Round 4: 5.01  
 Round 5: 4.21  
 Round 6: 10.68  
 

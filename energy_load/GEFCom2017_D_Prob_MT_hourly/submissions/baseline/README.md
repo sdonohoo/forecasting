@@ -180,7 +180,7 @@ Thus, the total cost is 444/3600 * 0.3840 = $0.0474.
 **Average relative improvement (in %) over GEFCom2017 benchmark model**  (measured over the first run)  
 Round 1: -6.67  
 Round 2: 20.25  
-Round 3: 20.04
+Round 3: 20.04  
 Round 4: -5.61  
 Round 5: -6.45  
 Round 6: 11.22  

@@ -99,7 +99,7 @@ Then, you can go to `~/Forecasting` directory in the VM and create a conda envir
    4.1 Log into Azure Container Registry (ACR)
 
    ```bash
-   docker login --username tsperf --password <ACR Access Key> tsperf.azurecr.io
+   sudo docker login --username tsperf --password <ACR Access Key> tsperf.azurecr.io
    ```
 
    The `<ACR Acccess Key>` can be found [here](https://github.com/Microsoft/Forecasting/blob/master/common/key.txt).   
@@ -107,7 +107,7 @@ Then, you can go to `~/Forecasting` directory in the VM and create a conda envir
    4.2 Pull the Docker image from ACR to your VM
 
    ```bash
-   docker pull tsperf.azurecr.io/energy_load/gefcom2017_d_prob_mt_hourly/fnn_image:v1
+   sudo docker pull tsperf.azurecr.io/energy_load/gefcom2017_d_prob_mt_hourly/fnn_image:v1
    ```
 
 5. Tune Hyperparameters **within Docker container** or **with AzureML hyperdrive**.
@@ -115,7 +115,7 @@ Then, you can go to `~/Forecasting` directory in the VM and create a conda envir
    5.1.1 Start a Docker container from the image  
 
    ```bash
-   docker run -it -v ~/Forecasting:/Forecasting --name fnn_cv_container tsperf.azurecr.io/energy_load/gefcom2017_d_prob_mt_hourly/fnn_image:v1
+   sudo docker run -it -v ~/Forecasting:/Forecasting --name fnn_cv_container tsperf.azurecr.io/energy_load/gefcom2017_d_prob_mt_hourly/fnn_image:v1
    ```
 
    Note that option `-v ~/Forecasting:/Forecasting` mounts the `~/Forecasting` folder (the one you cloned) to the container so that you can access the code and data on your VM within the container.
@@ -124,6 +124,7 @@ Then, you can go to `~/Forecasting` directory in the VM and create a conda envir
 
    ```
    source activate tsperf
+   cd /Forecasting
    nohup bash ./energy_load/GEFCom2017_D_Prob_MT_hourly/submissions/fnn/train_validate_vm.sh >& cv_out.txt &
    ```
    After generating the cross validation results, you can exit the Docker container by command `exit`.
@@ -146,7 +147,7 @@ Then, you can go to `~/Forecasting` directory in the VM and create a conda envir
    6.1 Start a Docker container from the image  
 
    ```bash
-   docker run -it -v ~/Forecasting:/Forecasting --name fnn_container tsperf.azurecr.io/energy_load/gefcom2017_d_prob_mt_hourly/fnn_image:v1
+   sudo docker run -it -v ~/Forecasting:/Forecasting --name fnn_container tsperf.azurecr.io/energy_load/gefcom2017_d_prob_mt_hourly/fnn_image:v1
    ```
 
    Note that option `-v ~/Forecasting:/Forecasting` mounts the `~/Forecasting` folder (the one you cloned) to the container so that you can access the code and data on your VM within the container.
@@ -155,12 +156,13 @@ Then, you can go to `~/Forecasting` directory in the VM and create a conda envir
 
    ```
    source activate tsperf
+   cd /Forecasting
    nohup bash ./energy_load/GEFCom2017_D_Prob_MT_hourly/submissions/fnn/train_score_vm.sh >& out.txt &
    ```
    The last command will take about 7 hours to complete. You can monitor its progress by checking out.txt file. Also during the run you can disconnect from VM. After reconnecting to VM, use the command  
 
    ```
-   docker exec -it fnn_container /bin/bash
+   sudo docker exec -it fnn_container /bin/bash
    tail out.txt
    ```
    to connect to the running container and check the status of the run.  

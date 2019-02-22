@@ -83,7 +83,7 @@ From the `~/Forecasting` directory on the VM create a conda environment named `t
    4.1 Log into Azure Container Registry (ACR)
 
    ```bash
-   docker login --username tsperf --password <ACR Access Key> tsperf.azurecr.io
+   sudo docker login --username tsperf --password <ACR Access Key> tsperf.azurecr.io
    ```
 
    The `<ACR Acccess Key>` can be found [here](https://github.com/Microsoft/Forecasting/blob/master/common/key.txt).   
@@ -91,7 +91,7 @@ From the `~/Forecasting` directory on the VM create a conda environment named `t
    4.2 Pull the Docker image from ACR to your VM
 
    ```bash
-   docker pull tsperf.azurecr.io/energy_load/gefcom2017_d_prob_mt_hourly/gbm_image:v1
+   sudo docker pull tsperf.azurecr.io/energy_load/gefcom2017_d_prob_mt_hourly/gbm_image:v1
    ```
 
 5. Train and predict **within Docker container**
@@ -99,7 +99,7 @@ From the `~/Forecasting` directory on the VM create a conda environment named `t
     5.1 Start a Docker container from the image  
 
    ```bash
-   docker run -it -v ~/Forecasting:/Forecasting --name gbm_container tsperf.azurecr.io/energy_load/gefcom2017_d_prob_mt_hourly/gbm_image:v1
+   sudo docker run -it -v ~/Forecasting:/Forecasting --name gbm_container tsperf.azurecr.io/energy_load/gefcom2017_d_prob_mt_hourly/gbm_image:v1
    ```
 
    Note that option `-v ~/Forecasting:/Forecasting` mounts the `~/Forecasting` folder (the one you cloned) to the container so that you can access the code and data on your VM within the container.
@@ -108,7 +108,8 @@ From the `~/Forecasting` directory on the VM create a conda environment named `t
 
    ```
    source activate tsperf
-   bash ~/Forecasting/energy_load/GEFCom2017_D_Prob_MT_hourly/submissions/GBM/train_score_vm.sh > out.txt &
+   cd /Forecasting
+   bash ./energy_load/GEFCom2017_D_Prob_MT_hourly/submissions/GBM/train_score_vm.sh > out.txt &
    ```
    After generating the forecast results, you can exit the Docker container with command `exit`.
 
@@ -143,36 +144,35 @@ Please follow the instructions below to deploy the Linux DSVM.
 
 ## Implementation evaluation
 **Quality:**  
-Note there is no randomness in this baseline model, so the model quality is the same for all five runs.
 
-* Pinball loss run 1: 78.72
-* Pinball loss run 2: 78.73
-* Pinball loss run 3: 78.73
-* Pinball loss run 4: 78.74
-* Pinball loss run 5: 78.73
+* Pinball loss run 1: 78.71
+* Pinball loss run 2: 78.72
+* Pinball loss run 3: 78.69
+* Pinball loss run 4: 78.71
+* Pinball loss run 5: 78.71
 
-Median Pinball loss: **78.73**
+Median Pinball loss: **78.71**
 
 **Time:**
 
-* Run time 1: 1063 seconds
-* Run time 2: 1048 seconds
-* Run time 3: 1043 seconds
-* Run time 4: 1065 seconds
-* Run time 5: 1055 seconds
+* Run time 1: 878 seconds
+* Run time 2: 888 seconds
+* Run time 3: 894 seconds
+* Run time 4: 894 seconds
+* Run time 5: 878 seconds
 
-Median run time: **1055 seconds**
+Median run time: **888 seconds**
 
 **Cost:**  
-The hourly cost of the Standard D8s Ubuntu Linux VM in East US Azure region is 0.3840 USD, based on the price at the submission date. Thus, the total cost is `1055/3600 * 0.3840 = $0.113`.
+The hourly cost of the Standard D8s Ubuntu Linux VM in East US Azure region is 0.3840 USD, based on the price at the submission date. Thus, the total cost is `888/3600 * 0.3840 = $0.0947`.
 
 **Average relative improvement (in %) over GEFCom2017 benchmark model**  (measured over the first run)  
-Round 1: 9.55  
-Round 2: 18.15  
-Round 3: 17.84   
-Round 4: 8.54  
-Round 5: 7.53  
-Round 6: 6.89  
+Round 1: 9.57  
+Round 2: 18.17  
+Round 3: 17.83   
+Round 4: 8.58  
+Round 5: 7.54  
+Round 6: 6.96  
 
 **Ranking in the qualifying round of GEFCom2017 competition**  
 4

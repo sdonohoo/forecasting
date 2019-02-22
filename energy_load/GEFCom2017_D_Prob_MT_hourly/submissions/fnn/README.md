@@ -99,7 +99,7 @@ Then, you can go to `~/Forecasting` directory in the VM and create a conda envir
    4.1 Log into Azure Container Registry (ACR)
 
    ```bash
-   docker login --username tsperf --password <ACR Access Key> tsperf.azurecr.io
+   sudo docker login --username tsperf --password <ACR Access Key> tsperf.azurecr.io
    ```
 
    The `<ACR Acccess Key>` can be found [here](https://github.com/Microsoft/Forecasting/blob/master/common/key.txt).   
@@ -107,7 +107,7 @@ Then, you can go to `~/Forecasting` directory in the VM and create a conda envir
    4.2 Pull the Docker image from ACR to your VM
 
    ```bash
-   docker pull tsperf.azurecr.io/energy_load/gefcom2017_d_prob_mt_hourly/fnn_image:v1
+   sudo docker pull tsperf.azurecr.io/energy_load/gefcom2017_d_prob_mt_hourly/fnn_image:v1
    ```
 
 5. Tune Hyperparameters **within Docker container** or **with AzureML hyperdrive**.
@@ -115,7 +115,7 @@ Then, you can go to `~/Forecasting` directory in the VM and create a conda envir
    5.1.1 Start a Docker container from the image  
 
    ```bash
-   docker run -it -v ~/Forecasting:/Forecasting --name fnn_cv_container tsperf.azurecr.io/energy_load/gefcom2017_d_prob_mt_hourly/fnn_image:v1
+   sudo docker run -it -v ~/Forecasting:/Forecasting --name fnn_cv_container tsperf.azurecr.io/energy_load/gefcom2017_d_prob_mt_hourly/fnn_image:v1
    ```
 
    Note that option `-v ~/Forecasting:/Forecasting` mounts the `~/Forecasting` folder (the one you cloned) to the container so that you can access the code and data on your VM within the container.
@@ -124,6 +124,7 @@ Then, you can go to `~/Forecasting` directory in the VM and create a conda envir
 
    ```
    source activate tsperf
+   cd /Forecasting
    nohup bash ./energy_load/GEFCom2017_D_Prob_MT_hourly/submissions/fnn/train_validate_vm.sh >& cv_out.txt &
    ```
    After generating the cross validation results, you can exit the Docker container by command `exit`.
@@ -146,7 +147,7 @@ Then, you can go to `~/Forecasting` directory in the VM and create a conda envir
    6.1 Start a Docker container from the image  
 
    ```bash
-   docker run -it -v ~/Forecasting:/Forecasting --name fnn_container tsperf.azurecr.io/energy_load/gefcom2017_d_prob_mt_hourly/fnn_image:v1
+   sudo docker run -it -v ~/Forecasting:/Forecasting --name fnn_container tsperf.azurecr.io/energy_load/gefcom2017_d_prob_mt_hourly/fnn_image:v1
    ```
 
    Note that option `-v ~/Forecasting:/Forecasting` mounts the `~/Forecasting` folder (the one you cloned) to the container so that you can access the code and data on your VM within the container.
@@ -155,12 +156,13 @@ Then, you can go to `~/Forecasting` directory in the VM and create a conda envir
 
    ```
    source activate tsperf
+   cd /Forecasting
    nohup bash ./energy_load/GEFCom2017_D_Prob_MT_hourly/submissions/fnn/train_score_vm.sh >& out.txt &
    ```
    The last command will take about 7 hours to complete. You can monitor its progress by checking out.txt file. Also during the run you can disconnect from VM. After reconnecting to VM, use the command  
 
    ```
-   docker exec -it fnn_container /bin/bash
+   sudo docker exec -it fnn_container /bin/bash
    tail out.txt
    ```
    to connect to the running container and check the status of the run.  
@@ -199,34 +201,44 @@ Please follow the instructions below to deploy the Linux DSVM.
 
 ## Implementation evaluation
 **Quality:**  
-Note there is randomness in this quantile regression neural network model, so the model quality is slightly different for each run.
 
-* Pinball loss run 1: 80.27
+* Pinball loss run 1: 79.27
 
-* Pinball loss run 2: 80.24
+* Pinball loss run 2: 79.32
 
-* Pinball loss run 3: 80.25
+* Pinball loss run 3: 79.25
 
-* Pinball loss run 4: 80.24
+* Pinball loss run 4: 79.24
 
-* Pinball loss run 5: 80.22
+* Pinball loss run 5: 79.32
 
-* Median Pinball loss: 80.24
+* Median Pinball loss: 79.27
 
 **Time:**
 
-* Run time 1: 5187 seconds
+* Run time 1: 4611 seconds
 
-* Run time 2: 5132 seconds
+* Run time 2: 4604 seconds
 
-* Run time 3: 5046 seconds
+* Run time 3: 4587 seconds
 
-* Run time 4: 5048 seconds
+* Run time 4: 4630 seconds
 
-* Run time 5: 5095 seconds
+* Run time 5: 4583 seconds
 
-* Median run time: 5095 seconds
+* Median run time: 4604 seconds
 
 **Cost:**  
 The hourly cost of the Standard D8s Ubuntu Linux VM in East US Azure region is 0.3840 USD, based on the price at the submission date.   
-Thus, the total cost is 5095/3600 * 0.3840 = $0.5435.
+Thus, the total cost is 4604/3600 * 0.3840 = $0.4911.
+
+**Average relative improvement (in %) over GEFCom2017 benchmark model**  (measured over the first run)  
+Round 1: 6.64  
+Round 2: 20.13  
+Round 3: 19.75   
+Round 4: 5.01  
+Round 5: 4.21  
+Round 6: 10.68  
+
+**Ranking in the qualifying round of GEFCom2017 competition**  
+4

@@ -1,5 +1,8 @@
 args = commandArgs(trailingOnly=TRUE)
 seed_value = args[1]
+
+set.seed(seed_value)
+
 library('data.table')
 library('gbm')
 

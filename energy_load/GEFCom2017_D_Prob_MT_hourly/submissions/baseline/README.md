@@ -79,6 +79,7 @@ Then, you can go to `~/Forecasting` directory in the VM and create a conda envir
     ```
 
 4. Prepare Docker container for model training and predicting.
+
    4.1 Make sure Docker is installed
     
    You can check if Docker is installed on your VM by running
@@ -95,7 +96,8 @@ Then, you can go to `~/Forecasting` directory in the VM and create a conda envir
    ```
 
 5. Train and predict **within Docker container**
-  5.1 Start a Docker container from the image  
+
+   5.1 Start a Docker container from the image  
 
    ```bash
    sudo docker run -it -v ~/Forecasting:/Forecasting --name baseline_container baseline_image

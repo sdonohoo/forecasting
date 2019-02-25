@@ -125,8 +125,8 @@ Then, you can go to `~/Forecasting` directory in the VM and create a conda envir
 
 **Platform:** Azure Cloud   
 **Resource location:** East US region   
-**Hardware:** Standard D8s v3 (8 vcpus, 32 GB memory) Ubuntu Linux VM
-**Data storage:** Premium SSD 
+**Hardware:** Standard D8s v3 (8 vcpus, 32 GB memory) Ubuntu Linux VM 
+**Data storage:** Premium SSD  
 **Dockerfile:** https://github.com/Microsoft/Forecasting/blob/master/energy_load/GEFCom2017_D_Prob_MT_hourly/submissions/baseline/Dockerfile  
 
 **Key packages/dependencies:**

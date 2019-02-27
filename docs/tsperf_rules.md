@@ -14,7 +14,7 @@
     3.2 [Retail sales forecasting](#retail-sales-forecasting)  
 4. [Development of benchmark implementation](#development-of-benchmark-implementation)  
     4.1 [Feature engineering](#feature-engineering)  
-    4.2 [Guideline for setting up conda environment](#Guideline-for-setting-up-conda-environment)
+    4.2 [Guideline for setting up conda environment](#Guideline-for-setting-up-conda-environment) 
     4.3 [Guideline for creating Docker images](#guideline-for-creating-docker-images)  
     4.4 [Measuring performance](#measuring-performance) 
 5. [Submission of benchmark implementation](#submission-of-benchmark-implementation)  
@@ -101,16 +101,16 @@ In addition to it, there will be a specific benchmark submission guidelines docu
 ### Structure of repository
 
 We use Git repo to maintain the source code and relevant files. The repository has three hierarchy levels: use case, benchmark, and benchmark 
-implementation. The top-level directory `/TSPerf` consists of folders of all the existing use cases, a folder storing common utility scripts, a 
+implementation. The top-level directory `/Forecasting` consists of folders of all the existing use cases, a folder storing common utility scripts, a 
 folder storing internal docs, and a Markdown file with an overview of TSPerf framework. 
 
 * Use case folders: Each such folder is named after a specific use case and contains scripts of the implementations/submissions for every 
-benchmark of this use case. Currently, we have a folder `/TSPerf/energy_load` for the energy load forecasting use case and another folder 
-`/TSPerf/retail_sales` for the retail sales forecasting use case. 
+benchmark of this use case. Currently, we have a folder `/Forecasting/energy_load` for the energy load forecasting use case and another folder 
+`/Forecasting/retail_sales` for the retail sales forecasting use case. 
 
   Under each use case folder, we have subfolders for different benchmarks and a Markdown file listing all the benchmarks of this use case. For 
-  example, `/TSPerf/energy_load/GEFCom2017-D_Prob_MT_hourly` contains all the submissions for a probabilistic forecasting problem defined upon 
-  GEFCom2017-D dataset. In addition, `/TSPerf/energy_load/README.md` summarizes all the benchmarks of the energy load forecasting use case. 
+  example, `/Forecasting/energy_load/GEFCom2017-D_Prob_MT_hourly` contains all the submissions for a probabilistic forecasting problem defined upon 
+  GEFCom2017-D dataset. In addition, `/Forecasting/energy_load/README.md` summarizes all the benchmarks of the energy load forecasting use case. 
 
   Under each benchmark folder, there are a subfolder containing reference materials, a subfolder containing source code of all submissions, a 
   subfolder storing common utility scripts, a subfolder reserved for data storage, and a Markdown file specifying the benchmark. The 
@@ -134,13 +134,13 @@ benchmark of this use case. Currently, we have a folder `/TSPerf/energy_load` fo
     * `/README.md`: This Markdown file provides detailed introductions about a certain benchmark. For instance, 
     `/TSPerf/energy_load/GEFCom2014_Pt_1Month_Hourly/README.md` describes the dataset and goal of the benchmark. 
 
-* `/TSPerf/common` folder: This folder has the scripts that could be used across different use cases, such as Python scripts which compute the 
+* `/Forecasting/common` folder: This folder has the scripts that could be used across different use cases, such as Python scripts which compute the 
 evaluation metrics of the forecasting results.
 
-* `/TSPerf/internal_docs` folder: This folder contains a high-level document summarizing the goals, rules, and general guidelines for 
+* `/Forecasting/internal_docs` folder: This folder contains a high-level document summarizing the goals, rules, and general guidelines for 
 participating and leveraging TSPerf. There is also a template of the submission form used for documenting a particular submission. 
 
-* `/TSPerf/README.md` file: This Markdown file describes the TSPerf framework in general. It introduces the goal and vision, specifies the use 
+* `/Forecasting/README.md` file: This Markdown file describes the TSPerf framework in general. It introduces the goal and vision, specifies the use 
 cases and benchmarks, and includes a performance board for each use case. 
 
 ## Benchmarks  
@@ -149,8 +149,8 @@ The following table summarizes benchmarks that are currently included in TSPerf:
 
 | **Benchmark** | **Dataset** | **Benchmark directory** |  
 | --------------------- | ----|---------------- |  
-| Probabilistic electricity load forecasting | GEFCom2017 |`TSPerf\energy_load\GEFCom2017-D_Prob_MT_Hourly` |
-| Retail sales forecasting | Orange Juice dataset | `TSPerf\retail_sales\OrangeJuice_Pt_3Weeks_Weekly` |
+| Probabilistic electricity load forecasting | GEFCom2017 |`Forecasting\energy_load\GEFCom2017-D_Prob_MT_Hourly` |
+| Retail sales forecasting | Orange Juice dataset | `Forecasting\retail_sales\OrangeJuice_Pt_3Weeks_Weekly` |
 
 Next sections provide a high-level description of the benchmarks. A more detailed description of the benchmarks is in README files in benchmark directories.
 
@@ -216,7 +216,7 @@ or
 
 Run the following commands to set up the tsperf conda environment:
 ```
-cd TSPerf
+cd Forecasting
 conda env create -f common/conda_dependencies.yml
 source activate tsperf
 ```
@@ -260,25 +260,25 @@ After customizing the Dockerfile and dependency files, you can build a local Doc
 
 1. Make sure Docker is installed. You can check if Docker is installed in your VM by running
     ```bash
-    docker -v
+    sudo docker -v
     ```
-    You will see the Docker version if Docker is installed. If not, you can install it by following the instructions [here](https://docs.docker.com/install/linux/docker-ce/ubuntu/). Note that if you want to execute Docker commands as a non-root user, you need to create a Unix group and add users to it by following the instructions [here](https://docs.docker.com/install/linux/linux-postinstall/#manage-docker-as-a-non-root-user). Otherwise, you need to run the commands with sudo. 
+    You will see the Docker version if Docker is installed. If not, you can install it by following the instructions [here](https://docs.docker.com/install/linux/docker-ce/ubuntu/). Note that if you want to execute Docker commands without sudo as a non-root user, you need to create a Unix group and add users to it by following the instructions [here](https://docs.docker.com/install/linux/linux-postinstall/#manage-docker-as-a-non-root-user). 
 
 2. Build Docker image by running
     ```bash
-    docker build -t <image name> .
+    sudo docker build -t <image name> .
     ```
     from the submission folder where the Dockerfile and dependency files reside. Here `<image name>` is the name of the local Docker image. An example name  is `lightgbm_image:v1`, where `v1` indicates the version of the Docker image. It may take tens of minutes to build the Docker image for the first time. But the process could be much faster if you rebuild the image after applying small changes to the Dockerfile or dependency files, since previous Docker building steps will be cached and most of them will not be repeated.  
     
 3. After the Docker image is built, you may need to test your model training and scoring script inside a Docker container created from this image. To do this, you will need to
-    * 3.1 Choose a name for a new Docker container and create it by running the following command from `/TSPerf` folder (assuming that you've cloned TSPerf repository):
+    * 3.1 Choose a name for a new Docker container and create it by running the following command from `~/Forecasting` folder (assuming that you've cloned Forecasting repository):
         ```bash
-        docker run -it -v $(pwd):/TSPerf --name <container name> <image name>
+        sudo docker run -it -v ~/Forecasting:/Forecasting --name <container name> <image name>
         ```
-        Note that option `-v $(pwd):/TSPerf` allows you to mount `/TSPerf` folder (the one you cloned) to the container so that you will have access to the source code and data in the container. Here `<container name>` is the name of the Docker container, e.g. `lightgbm_container`. You will automatically enter the Docker container after executing the above command.  
+        Note that option `-v ~/Forecasting:/Forecasting` allows you to mount `~/Forecasting` folder (the one you cloned) to the container so that you will have access to the source code and data in the container. Here `<container name>` is the name of the Docker container, e.g. `lightgbm_container`. You will automatically enter the Docker container after executing the above command.  
         For Docker images with GPU support, you will need to run the above command with an additional argument `--runtime=nvidia`.  
 
-    * 3.2 Inside the Docker container, train the model and make predictions by running the following command from `/TSPerf` folder
+    * 3.2 Inside the Docker container, train the model and make predictions by running the following command from `~/Forecasting` folder
         ```bash
         source ./common/train_score_vm <submission path> <script type> 
         ```
@@ -287,17 +287,17 @@ After customizing the Dockerfile and dependency files, you can build a local Doc
 4. If the above test goes smoothly, we can push the Docker image to the Azure Container Registry (ACR) with the following steps:
     * 4.1 Log into Azure Container Registry (ACR)
     ```bash
-    docker login --username tsperf --password <ACR Access Key> tsperf.azurecr.io
+    sudo docker login --username tsperf --password <ACR Access Key> tsperf.azurecr.io
     ``` 
     where `<ACR Acccess Key>` can be found [here](https://ms.portal.azure.com/#@microsoft.onmicrosoft.com/resource/subscriptions/ff18d7a8-962a-406c-858f-49acd23d6c01/resourceGroups/tsperf/providers/Microsoft.ContainerRegistry/registries/tsperf/accessKey).
     * 4.2 Create a tag that refers to the Docker image
     ```bash
-    docker tag <image name> <tag name>
+    sudo docker tag <image name> <tag name>
     ```
     where `<tag name>` is the name of the Docker image in the ACR. We recommend to name the tag using the convention `tsperf.azurecr.io/<benchmark directory>/<image name>`, e.g. `tsperf.azurecr.io/retail_sales/orangejuice_pt_3weeks_weekly/lightgbm_image:v1`.
     * 4.3 Push the Docker image to ACR
     ```bash
-    docker push <tag name>
+    sudo docker push <tag name>
     ```
     with `<tag name>` being the one that you picked in the last step. Make sure that your tag name starts with `tsperf.azurecr.io/`, otherwise the docker push command will not work. You can find the Docker image [here](https://ms.portal.azure.com/#@microsoft.onmicrosoft.com/resource/subscriptions/ff18d7a8-962a-406c-858f-49acd23d6c01/resourceGroups/tsperf/providers/Microsoft.ContainerRegistry/registries/tsperf/repository), after it is successfully pushed to ACR.
 
@@ -385,7 +385,8 @@ The submission process depends on the architecture and is described in the follo
 
 1. Clone the Git repo and create a new git branch
    ```bash
-   git clone https://msdata.visualstudio.com/DefaultCollection/AlgorithmsAndDataScience/_git/TSPerf   
+   cd ~
+   git clone https://github.com/Microsoft/Forecasting.git  
    git checkout -b <branch name>
    ```
 
@@ -394,16 +395,16 @@ e.g., `/LSTM_3layers` under `energy_load/<benchmark name>/submissions`. Please n
 
 3. Create [TSPerf conda environment](#Guideline-for-setting-up-conda-environment) for running the scripts of data downloading, data 
 preparation, and result evaluation. To do this, you need to check if conda has been installed by runnning command `conda -V`. If it is 
-installed, you will see the conda version in the terminal. Otherwise, please follow the instructions [here](https://conda.io/docs/user-guide/install/linux.html) to install conda. Then, you can go to `TSPerf` directory in the VM and create a conda environment named `tsperf` by
+installed, you will see the conda version in the terminal. Otherwise, please follow the instructions [here](https://conda.io/docs/user-guide/install/linux.html) to install conda. Then, you can go to `~/Forecasting` directory in the VM and create a conda environment named `tsperf` by
 
    ```bash
-   cd TSPerf/
+   cd ~/Forecasting
    conda env create --file ./common/conda_dependencies.yml
    ```
   
    This will create a conda environment named TSPerf with the Python and R packages listed in `conda_dependencies.yml` being installed.
 
-4. Activate the conda environment and download the benchmark dataset. Use command `source activate tsperf` to activate the conda environment. Then, download the dataset by running one of the following commands from `/TSPerf` directory 
+4. Activate the conda environment and download the benchmark dataset. Use command `source activate tsperf` to activate the conda environment. Then, download the dataset by running one of the following commands from `~/Forecasting` directory 
 
    ```bash
    python <benchmark directory>/common/download_data.py 
@@ -441,34 +442,27 @@ training and scoring script inside a Docker container as follows
    This command will output benchmark quality values (e.g. MAPEs) of the five runs, using which you can compute the median quality value. 
 
 9. Include other scripts that are necessary for reproducing the submitted benchmark results. For example, you should include a Dockerfile containing all 
-dependencies for running your benchmark submission. The Dockerfile can point to a `.txt` file which contains a list of necessary packages. 
+dependencies for running your benchmark submission. The Dockerfile can point to a `.txt` or `.yml` file which contains a list of necessary packages. 
 
-10. Create a Docker image and push it to the ACR   
+10. Create a local Docker image   
    To create your Docker image, for example you can go to `/submissions/submission1/` folder and run the following command   
    ```bash
-   docker build -t submission1_image .
+   sudo docker build -t submission1_image .
    ```
-   Then, you can push the image to ACR by executing
-   ```bash
-   docker tag submission1_image tsperf.azurecr.io/energy_load/problem1/submission1/submission1_image:v1
-   docker push tsperf.azurecr.io/energy_load/problem1/submission1/submission1_image:v1
-   ```
-   Note that you will need to log into the ACR before publishing the image.
 
 11. Include a submission form in the submission folder as README.md file. The submission form documents the submitter's information, method utlized in the 
 benchmark implementation, information about the scripts, obtained results, and steps of reproducing the results. An example submission form can be found 
-[here](https://msdata.visualstudio.com/AlgorithmsAndDataScience/_git/TSPerf?_a=contents&path=%2Fdocs%2Fsubmission_form_template.md&version=GBmaster). Specifically, it should include
+[here](https://github.com/Microsoft/Forecasting/blob/master/docs/submission_form_template.md). Specifically, it should include
     * name of the branch with submission code
-    * benchmark path, e.g. `/TSPerf/energy_load/problem1`
-    * path to submission directory, e.g. `/TSPerf/energy_load/problem1/submissions/submission1`
+    * benchmark path, e.g. `/Forecasting/energy_load/problem1`
+    * path to submission directory, e.g. `/Forecasting/energy_load/problem1/submissions/submission1`
     * instructions for provisioning the architecture components (e.g. DSVM, Batch AI)
-    * name of Docker image stored in tsperf registry, for example
-      tsperf.azurecr.io/energy_load/problem1/submission1/submission1_image:v1
+    * link to Dockerfile stored in submission folder, for example [here](https://github.com/Microsoft/Forecasting/blob/master/energy_load/GEFCom2017_D_Prob_MT_hourly/submissions/baseline/Dockerfile)
     * benchmark quality values obtained with random seeds 1 through 5
     * running time in each run
     * cost in each run 
 
-12. Update the performance board by including the performance values of the new submission. First, you should add the performance values to one of the csv files named `TSPerfBoard-*.csv` corresponding to the benchmark under `./common` folder. Then, you need to run `ReadmeGenerator.py` to update the README file under TSPerf directory with
+12. Update the performance board by including the performance values of the new submission. First, you should add the performance values to one of the csv files named `TSPerfBoard-*.csv` corresponding to the benchmark under `./common` folder. Then, you need to run `ReadmeGenerator.py` to update the README file under `~/Forecasting` directory with
    ```bash
    python ./common/ReadmeGenerator.py
    ```
@@ -568,11 +562,10 @@ reviewer needs to complete the following three steps:
 
 0. Verify that the submission has README.md file with  
     * name of the branch with submission code
-    * benchmark path, for example /TSPerf/energy_load/problem1
-    * path to submission directory, for example  /TSPerf/energy_load/problem1/benchmarks/submission1
+    * benchmark path, for example /Forecasting/energy_load/problem1
+    * path to submission directory, for example  /Forecasting/energy_load/problem1/benchmarks/submission1
     * instructions for provisioning the architecture components (e.g. DSVM, Batch AI)
-    * name of Docker image stored in tsperf registry, for example 
-    tsperf.azurecr.io/energy_load/problem1/submission1/submission1_image:v1
+    * link to Dockerfile stored in submission folder, for example [here](https://github.com/Microsoft/Forecasting/blob/master/energy_load/GEFCom2017_D_Prob_MT_hourly/submissions/baseline/Dockerfile)
 
 In the following sections all occurences of "README file" refer to README file in the submission, unless 
 specified otherwise.
@@ -585,34 +578,35 @@ The next steps depend on the architecture and are described in the following two
 benchmark results. Then log into the provisioned VM.
 
 2. Choose submission branch and clone the Github repo to your machine:
-
-        git clone https://msdata.visualstudio.com/DefaultCollection/AlgorithmsAndDataScience/_git/TSPerf
+        
+        cd ~
+        git clone https://github.com/Microsoft/Forecasting.git
         git checkout <branch name>
 
-3. Download the data using the following commands
+3. Download the data using the following commands from `~/Forecasting` directory
 
         python <benchmark path>/common/get_data.py
 
     where \<benchmark path\> is a root benchmark directory, for example energy_load/problem1
 
-4. Log into Azure Container Registry:
-   
-       docker login --username tsperf --password <ACR Access Key> tsperf.azurecr.io
-   
-   If want to execute docker commands without sudo as a non-root user, you need to create a Unix group and 
-   add users to it by following the instructions 
-   [here](https://docs.docker.com/install/linux/linux-postinstall/#manage-docker-as-a-non-root-user).
+4. Make sure Docker is installed
+    
+   You can check if Docker is installed on your VM by running
 
-5. Pull a Docker image from ACR, using image name that is specified in README file:   
-      
-       docker pull <image name>
+        sudo docker -v
+
+   You will see the Docker version if Docker is installed. If not, you can install it by following the instructions [here](https://docs.docker.com/install/linux/docker-ce/ubuntu/). Note that if you want to execute Docker commands without sudo as a non-root user, you need to create a Unix group and add users to it by following the instructions [here](https://docs.docker.com/install/linux/linux-postinstall/#manage-docker-as-a-non-root-user).  
+
+5. Build a local Docker image by running the following command from `~/Forecasting` directory
+
+       sudo docker build -t <image name> <submission directory>
 
 6. Choose a name for a new Docker container and create it using command:   
    
-       docker run -it -v ~/TSPerf:/TSPerf --name <container name> <image name>
+       docker run -it -v ~/Forecasting:/Forecasting --name <container name> <image name>
    
-   Note that you need to mount `/TSPerf` folder (the one you cloned) to the container so that you will 
-   have access to the source code in the container. For Docker images with GPU support, you will need to run the above command with an additional argument `--runtime=nvidia`.   
+   Note that option `-v ~/Forecasting:/Forecasting` allows you to mount `~/Forecasting` folder (the one you cloned) to the container so that you will have
+   access to the source code in the container. For Docker images with GPU support, you will need to run the above command with an additional argument `--runtime=nvidia`.   
 
 7. Inside Docker container, run the following command:  
 
@@ -636,10 +630,11 @@ benchmark results. Then log into the provisioned VM.
 
 2. Choose submission branch and clone the Github repo to your machine:
 
-        git clone https://msdata.visualstudio.com/DefaultCollection/AlgorithmsAndDataScience/_git/TSPerf
+        cd ~
+        git clone https://github.com/Microsoft/Forecasting.git
         git checkout <branch name>
 
-3. Download the data using the following commands
+3. Download the data using the following commands from `~/Forecasting` directory
 
         python <benchmark path>/common/get_data.py
 

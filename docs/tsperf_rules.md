@@ -120,11 +120,11 @@ benchmark of this use case. Currently, we have a folder `/Forecasting/energy_loa
 
     * `/submissions` folder: This folder contains multiple subfolders where each subfolder includes all the necessary scripts and the 
     submission form for reproducing a certain submission. For instance, `/baseline` folder under 
-    `/TSPerf/energy_load/GEFCom2014_Pt_1Month_Hourly/submissions` includes the required submission files of the baseline model which is simple 
+    `/Forecasting/energy_load/GEFCom2014_Pt_1Month_Hourly/submissions` includes the required submission files of the baseline model which is simple 
     method used to be compared with other submissions.
     
     * `/common` folder: This folder includes utility scripts for a benchmark. As an example, 
-    `/TSPerf/energy_load/GEFCom2014_Pt_1Month_Hourly/common` 
+    `/Forecasting/energy_load/GEFCom2014_Pt_1Month_Hourly/common` 
     contains the scripts that could be commonly used for GEFCom2014_Pt_1Month_Hourly, such as Python scripts that download the data, prepare 
     training and scoring data, and evaluate performance of the benchmark implementation. 
 
@@ -132,12 +132,12 @@ benchmark of this use case. Currently, we have a folder `/Forecasting/energy_loa
     of the benchmark.
 
     * `/README.md`: This Markdown file provides detailed introductions about a certain benchmark. For instance, 
-    `/TSPerf/energy_load/GEFCom2014_Pt_1Month_Hourly/README.md` describes the dataset and goal of the benchmark. 
+    `/Forecasting/energy_load/GEFCom2014_Pt_1Month_Hourly/README.md` describes the dataset and goal of the benchmark. 
 
 * `/Forecasting/common` folder: This folder has the scripts that could be used across different use cases, such as Python scripts which compute the 
 evaluation metrics of the forecasting results.
 
-* `/Forecasting/internal_docs` folder: This folder contains a high-level document summarizing the goals, rules, and general guidelines for 
+* `/Forecasting/docs` folder: This folder contains a high-level document summarizing the goals, rules, and general guidelines for 
 participating and leveraging TSPerf. There is also a template of the submission form used for documenting a particular submission. 
 
 * `/Forecasting/README.md` file: This Markdown file describes the TSPerf framework in general. It introduces the goal and vision, specifies the use 
@@ -216,7 +216,7 @@ or
 
 Run the following commands to set up the tsperf conda environment:
 ```
-cd Forecasting
+cd ~/Forecasting
 conda env create -f common/conda_dependencies.yml
 source activate tsperf
 ```
@@ -445,10 +445,10 @@ training and scoring script inside a Docker container as follows
 dependencies for running your benchmark submission. The Dockerfile can point to a `.txt` or `.yml` file which contains a list of necessary packages. 
 
 10. Create a local Docker image   
-   To create your Docker image, for example you can go to `/submissions/submission1/` folder and run the following command   
-   ```bash
-   sudo docker build -t submission1_image .
-   ```
+   To create your Docker image, for example you can go to `/submissions/submission1/` folder and run the following command       
+    ```bash
+    sudo docker build -t submission1_image .
+    ```
 
 11. Include a submission form in the submission folder as README.md file. The submission form documents the submitter's information, method utlized in the 
 benchmark implementation, information about the scripts, obtained results, and steps of reproducing the results. An example submission form can be found 
@@ -462,10 +462,10 @@ benchmark implementation, information about the scripts, obtained results, and s
     * running time in each run
     * cost in each run 
 
-12. Update the performance board by including the performance values of the new submission. First, you should add the performance values to one of the csv files named `TSPerfBoard-*.csv` corresponding to the benchmark under `./common` folder. Then, you need to run `ReadmeGenerator.py` to update the README file under `~/Forecasting` directory with
-   ```bash
-   python ./common/ReadmeGenerator.py
-   ```
+12. Update the performance board by including the performance values of the new submission. First, you should add the performance values to one of the csv files named `TSPerfBoard-*.csv` corresponding to the benchmark under `./common` folder. Then, you need to run `ReadmeGenerator.py` to update the README file under `~/Forecasting` directory with   
+    ```bash
+    python ./common/ReadmeGenerator.py
+    ```
 
 13. Create pull request for review by following the process in the next section.
 

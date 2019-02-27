@@ -603,7 +603,7 @@ benchmark results. Then log into the provisioned VM.
 
 6. Choose a name for a new Docker container and create it using command:   
    
-       docker run -it -v ~/Forecasting:/Forecasting --name <container name> <image name>
+       sudo docker run -it -v ~/Forecasting:/Forecasting --name <container name> <image name>
    
    Note that option `-v ~/Forecasting:/Forecasting` allows you to mount `~/Forecasting` folder (the one you cloned) to the container so that you will have
    access to the source code in the container. For Docker images with GPU support, you will need to run the above command with an additional argument `--runtime=nvidia`.   

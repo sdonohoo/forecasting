@@ -14,7 +14,7 @@
     3.2 [Retail sales forecasting](#retail-sales-forecasting)  
 4. [Development of benchmark implementation](#development-of-benchmark-implementation)  
     4.1 [Feature engineering](#feature-engineering)  
-    4.2 [Guideline for setting up conda environment](#Guideline-for-setting-up-conda-environment) 
+    4.2 [Guideline for setting up conda environment](#Guideline-for-setting-up-conda-environment)     
     4.3 [Guideline for creating Docker images](#guideline-for-creating-docker-images)  
     4.4 [Measuring performance](#measuring-performance) 
 5. [Submission of benchmark implementation](#submission-of-benchmark-implementation)  

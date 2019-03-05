@@ -40,7 +40,8 @@ class TemporalFeaturizer(BaseEstimator):
                                       'month_of_year': self.month_of_year,
                                       'day_of_week': self.day_of_week,
                                       'day_of_month': self.day_of_month,
-                                      'day_of_year': self.day_of_year}
+                                      'day_of_year': self.day_of_year,
+                                      'hour_of_year': self.hour_of_year}
 
     def hour_of_day(self, time_col):
         """Returns the hour from a datetime column."""
@@ -113,7 +114,7 @@ class TemporalFeaturizer(BaseEstimator):
         return X
 
 
-class DateTypeFeaturizer(BaseEstimator):
+class DayTypeFeaturizer(BaseEstimator):
 
     """
     Convert datetime_col to 7 day types

@@ -90,7 +90,7 @@ class SameWeekDayHourLagFeaturizer(BaseEstimator):
         elif self.agg_func == 'std' and self.q is None:
             df[self.output_col_name] = round(df[week_lag_cols].std(axis=1))
 
-        return df[[self.output_colname]]
+        return df[[self.output_col_name]]
 
     def fit(self, X, y=None):
         return self
@@ -155,7 +155,7 @@ class SameDayHourLagFeaturizer(BaseEstimator):
         datetime_col = input_df[self.time_col_name]
         input_col = input_df[self.input_col_name]
         if not is_datetime_like(datetime_col):
-            datetime_col = pd.to_datetime(datetime_col, format=DATETIME_FORMAT)
+            datetime_col = pd.to_datetime(datetime_col, format=self.time_format)
         min_time_stamp = min(datetime_col)
         max_time_stamp = max(datetime_col)
 

@@ -8,7 +8,7 @@ from .lag import SameWeekDayHourLagFeaturizer
 
 class SameWeekDayHourRollingFeaturizer(BaseEstimator):
     def __init__(self, df_config, input_col_name, window_size, start_week,
-                 forecast_creation_time, agg_count=1, agg_func='mean', q=None,
+                 agg_count=1, agg_func='mean', q=None,
                  output_col_prefix='rolling_agg_lag_'):
         self.time_col_name = df_config['time_col_name']
         self.value_col_name = df_config['value_col_name']
@@ -19,11 +19,12 @@ class SameWeekDayHourRollingFeaturizer(BaseEstimator):
         self.input_col_name = input_col_name
         self.window_size = window_size
         self.start_week = start_week
-        self.forecast_creation_time = forecast_creation_time
         self.agg_count = agg_count
         self.agg_func = agg_func
         self.q = q
         self.output_col_prefix = output_col_prefix
+
+        self._is_fit = False
 
     def same_weekday_hour_rolling_agg(self, input_df):
         """
@@ -100,9 +101,12 @@ class SameWeekDayHourRollingFeaturizer(BaseEstimator):
         return df
 
     def fit(self, X, y=None):
+        self.forecast_creation_time = max(X[self.time_col_name])
+        self._is_fit = True
         return self
 
     def transform(self, X):
+        ## TODO: raise an exception when the transformer is not fit
         if self.grain_col_name is None:
             output_tmp = self.same_weekday_hour_rolling_agg(X)
             X = pd.merge(X, output_tmp, on=self.time_col_name)

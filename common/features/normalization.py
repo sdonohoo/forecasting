@@ -1,4 +1,3 @@
-import pandas as pd
 from sklearn.base import BaseEstimator
 
 
@@ -24,6 +23,8 @@ class YearNormalizer(BaseEstimator):
         self.min_year = min(datetime_col.dt.year)
         self.max_year = max(datetime_col.dt.year)
         self._is_fit = True
+
+        return self
 
     def transform(self, X):
         datetime_col = X[self.time_col_name]
@@ -60,6 +61,8 @@ class DateNormalizer(BaseEstimator):
         self.min_date = min(datetime_col.dt.date)
         self.max_date = max(datetime_col.dt.date)
         self._is_fit = True
+
+        return self
 
     def transform(self, X):
         datetime_col = X[self.time_col_name]
@@ -98,6 +101,8 @@ class DateHourNormalizer(BaseEstimator):
         self.max_datehour = max(datetime_col)
         self._is_fit = True
 
+        return self
+
     def transform(self, X):
         datetime_col = X[self.time_col_name]
         current_datehour = (datetime_col - self.min_datehour)\
@@ -107,7 +112,7 @@ class DateHourNormalizer(BaseEstimator):
 
         if max_min_diff != 0:
             X['normalized_datehour'] = \
-                current_datehour(
+                current_datehour/(
                     max_min_diff.days * 24 + max_min_diff.seconds / 3600)
         elif max_min_diff == 0:
             X['normalized_datehour'] = 0

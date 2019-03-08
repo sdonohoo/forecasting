@@ -4,7 +4,7 @@ do
     echo "Run $i"
     start=`date +%s`
     echo 'Creating features...'
-    python $path/submissions/qrf/feature_engineering.py --submission qrf
+    python $path/submissions/qrf/compute_features.py --submission qrf
 
     echo 'Training and predicting...'
     python $path/submissions/qrf/train_score.py --data-folder $path/submissions/qrf/data --output-folder $path/submissions/qrf --seed $i

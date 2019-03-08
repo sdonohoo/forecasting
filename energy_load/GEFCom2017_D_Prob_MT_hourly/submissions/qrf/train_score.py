@@ -26,7 +26,7 @@ n_rounds = 6
 quantiles = arange(0.1,1,0.1)
 
 # schema of the output
-y_test = pd.DataFrame(columns=['Datetime','Zone','Round','q','Prediction'])
+y_test = pd.DataFrame(columns=['Datetime', 'Zone', 'Round', 'q', 'Prediction'])
 
 for i in range(1,n_rounds+1):
     print('Round {}'.format(i))
@@ -39,14 +39,19 @@ for i in range(1,n_rounds+1):
     test_df = pd.read_csv(test_file)
 
     # train and test for each hour separately
-    for hour in arange(0,24):
+    for hour in arange(0, 24):
         print(hour)
 
         # select training sets
-        train_df_hour = train_df[(train_df['Hour']==hour)]
-        train_df_hour = pd.get_dummies(train_df_hour, columns=['Zone'])   # create one-hot encoding of Zone (scikit-garden works only with numerical columns)
-        X_train = train_df_hour.drop(columns=['Datetime','DEMAND','DryBulb','DewPnt']).values    # remove column that are not useful (Datetime) or are not 
-                                                                                                 # available in the test set (DEMAND, DryBulb, DewPnt)
+        train_df_hour = train_df[(train_df['hour_of_day'] == hour)]
+        # create one-hot encoding of Zone
+        # (scikit-garden works only with numerical columns)
+        train_df_hour = pd.get_dummies(train_df_hour, columns=['Zone'])
+        # remove column that are not useful (Datetime) or are not
+        # available in the test set (DEMAND, DryBulb, DewPnt)
+        X_train = train_df_hour.drop(columns=['Datetime','DEMAND','DryBulb',
+                                              'DewPnt']).values
+
         y_train = train_df_hour['DEMAND'].values
 
         # train a model
@@ -55,7 +60,7 @@ for i in range(1,n_rounds+1):
         rfqr.fit(X_train, y_train)
 
         # select test set
-        test_df_hour = test_df[test_df['Hour']==hour]
+        test_df_hour = test_df[test_df['hour_of_day']==hour]
         y_test_baseline = test_df_hour[['Datetime','Zone']]
         test_df_cat = pd.get_dummies(test_df_hour, columns=['Zone'])
         X_test = test_df_cat.drop(columns=['Datetime']).values

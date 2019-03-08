@@ -97,12 +97,13 @@ class SameWeekDayHourRollingFeaturizer(BaseEstimator):
                     tmp_col_all.append(tmp_col)
                     tmp_df[tmp_col] = tmp_df['value'].shift(h)
 
-            if self.agg_func == 'mean' and self.q is None:
-                df[output_col] = round(tmp_df[tmp_col_all].mean(axis=1))
-            elif self.agg_func == 'quantile' and self.q is not None:
-                df[output_col] = round(tmp_df[tmp_col_all].quantile(q, axis=1))
-            elif self.agg_func == 'std' and self.q is None:
-                df[output_col] = round(tmp_df[tmp_col_all].std(axis=1))
+                if self.agg_func == 'mean' and self.q is None:
+                    df[output_col] = round(tmp_df[tmp_col_all].mean(axis=1))
+                elif self.agg_func == 'quantile' and self.q is not None:
+                    df[output_col] = \
+                        round(tmp_df[tmp_col_all].quantile(self.q, axis=1))
+                elif self.agg_func == 'std' and self.q is None:
+                    df[output_col] = round(tmp_df[tmp_col_all].std(axis=1))
 
         df.drop(['fct_diff', 'value'], inplace=True, axis=1)
 

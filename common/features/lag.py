@@ -34,7 +34,7 @@ class SameWeekDayHourLagFeaturizer(BaseEstimator):
             feature as a column.
     """
 
-    def __init__(self, df_config, input_col_name, n_years=3,
+    def __init__(self, df_config, input_col_name, training_df=None, n_years=3,
                  week_window=1, agg_func='mean', q=None,
                  output_col_name='SameWeekDayHourLag'):
         self.time_col_name = df_config['time_col_name']
@@ -49,6 +49,16 @@ class SameWeekDayHourLagFeaturizer(BaseEstimator):
         self.agg_func = agg_func
         self.q = q
         self.output_col_name = output_col_name
+
+        self._training_df = training_df
+
+    @property
+    def training_df(self):
+        return self._training_df
+
+    @training_df.setter
+    def training_df(self, val):
+        self._training_df = val
 
     def same_weekday_hour_lag(self, input_df):
         datetime_col = input_df[self.time_col_name]
@@ -96,18 +106,35 @@ class SameWeekDayHourLagFeaturizer(BaseEstimator):
         return self
 
     def transform(self, X):
+        if self.training_df is not None:
+            forecast_creation_time = max(self.training_df[self.time_col_name])
+            X = pd.concat([self.training_df, X])
+        else:
+            forecast_creation_time = max(X[self.time_col_name])
+            X = X.copy()
         if self.grain_col_name is None:
             X[self.output_col_name] = \
                 self.same_weekday_hour_lag(X).values
+            if self.training_df is not None:
+                X = X.loc[X[self.time_col_name] > forecast_creation_time].copy()
         else:
-            ##TODO: Need to handle when grain column name is a list
+            if isinstance(self.grain_col_name, list):
+                col_names = [self.time_col_name, self.input_col_name] + \
+                            self.grain_col_name
+                merge_col_names = [self.time_col_name] + self.grain_col_name
+            else:
+                col_names = [self.time_col_name, self.input_col_name,
+                             self.grain_col_name]
+                merge_col_names = [self.time_col_name, self.grain_col_name]
             X_lag_tmp = \
-                X[[self.time_col_name, self.input_col_name,
-                   self.grain_col_name]].groupby(self.grain_col_name)\
+                X[col_names].groupby(self.grain_col_name)\
                     .apply(lambda g: self.same_weekday_hour_lag(g))
             X_lag_tmp.reset_index(inplace=True)
-            X = pd.merge(X, X_lag_tmp,
-                         on=[self.grain_col_name, self.time_col_name])
+
+            if self.training_df is not None:
+                X_lag_tmp = X_lag_tmp.loc[X_lag_tmp[self.time_col_name] >
+                                          forecast_creation_time].copy()
+            X = pd.merge(X, X_lag_tmp, on=merge_col_names)
 
         return X
 
@@ -135,8 +162,9 @@ class SameDayHourLagFeaturizer(BaseEstimator):
             feature as a column.
     """
 
-    def __init__(self, df_config, input_col_name, n_years=3, day_window=1,
-                 agg_func='mean', q=None, output_col_name='SameDayHourLag'):
+    def __init__(self, df_config, input_col_name, training_df=None,
+                 n_years=3, day_window=1, agg_func='mean', q=None,
+                 output_col_name='SameDayHourLag'):
 
         self.time_col_name = df_config['time_col_name']
         self.value_col_name = df_config['value_col_name']
@@ -150,6 +178,16 @@ class SameDayHourLagFeaturizer(BaseEstimator):
         self.agg_func = agg_func
         self.q = q
         self.output_col_name = output_col_name
+
+        self.training_df = training_df
+
+    @property
+    def training_df(self):
+        return self._training_df
+
+    @training_df.setter
+    def training_df(self, val):
+        self._training_df = val
 
     def same_day_hour_lag(self, input_df):
         datetime_col = input_df[self.time_col_name]
@@ -198,18 +236,37 @@ class SameDayHourLagFeaturizer(BaseEstimator):
         return self
 
     def transform(self, X):
+        if self.training_df is not None:
+            forecast_creation_time = max(self.training_df[self.time_col_name])
+            X = pd.concat([self.training_df, X])
+        else:
+            forecast_creation_time = max(X[self.time_col_name])
+            X = X.copy()
+
         if self.grain_col_name is None:
             X[self.output_col_name] = \
                 self.same_day_hour_lag(X).values
+            if self.training_df is not None:
+                X = X.loc[X[self.time_col_name] > forecast_creation_time].copy()
         else:
-            ##TODO: Need to handle when grain column name is a list
+            if isinstance(self.grain_col_name, list):
+                col_names = [self.time_col_name, self.input_col_name] + \
+                            self.grain_col_name
+                merge_col_names = [self.time_col_name] + self.grain_col_name
+            else:
+                col_names = [self.time_col_name, self.input_col_name,
+                             self.grain_col_name]
+                merge_col_names = [self.time_col_name, self.grain_col_name]
             X_lag_tmp = \
-                X[[self.time_col_name, self.input_col_name,
-                   self.grain_col_name]].groupby(self.grain_col_name)\
+                X[col_names].groupby(self.grain_col_name)\
                     .apply(lambda g: self.same_day_hour_lag(g))
             X_lag_tmp.reset_index(inplace=True)
-            X = pd.merge(X, X_lag_tmp,
-                         on=[self.grain_col_name, self.time_col_name])
+
+            if self.training_df is not None:
+                X_lag_tmp = X_lag_tmp.loc[X_lag_tmp[self.time_col_name] >
+                                          forecast_creation_time].copy()
+
+            X = pd.merge(X, X_lag_tmp, on=merge_col_names)
 
         return X
 

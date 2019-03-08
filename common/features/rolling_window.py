@@ -7,7 +7,8 @@ from .lag import SameWeekDayHourLagFeaturizer
 
 
 class SameWeekDayHourRollingFeaturizer(BaseEstimator):
-    def __init__(self, df_config, input_col_name, window_size, start_week,
+    def __init__(self, df_config, input_col_name,
+                 window_size, start_week, training_df=None,
                  agg_count=1, agg_func='mean', q=None,
                  output_col_prefix='rolling_agg_lag_'):
         self.time_col_name = df_config['time_col_name']
@@ -26,11 +27,20 @@ class SameWeekDayHourRollingFeaturizer(BaseEstimator):
 
         self._is_fit = False
 
-    def same_weekday_hour_rolling_agg(self, input_df):
+        self.training_df = training_df
+
+    @property
+    def training_df(self):
+        return self._training_df
+
+    @training_df.setter
+    def training_df(self, val):
+        self._training_df = val
+
+    def same_weekday_hour_rolling_agg(self, input_df, forecast_creation_time):
         """
         Creates a series of aggregation features by calculating mean, quantiles,
         or std of values of the same day of week and same hour of day of previous weeks.
-
         Args:
             datetime_col: Datetime column
             value_col: Feature value column to create aggregation features from.
@@ -45,11 +55,9 @@ class SameWeekDayHourRollingFeaturizer(BaseEstimator):
             q: If agg_func is 'quantile', taking value between 0 and 1.
             output_col_prefix: Prefix of the output columns. The start week of each
                 moving average feature is added at the end. Default value 'moving_agg_lag_'.
-
         Returns:
             pandas.DataFrame: data frame containing the newly created lag features as
                 columns.
-
         For example, start_week = 9, window_size=4, and count = 3 will
         create three aggregation of features.
         1) moving_agg_lag_9: aggregate the same day and hour values of the 9th,
@@ -69,8 +77,8 @@ class SameWeekDayHourRollingFeaturizer(BaseEstimator):
 
         if not df.index.is_monotonic:
             df.sort_index(inplace=True)
-
-        df['fct_diff'] = df.index - self.forecast_creation_time
+        ## TODO: double check this
+        df['fct_diff'] = df.index - forecast_creation_time
         df['fct_diff'] = df['fct_diff'].apply(
             lambda x: x.days * 24 + x.seconds / 3600)
         max_diff = max(df['fct_diff'])
@@ -101,24 +109,43 @@ class SameWeekDayHourRollingFeaturizer(BaseEstimator):
         return df
 
     def fit(self, X, y=None):
-        self.forecast_creation_time = max(X[self.time_col_name])
-        self._is_fit = True
         return self
 
     def transform(self, X):
-        ## TODO: raise an exception when the transformer is not fit
+        if self.training_df is not None:
+            forecast_creation_time = max(self.training_df[self.time_col_name])
+            X = pd.concat([self.training_df, X])
+        else:
+            forecast_creation_time = max(X[self.time_col_name])
+            X = X.copy()
+
         if self.grain_col_name is None:
-            output_tmp = self.same_weekday_hour_rolling_agg(X)
+            output_tmp = \
+                self.same_weekday_hour_rolling_agg(X, forecast_creation_time)
+            if self.training_df is not None:
+                output_tmp = output_tmp.loc[X[self.time_col_name] >
+                                            forecast_creation_time].copy()
             X = pd.merge(X, output_tmp, on=self.time_col_name)
         else:
-            ##TODO: Need to handle when grain column name is a list
+            if isinstance(self.grain_col_name, list):
+                col_names = [self.time_col_name, self.input_col_name] + \
+                            self.grain_col_name
+                merge_col_names = [self.time_col_name] + self.grain_col_name
+            else:
+                col_names = [self.time_col_name, self.input_col_name,
+                             self.grain_col_name]
+                merge_col_names = [self.time_col_name, self.grain_col_name]
             output_tmp = \
-                X[[self.time_col_name, self.input_col_name,
-                   self.grain_col_name]].groupby(self.grain_col_name)\
-                    .apply(lambda g: self.same_weekday_hour_rolling_agg(g))
+                X[col_names].groupby(self.grain_col_name).apply(
+                    lambda g: self.same_weekday_hour_rolling_agg(
+                        g, forecast_creation_time))
             output_tmp.reset_index(inplace=True)
-            X = pd.merge(X, output_tmp,
-                         on=[self.grain_col_name, self.time_col_name])
+
+            if self.training_df is not None:
+                output_tmp = output_tmp.loc[output_tmp[self.time_col_name] >
+                                            forecast_creation_time].copy()
+
+            X = pd.merge(X, output_tmp, on=merge_col_names)
 
         return X
 
@@ -126,7 +153,7 @@ class SameWeekDayHourRollingFeaturizer(BaseEstimator):
 class YearOverYearRatioFeaturizer(BaseEstimator):
 
     def __init__(self, df_config, input_col_name,
-                 n_years, column_prefix, output_col_prefix):
+                 n_years, column_prefix, output_col_prefix, training_df=None):
         self.time_col_name = df_config['time_col_name']
         self.value_col_name = df_config['value_col_name']
         self.grain_col_name = df_config['grain_col_name']
@@ -138,6 +165,16 @@ class YearOverYearRatioFeaturizer(BaseEstimator):
         self.n_years = n_years
         self.column_prefix = column_prefix
         self.output_col_prefix = output_col_prefix
+
+        self.training_df = training_df
+
+    @property
+    def training_df(self):
+        return self._training_df
+
+    @training_df.setter
+    def training_df(self, val):
+        self._training_df = val
 
     def fit(self, X, y=None):
         return self
@@ -155,7 +192,8 @@ class YearOverYearRatioFeaturizer(BaseEstimator):
                                              input_col_name=col_old,
                                              n_years=self.n_years,
                                              week_window=0,
-                                             output_col_name=col_new)
+                                             output_col_name=col_new,
+                                             training_df=self.training_df)
 
             lag_df = same_weekday_hour_lag_featurizer.transform(X)
 
@@ -164,11 +202,15 @@ class YearOverYearRatioFeaturizer(BaseEstimator):
             lag_df.drop(col_new, inplace=True, axis=1)
             lag_df_list.append(lag_df)
 
-        ##TODO: Need to handle when grain column name is a list
+        if self.grain_col_name is None:
+            merge_col_names = self.time_col_name
+        elif isinstance(self.grain_col_name, list):
+            merge_col_names = [self.time_col_name] + self.grain_col_name
+        else:
+            merge_col_names = [self.time_col_name, self.grain_col_name]
         output_df = reduce(
-            lambda left, right: pd.merge(left, right,
-                                         on=[self.time_col_name,
-                                             self.grain_col_anme]),
+            lambda left, right: pd.merge(left, right, on=merge_col_names),
             [X] + lag_df_list)
 
         return output_df
+

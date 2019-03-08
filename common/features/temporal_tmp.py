@@ -4,34 +4,15 @@ import pandas as pd
 import numpy as np
 import warnings
 
-from sklearn.base import BaseEstimator
 
+class TemporalFeaturizer:
 
-class TemporalFeaturizer(BaseEstimator):
-
-    def __init__(self, df_config, feature_list=None):
+    def __init__(self, df_config):
         self.time_col_name = df_config['time_col_name']
         self.value_col_name = df_config['value_col_name']
         self.grain_col_name = df_config['grain_col_name']
         self.frequency = df_config['frequency']
         self.time_format = df_config['time_format']
-
-        if feature_list:
-            self.feature_list = feature_list
-        elif self.frequency == 'hourly':
-            self.feature_list = ['hour_of_day', 'day_of_week',
-                                 'week_of_year', 'month_of_year']
-        elif self.frequency == 'daily':
-            self.feature_list = ['day_of_week', 'week_of_year',
-                                 'month_of_year']
-        elif self.frequency == 'weekly':
-            self.feature_list = ['week_of_year', 'month_of_year']
-        elif self.frequency == 'monthly':
-            self.feature_list = ['month_of_year']
-        else:
-            raise Exception('Please specify the feature_list, because the '
-                            'data frequency is not hourly, daily, weekly, '
-                            'or monthly')
 
         self._feature_function_map = {'hour_of_day': self.hour_of_day,
                                       'week_of_year': self.week_of_year,
@@ -41,6 +22,13 @@ class TemporalFeaturizer(BaseEstimator):
                                       'day_of_year': self.day_of_year,
                                       'hour_of_year': self.hour_of_year,
                                       'week_of_month': self.week_of_month}
+        if self.grain_col_name is None:
+            self.output_col_names = [self.time_col_name]
+        elif isinstance(self.grain_col_name, list):
+            self.output_col_names = [self.time_col_name] + self.grain_col_name
+        else:
+            self.output_col_names = [self.time_col_name, self.grain_col_name]
+
 
     def hour_of_day(self, time_col):
         """Returns the hour from a datetime column."""
@@ -98,23 +86,38 @@ class TemporalFeaturizer(BaseEstimator):
 
         return time_of_year['TimeOfYear'].values
 
-    def fit(self, X, y=None):
-        return self
+    def compute_temporal_features(self, input_df, feature_list=None):
+        output_df = input_df[self.output_col_names].copy()
 
-    def transform(self, X):
-        X = X.copy()
-        time_col = X[self.time_col_name]
+        if feature_list:
+            self.feature_list = feature_list
+        elif self.frequency == 'hourly':
+            self.feature_list = ['hour_of_day', 'day_of_week',
+                                 'week_of_year', 'month_of_year']
+        elif self.frequency == 'daily':
+            self.feature_list = ['day_of_week', 'week_of_year',
+                                 'month_of_year']
+        elif self.frequency == 'weekly':
+            self.feature_list = ['week_of_year', 'month_of_year']
+        elif self.frequency == 'monthly':
+            self.feature_list = ['month_of_year']
+        else:
+            raise Exception('Please specify the feature_list, because the '
+                            'data frequency is not hourly, daily, weekly, '
+                            'or monthly')
+
+        time_col = input_df[self.time_col_name]
         for feature in self.feature_list:
-            if feature in X.columns:
+            if feature in input_df.columns:
                 warnings.warn('Column {} is already in the data frame, '
                              'it will be overwritten.'.format(feature))
             feature_function = self._feature_function_map[feature]
-            X[feature] = feature_function(time_col)
+            output_df[feature] = feature_function(time_col)
 
-        return X
+        return output_df
 
 
-class DayTypeFeaturizer(BaseEstimator):
+class DayTypeFeaturizer():
 
     """
     Convert datetime_col to 7 day types
@@ -152,13 +155,8 @@ class DayTypeFeaturizer(BaseEstimator):
         self.holidday_code = holiday_code
         self.semi_holiday_code = semi_holiday_code
 
-    def fit(self, X, y=None):
-        return self
-
-    def transform(self, X):
-        X = X.copy()
-
-        datetime_col = X[self.time_col_name]
+    def day_type(self, input_df):
+        datetime_col = input_df[self.time_col_name]
 
         datetype = pd.DataFrame({'day_type': datetime_col.dt.dayofweek})
         datetype.replace({'day_type': self.weekday_type_map}, inplace=True)
@@ -190,33 +188,10 @@ class DayTypeFeaturizer(BaseEstimator):
                          'day_type'] \
                 = self.semi_holiday_code
 
-        X['day_type'] = datetype['day_type'].values
-
-        return X
+        return datetype['day_type'].values
 
 
-def fourier_approximation(t, n, period):
-    """
-    Generic helper function to create Fourier Series at different
-    harmonies (n) and periods.
-
-    Args:
-        t: Datetime column.
-        n: Harmonies, n=0, 1, 2, 3,...
-        period: Period of the datetime variable t.
-
-    Returns:
-        float: Sine component
-        float: Cosine component
-    """
-    x = n * 2 * np.pi * t / period
-    x_sin = np.sin(x)
-    x_cos = np.cos(x)
-
-    return x_sin, x_cos
-
-
-class AnnualFourierFeaturizer(BaseEstimator):
+class FourierFeaturizer:
     """
     Creates Annual Fourier Series at different harmonies (n).
 
@@ -229,25 +204,41 @@ class AnnualFourierFeaturizer(BaseEstimator):
             the Fourier series for all harmonies.
     """
 
-    def __init__(self, df_config, n_harmonics):
+    def __init__(self, df_config):
         self.time_col_name = df_config['time_col_name']
         self.value_col_name = df_config['value_col_name']
         self.grain_col_name = df_config['grain_col_name']
         self.frequency = df_config['frequency']
         self.time_format = df_config['time_format']
-        self.n_harmonics = n_harmonics
 
-    def fit(self, X, y=None):
-        return self
+    def fourier_approximation(self, n, period):
+        """
+        Generic helper function to create Fourier Series at different
+        harmonies (n) and periods.
 
-    def transform(self, X):
+        Args:
+            t: Datetime column.
+            n: Harmonies, n=0, 1, 2, 3,...
+            period: Period of the datetime variable t.
+
+        Returns:
+            float: Sine component
+            float: Cosine component
+        """
+        x = n * 2 * np.pi * t / period
+        x_sin = np.sin(x)
+        x_cos = np.cos(x)
+
+        return x_sin, x_cos
+
+    def annual_fourier(self, X, n_harmonics):
         X = X.copy()
         datetime_col = X[self.time_col_name]
         day_of_year = datetime_col.dt.dayofyear
 
         output_dict = {}
         for n in range(1, self.n_harmonics + 1):
-            sin, cos = fourier_approximation(day_of_year, n, 365.24)
+            sin, cos = self.fourier_approximation(day_of_year, n, 365.24)
 
             output_dict['annual_sin_' + str(n)] = sin
             output_dict['annual_cos_' + str(n)] = cos

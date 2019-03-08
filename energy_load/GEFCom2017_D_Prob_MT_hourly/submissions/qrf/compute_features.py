@@ -47,46 +47,41 @@ DATETIME_FORMAT = DF_CONFIG['time_format']
 # can be done for features that only requires the datetime column
 # FeatureArgs is a dictionary of additional arguments passed to the feature
 # function
-basic_feature_list = [('Temporal', {'feature_list':
-                                        ['hour_of_day', 'day_of_week',
-                                         'day_of_month', 'hour_of_year',
-                                         'week_of_year', 'month_of_year']}),
-                      ('AnnualFourier', {'n_harmonics': 3}),
-                      ('WeeklyFourier', {'n_harmonics': 3}),
-                      ('DailyFourier',  {'n_harmonics': 2})]
-
-
-advanced_feature_list = [('CurrentDate', {}),
-                         ('CurrentDateHour', {}),
-                         ('CurrentYear', {}),
-                         ('DayType', {'holiday_col_name': HOLIDAY_COLNAME}),
-                         ('PreviousYearLoadLag',
-                          {'input_col_name': 'DEMAND',
-                           'output_col_name': 'LoadLag'}),
-                         ('PreviousYearDewPntLag',
-                          {'input_col_name': 'DewPnt',
-                           'output_col_name': 'DewPntLag'}),
-                         ('PreviousYearDryBulbLag',
-                          {'input_col_name': 'DryBulb',
-                           'output_col_name': 'DryBulbLag'}),
-                         ('RecentLoadLag',
-                          {'input_col_name': 'DEMAND',
-                           'start_week': 10,
-                           'window_size': 4,
-                           'agg_count': 8,
-                           'output_col_prefix': 'RecentLoad_'}),
-                         ('RecentDryBulbLag',
-                          {'input_col_name': 'DryBulb',
-                           'start_week': 9,
-                           'window_size': 4,
-                           'agg_count': 8,
-                           'output_col_prefix': 'RecentDryBulb_'}),
-                         ('RecentDewPntLag',
-                          {'input_col_name': 'DewPnt',
-                           'start_week': 9,
-                           'window_size': 4,
-                           'agg_count': 8,
-                           'output_col_prefix': 'RecentDewPnt_'})]
+feature_config_list = \
+    [('Temporal', {'feature_list':
+                       ['hour_of_day', 'day_of_week', 'day_of_month',
+                        'hour_of_year', 'week_of_year', 'month_of_year']}),
+     ('AnnualFourier', {'n_harmonics': 3}),
+     ('WeeklyFourier', {'n_harmonics': 3}),
+     ('DailyFourier',  {'n_harmonics': 2}),
+     ('CurrentDate', {}),
+     ('CurrentDateHour', {}),
+     ('CurrentYear', {}),
+     ('DayType', {'holiday_col_name': HOLIDAY_COLNAME}),
+     ('PreviousYearLoadLag',
+      {'input_col_name': 'DEMAND', 'output_col_name': 'LoadLag'}),
+     ('PreviousYearDewPntLag',
+      {'input_col_name': 'DewPnt', 'output_col_name': 'DewPntLag'}),
+     ('PreviousYearDryBulbLag',
+      {'input_col_name': 'DryBulb', 'output_col_name': 'DryBulbLag'}),
+     ('RecentLoadLag',
+      {'input_col_name': 'DEMAND',
+       'start_week': 10,
+       'window_size': 4,
+       'agg_count': 8,
+       'output_col_prefix': 'RecentLoad_'}),
+     ('RecentDryBulbLag',
+      {'input_col_name': 'DryBulb',
+       'start_week': 9,
+       'window_size': 4,
+       'agg_count': 8,
+       'output_col_prefix': 'RecentDryBulb_'}),
+     ('RecentDewPntLag',
+      {'input_col_name': 'DewPnt',
+       'start_week': 9,
+       'window_size': 4,
+       'agg_count': 8,
+       'output_col_prefix': 'RecentDewPnt_'})]
 
 
 if __name__ == '__main__':
@@ -103,5 +98,5 @@ if __name__ == '__main__':
         os.mkdir(OUTPUT_DIR)
 
     compute_features(TRAIN_DATA_DIR, TEST_DATA_DIR, OUTPUT_DIR, DF_CONFIG,
-                     basic_feature_list, advanced_feature_list,
+                     feature_config_list,
                      filter_by_month=False)

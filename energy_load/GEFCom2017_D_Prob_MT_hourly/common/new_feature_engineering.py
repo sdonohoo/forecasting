@@ -7,11 +7,12 @@ calling the feature_utils functions with alternative parameters.
 import os
 import pandas as pd
 pd.set_option('display.max_columns', None)
+from functools import reduce
 from sklearn.pipeline import Pipeline
 
 from .benchmark_paths import DATA_DIR
-from common.features.lag import (SameWeekDayHourLagFeaturizer,
-                                 SameDayHourLagFeaturizer)
+from common.features.lag import (SameDayHourLagFeaturizer,
+                                 SameWeekDayHourLagFeaturizer)
 from common.features.temporal import (TemporalFeaturizer,
                                       DayTypeFeaturizer,
                                       AnnualFourierFeaturizer,
@@ -53,10 +54,14 @@ FEATURE_MAP = {'Temporal': TemporalFeaturizer,
                'RecentLoadLag': SameWeekDayHourRollingFeaturizer,
                'RecentDryBulbLag': SameWeekDayHourRollingFeaturizer,
                'RecentDewPntLag': SameWeekDayHourRollingFeaturizer,
-               'PreviousYearLoadLag':  SameWeekDayHourLagFeaturizer,
+               'PreviousYearLoadLag': SameWeekDayHourLagFeaturizer,
                'PreviousYearDewPntLag':  SameDayHourLagFeaturizer,
                'PreviousYearDryBulbLag': SameDayHourLagFeaturizer,
                'LoadRatio': YearOverYearRatioFeaturizer}
+
+FEATURES_REQUIRE_TRAINING_DATA = \
+    ['RecentLoadLag', 'RecentDryBulbLag', 'RecentDewPntLag',
+     'PreviousYearLoadLag', 'PreviousYearDewPntLag', 'PreviousYearDryBulbLag']
 
 
 def parse_feature_config(feature_config, feature_map):
@@ -104,78 +109,59 @@ def compute_testing_features(test_df, df_config, feature_engineering_pipeline,
     return test_features
 
 
+def create_train_scoring_df(train_df, test_df=None,
+                            scoring_flag_col_name='scoring_flag'):
+    train_df = train_df.copy()
+    train_df[scoring_flag_col_name] = 1
+
+    if test_df is not None:
+        train_df_scoring = train_df.copy()
+        test_df_scoring = test_df.copy()
+        train_df_scoring[scoring_flag_col_name] = 0
+        test_df_scoring[scoring_flag_col_name] = 1
+        scoring_df = pd.concat([train_df_scoring, test_df_scoring])
+
+        return train_df, scoring_df
+    else:
+        return train_df
+
+
 def compute_features_one_round(train_base_df, train_delta_df, test_df,
-                               df_config, basic_feature_config_list,
-                               advanced_feature_config_list, feature_map,
-                               train_base_basic_features,
+                               df_config, feature_config_list, feature_map,
                                filter_by_month):
 
-    time_col_name = df_config['time_col_name']
-    grain_col_name = df_config['grain_col_name']
-    if isinstance(grain_col_name, list):
-        merge_on_cols = [time_col_name] + grain_col_name
-    else:
-        merge_on_cols = [time_col_name, grain_col_name]
+    train_round_df = pd.concat([train_base_df, train_delta_df], sort=True)
 
-    train_delta_basic_features, basic_feature_pipeline = \
-        compute_training_features(train_delta_df, df_config,
-                                  basic_feature_config_list, feature_map)
+    # train_df, scoring_df = create_train_scoring_df(train_round_df, test_df)
 
-    test_basic_features = \
-        compute_testing_features(test_df, df_config, basic_feature_pipeline)
-
-    train_round_df = pd.concat([train_base_df, train_delta_df])
-
-    train_advanced_features, advanced_feature_pipeline = \
+    train_features, feature_pipeline = \
         compute_training_features(train_round_df, df_config,
-                                  advanced_feature_config_list, feature_map)
+                                  feature_config_list, feature_map)
 
-    test_advanced_features = \
-        compute_testing_features(test_df, df_config,
-                                 advanced_feature_pipeline, train_round_df)
+    training_df_arguments = {}
+    for feature_config in feature_config_list:
+        feature_step_name = feature_config[0]
+        if feature_step_name in FEATURES_REQUIRE_TRAINING_DATA:
+            training_df_arguments[feature_step_name + '__training_df'] = \
+                train_round_df
+    if len(training_df_arguments) > 0:
+        feature_pipeline.set_params(**training_df_arguments)
 
-    train_basic_features = pd.concat([train_base_basic_features,
-                                      train_delta_basic_features])
+    test_features = \
+        compute_testing_features(test_df, df_config, feature_pipeline)
 
-    # Drop some overlapping columns before merge basic and advanced
-    # features.
-    train_basic_columns = set(train_basic_features.columns)
-    train_advanced_columns = set(train_advanced_features.columns)
-    train_overlap_columns = list(train_basic_columns.
-                                 intersection(train_advanced_columns))
-    train_overlap_columns.remove('Zone')
-    train_overlap_columns.remove('Datetime')
-    train_advanced_features.drop(train_overlap_columns,
-                                 inplace=True, axis=1)
+    train_features.dropna(inplace=True)
 
-    test_basic_columns = set(test_basic_features.columns)
-    test_advanced_columns = set(test_advanced_features.columns)
-    test_overlap_columns = list(test_basic_columns.
-                                intersection(test_advanced_columns))
-    test_overlap_columns.remove('Zone')
-    test_overlap_columns.remove('Datetime')
-    test_advanced_features.drop(test_overlap_columns, inplace=True, axis=1)
-
-    train_all_features = pd.merge(train_basic_features,
-                                  train_advanced_features,
-                                  on=['Zone', 'Datetime'])
-    test_all_features = pd.merge(test_basic_features,
-                                 test_advanced_features,
-                                 on=['Zone', 'Datetime'])
-
-    train_all_features.dropna(inplace=True)
-    test_all_features.drop(['DewPnt', 'DryBulb', 'DEMAND'],
-                           inplace=True, axis=1)
     if filter_by_month:
-        test_month = test_basic_features['month_of_year'].values[0]
-        train_all_features = train_all_features.loc[
-            train_all_features['month_of_year'] == test_month, ].copy()
+        test_month = test_features['month_of_year'].values[0]
+        train_features = train_features.loc[
+            train_features['month_of_year'] == test_month, ].copy()
 
-    return train_all_features, test_all_features
+    return train_features, test_features
 
 
 def compute_features(train_dir, test_dir, output_dir, df_config,
-                     basic_feature_list, advanced_feature_list,
+                     feature_config_list,
                      filter_by_month=True):
     """
     This helper function uses the create_basic_features and create_advanced
@@ -200,11 +186,6 @@ def compute_features(train_dir, test_dir, output_dir, df_config,
     train_base_df = pd.read_csv(os.path.join(train_dir, TRAIN_BASE_FILE),
                                 parse_dates=[time_col_name])
 
-    # These features only need to be created once for all rounds
-    train_base_basic_features, _ = \
-        compute_training_features(train_base_df, df_config,
-                                  basic_feature_list, FEATURE_MAP)
-
     for i in range(1, NUM_ROUND + 1):
         train_file = os.path.join(train_dir,
                                   TRAIN_FILE_PREFIX + str(i) + '.csv')
@@ -216,10 +197,8 @@ def compute_features(train_dir, test_dir, output_dir, df_config,
         train_all_features, test_all_features = \
             compute_features_one_round(train_base_df, train_delta_df,
                                        test_round_df, df_config,
-                                       basic_feature_list,
-                                       advanced_feature_list,
+                                       feature_config_list,
                                        FEATURE_MAP,
-                                       train_base_basic_features,
                                        filter_by_month)
 
         train_output_file = os.path.join(output_dir, 'train',

@@ -10,15 +10,19 @@ import numpy as np
 ###     Generating performance charts
 #################################################
 
-#Function to plot a perfromance chart
+#Function to plot a performance chart
 def plot_perf(x,y,df):
-    fig = plt.scatter(x=df[x],y=df[y], label=df['Submission Name'], s=150, alpha = 0.5,
+
+    # extract submission name from submission URL
+    labels = df.apply(lambda x: x['Submission Name'][1:].split(']')[0], axis=1)
+
+    fig = plt.scatter(x=df[x],y=df[y], label=labels, s=150, alpha = 0.5,
              c= ['b', 'g', 'r', 'c', 'm', 'y', 'k'])
     plt.xlabel(x)
     plt.ylabel(y)
     plt.title(y + ' by ' + x)
     offset = (max(df[y]) - min(df[y]))/50
-    for i,name in enumerate(df['Submission Name']):
+    for i,name in enumerate(labels):
         ax = df[x][i]
         ay = df[y][i] + offset * (-2.5 + i % 5)
         plt.text(ax, ay, name, fontsize=10)

@@ -1,9 +1,7 @@
 # TSPerf
 
-TSPerf is a collection of implementations of time-series forecasting algorithms in Azure cloud and comparison of their performance over benchmark datasets. 
-Algorithm implementations are compared by model accuracy, training and scoring time and cost. Each implementation includes all the necessary 
-instructions and tools that ensure its reproducibility.   
-
+TSPerf is a framework that allows discovery and comparison of various time-series forecasting algorithms and architectures on a cloud-based environment. This framework allows data scientists to discover the best approach that fits their use case from cost, time and quality perspective.
+ TSPerf framework is designed to facilitate data science community participation and contribution through the development of benchmark implementations against a given set of forecasting problems and datasets. Benchmark implementations are measured in terms of standard metrics of model accuracy, training cost and model training time. Each implementation includes all the necessary instructions and tools that ensure its reproducibility on Azure customer's subscription. We plan to leverage TSPerf to propose a new time-series forecasting track in [MLPerf](https://mlperf.org/).
 The following table summarizes benchmarks that are currently included in TSPerf.
 
 Benchmark                                   |  Dataset               |  Benchmark directory
@@ -12,12 +10,14 @@ Probabilistic electricity load forecasting  |  GEFCom2017            |  `energy_
 Retail sales forecasting                    |  Orange Juice dataset  |  `retail_sales/OrangeJuice_Pt_3Weeks_Weekly`
 
 
-A complete documentation of TSPerf, along with the instructions for submitting and reviewing implementations, can be found [here](./docs/tsperf_rules.md). The tables below show performance of implementations that are developed so far. Source code of implementations and instructions for reproducing their performance can be found in submission folders, which are linked in the first column.
+
+
+A complete documentation of TSPerf, along with the instructions for submitting and reviewing benchmark implementations, can be found [here](./docs/tsperf_rules.md). The tables below show performance of benchmark implementations that are developed so far. These tables are referred to as *performance boards*. Source code of benchmark implementations and instructions for reproducing their performance can be found in submission folders, which are linked in the last column of performance boards.
 
 ## Probabilistic energy forecasting performance board
 
 
-The following table lists the current submision for the energy forecasting and their respective performances:
+The following table lists the current submision for the energy foercasting and their respective performances.
 
 
 Submission Name                                                                 |  Pinball Loss  |  Training and Scoring Time (sec)  |  Training and Scoring Cost($)  |  Architecture                                 |  Framework                         |  Algorithm                            |  Uni/Multivariate  |  External Feature Support
@@ -39,7 +39,7 @@ The following chart compares the submissions performance on accuracy in Pinball 
 ## Retail sales forecasting performance board
 
 
-The following table lists the current submision for the retail forecasting and their respective performances:
+The following table lists the current submision for the retail foercasting and their respective performances.
 
 
 Submission Name                                                                             |  MAPE (%)  |  Training and Scoring Time (sec)  |  Training and Scoring Cost ($)  |  Architecture                                |  Framework                   |  Algorithm                                                          |  Uni/Multivariate  |  External Feature Support

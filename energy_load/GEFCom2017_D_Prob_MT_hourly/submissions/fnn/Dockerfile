@@ -1,7 +1,5 @@
 ## Download base image
 FROM continuumio/anaconda3:4.4.0
-# ADD Forecasting/energy_load/GEFCom2017_D_Prob_MT_hourly/submissions/fnn/conda_dependencies.yml /tmp/conda_dependencies.yml
-# ADD Forecasting/energy_load/GEFCom2017_D_Prob_MT_hourly/submissions/fnn/install_R_dependencies.R /tmp/install_R_dependencies.R
 ADD ./conda_dependencies.yml /tmp/conda_dependencies.yml
 ADD ./install_R_dependencies.R /tmp/install_R_dependencies.R
 WORKDIR /tmp

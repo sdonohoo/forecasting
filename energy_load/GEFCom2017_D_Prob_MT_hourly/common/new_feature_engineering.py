@@ -201,7 +201,7 @@ def compute_features(train_dir, test_dir, output_dir, df_config,
                                        feature_config_list,
                                        FEATURE_MAP,
                                        filter_by_month)
-
+        ## TODO: Move this to compute_features_one_round?
         train_all_features.dropna(inplace=True)
         test_all_features.drop(['DewPnt', 'DryBulb', 'DEMAND'],
                                inplace=True, axis=1)

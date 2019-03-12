@@ -14,24 +14,41 @@ class LagFeaturizer():
 
 class SameWeekDayHourLagFeaturizer(BaseEstimator):
     """
-    Creates a lag feature by calculating quantiles, mean and std of values of and
-    around the same week, same day of week, and same hour of day, of previous years.
+    Creates a lag feature based on data from the same week of previous years.
+
+    This feature is useful for data with daily, weekly, and yearly
+    seasonality and has hourly frequency. It is computed by calculating
+    quantiles, mean, or std of values of and around the same week, same day
+    of week, and same hour of day, of previous years.
 
     Args:
-        datetime_col: Datetime column.
-        value_col: Feature value column to create lag feature from.
-        n_years: Number of previous years data to use. Default value 3.
-        week_window: Number of weeks before and after the same week to use,
-            which should help reduce noise in the data. Default value 1.
-        agg_func: Aggregation function to apply on multiple previous values,
-            accepted values are 'mean', 'quantile', 'std'. Default value 'mean'.
-        q: If agg_func is 'quantile', taking value between 0 and 1.
-        output_colname: name of the output lag feature column.
-            Default value 'SameWeekHourLag'.
-
-    Returns:
-         pandas.DataFrame: data frame containing the newly created lag
-            feature as a column.
+        df_config(dict): Configuration of the time series data frame to compute
+            features on.
+        input_col_name(str): Name of the column to create the lag feature on.
+        training_df(pd.DataFrame): training data needed to compute lag
+            features on testing data.
+            Note: this property must be None when transforming the
+            training data, and training_df can only be passed after
+            transforming the training data.  It's not recommended to save a
+            pipeline with training_df not set to None, because it results in a
+            large pipeline object, especially when you have multiple
+            featurizers requiring the training data at scoring time.
+            To set this value on in a pipeline, use the following code
+            pipeline.set_params('featurizer_step_name__train_df) = None
+            pipeline.set_params('featurizer_step_name__train_df) = train_df
+            featurizer_step_name is the name of the featurizer step when
+            creating the pipeline.
+        n_years(int): Number of previous years data to use. Default value is 3.
+        week_window(int): Number of weeks before and after the same week of
+            year to use, which should help reduce noise in the data. Default
+            value is 1.
+        agg_func(str): Aggregation function to apply on multiple previous
+            values, accepted values are 'mean', 'quantile', 'std'. Default
+            value is 'mean'.
+        q(float): Quantile to compute from previous values, if agg_func is
+            'quantile', taking value between 0 and 1.
+        output_col_name(str): Name of the output lag feature column.
+            Default value is 'SameWeekDayHourLag'.
     """
 
     def __init__(self, df_config, input_col_name, training_df=None, n_years=3,
@@ -75,8 +92,8 @@ class SameWeekDayHourLagFeaturizer(BaseEstimator):
         week_lag_last_year = list(range(week_lag_base - self.week_window,
                                         week_lag_base + self.week_window + 1))
         week_lag_all = []
-        for y in range(self.n_years):
-            week_lag_all += [x + y * 52 for x in week_lag_last_year]
+        for i in range(self.n_years):
+            week_lag_all += [j + i * 52 for j in week_lag_last_year]
 
         week_lag_cols = []
         for w in week_lag_all:
@@ -92,17 +109,19 @@ class SameWeekDayHourLagFeaturizer(BaseEstimator):
                 df.loc[valid_lag_mask, col_name] = \
                     df.loc[lag_datetime[valid_lag_mask], 'value'].values
 
-        if self.agg_func == 'mean' and self.q is None:
+        if self.agg_func == 'mean':
             df[self.output_col_name] = round(df[week_lag_cols].mean(axis=1))
         elif self.agg_func == 'quantile' and self.q is not None:
             df[self.output_col_name] = \
                 round(df[week_lag_cols].quantile(self.q, axis=1))
-        elif self.agg_func == 'std' and self.q is None:
+        elif self.agg_func == 'std':
             df[self.output_col_name] = round(df[week_lag_cols].std(axis=1))
 
         return df[[self.output_col_name]]
 
     def fit(self, X, y=None):
+        """To be compatible with scikit-learn interface. Nothing needs to be
+        done at the fit stage for this transformer"""
         return self
 
     def transform(self, X):
@@ -142,24 +161,42 @@ class SameWeekDayHourLagFeaturizer(BaseEstimator):
 class SameDayHourLagFeaturizer(BaseEstimator):
 
     """
-    Creates a lag feature by calculating quantiles, mean, and std of values of
-    and around the same day of year, and same hour of day, of previous years.
+    Creates a lag feature based on data from the same day of previous years.
+
+    This feature is useful for data with daily and yearly seasonality and
+    has hourly frequency. It is computed by calculating quantiles, mean,
+    or std of values of and around the same day of year and same hour of
+    day of previous years.
 
     Args:
-        datetime_col: Datetime column.
-        value_col: Feature value column to create lag feature from.
-        n_years: Number of previous years data to use. Default value 3.
-        day_window: Number of days before and after the same day to use,
-            which should help reduce noise in the data. Default value 1.
-        agg_func: Aggregation function to apply on multiple previous values,
-            accepted values are 'mean', 'quantile', 'std'. Default value 'mean'.
-        q: If agg_func is 'quantile', taking value between 0 and 1.
-        output_colname: name of the output lag feature column.
-            Default value 'SameDayHourLag'.
+        df_config(dict): Configuration of the time series data frame to compute
+            features on.
+        input_col_name(str): Name of the column to create the lag feature on.
+        training_df(pd.DataFrame): training data needed to compute lag
+            features on testing data.
+            Note: this property must be None when transforming the
+            training data, and training_df can only be passed after
+            transforming the training data.  It's not recommended to save a
+            pipeline with training_df not set to None, because it results in a
+            large pipeline object, especially when you have multiple
+            featurizers requiring the training data at scoring time.
+            To set this value on in a pipeline, use the following code
+            pipeline.set_params('featurizer_step_name__train_df) = None
+            pipeline.set_params('featurizer_step_name__train_df) = train_df
+            featurizer_step_name is the name of the featurizer step when
+            creating the pipeline.
+        n_years(int): Number of previous years data to use. Default value is 3.
+        day_window(int): Number of days before and after the same day  of
+            year to use, which should help reduce noise in the data. Default
+            value is 1.
+        agg_func(int): Aggregation function to apply on multiple previous
+            values, accepted values are 'mean', 'quantile', 'std'. Default
+            value 'mean'.
+        q(float): Quantile to compute from previous values, if agg_func is
+            'quantile', taking value between 0 and 1.
+        output_col_name(str): Name of the output lag feature column.
+            Default value is 'SameDayHourLag'.
 
-    Returns:
-        pandas.DataFrame: data frame containing the newly created lag
-            feature as a column.
     """
 
     def __init__(self, df_config, input_col_name, training_df=None,
@@ -233,6 +270,8 @@ class SameDayHourLagFeaturizer(BaseEstimator):
         return df[[self.output_col_name]]
 
     def fit(self, X, y=None):
+        """To be compatible with scikit-learn interface. Nothing needs to be
+        done at the fit stage for this transformer"""
         return self
 
     def transform(self, X):

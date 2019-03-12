@@ -8,6 +8,32 @@ from sklearn.base import BaseEstimator
 
 
 class TemporalFeaturizer(BaseEstimator):
+    """
+    Computes commonly used time-related features.
+
+    Args:
+        df_config(dict): Configuration of the time series data frame to compute
+            features on.
+
+        feature_list(list of str, optional): list of temporal features to
+            return. The following features are available:
+                hour_of_day
+                week_of_year
+                month_of_year
+                day_of_week
+                day_of_month
+                day_of_year
+                hour_of_year
+                week_of_year
+
+            If feature_list is not specified, a default set of features are
+            returned depending on df_config['frequency']
+            For 'hourly' data: hour_of_day, day_of_week, week_of_year,
+            'month_of_year
+            For 'daily' data: day_of_week, week_of_year, month_of_year
+            For 'weekly' data: week_of_year, month_of_year
+            For 'monthly' data: month_of_year
+    """
 
     def __init__(self, df_config, feature_list=None):
         self.time_col_name = df_config['time_col_name']
@@ -67,38 +93,43 @@ class TemporalFeaturizer(BaseEstimator):
         return time_col.dt.dayofyear
 
     def week_of_month(self, time_col):
+        """Returns the week of month from a datetime column"""
+        #Placeholder for week of month feature
         pass
 
     def hour_of_year(self, time_col):
         """
-        Time of year is a cyclic variable that indicates the annual position and
-        repeats each year. It is each year linearly increasing over time going
-        from 0 on January 1 at 00:00 to 1 on December 31st at 23:00. The values
+        Hour of year is a cyclic variable that indicates the annual
+        position of a particular hour on a particular day and repeats each
+        year. It is each year linearly increasing over time going from 0 on
+        January 1 at 00:00 to 1 on December 31st at 23:00. The values
         are normalized to be between [0; 1].
 
         Args:
             datetime_col: Datetime column.
 
         Returns:
-            A numpy array containing converted datatime_col into time of year.
+            A numpy array containing converted the time column to hour of year.
         """
 
-        time_of_year = pd.DataFrame({'DayOfYear': time_col.dt.dayofyear,
-                                     'HourOfDay': time_col.dt.hour,
-                                     'Year': time_col.dt.year})
-        time_of_year['TimeOfYear'] = \
-            (time_of_year['DayOfYear'] - 1) * 24 + time_of_year['HourOfDay']
+        time_of_year = pd.DataFrame({'day_of_year': time_col.dt.dayofyear,
+                                     'hour_of_day': time_col.dt.hour,
+                                     'year': time_col.dt.year})
+        time_of_year['hour_of_year'] = \
+            (time_of_year['day_of_year'] - 1) * 24 + time_of_year['hour_of_day']
 
-        time_of_year['YearLength'] = \
-            time_of_year['Year'].apply(
+        time_of_year['year_length'] = \
+            time_of_year['year'].apply(
                 lambda y: 366 if calendar.isleap(y) else 365)
 
-        time_of_year['TimeOfYear'] = \
-            time_of_year['TimeOfYear'] / (time_of_year['YearLength'] * 24 - 1)
+        time_of_year['hour_of_year'] = \
+            time_of_year['hour_of_year'] / (time_of_year['year_length'] * 24 - 1)
 
-        return time_of_year['TimeOfYear'].values
+        return time_of_year['hour_of_year'].values
 
     def fit(self, X, y=None):
+        """To be compatible with scikit-learn interface. Nothing needs to be
+        done at the fit stage for this transformer"""
         return self
 
     def transform(self, X):
@@ -117,23 +148,36 @@ class TemporalFeaturizer(BaseEstimator):
 class DayTypeFeaturizer(BaseEstimator):
 
     """
-    Convert datetime_col to 7 day types
-    0: Monday
-    2: Tuesday, Wednesday, and Thursday
-    4: Friday
-    5: Saturday
-    6: Sunday
-    7: Holiday
-    8: Days before and after a holiday
+    Convert the time column of the input data frame to 7 day types.
+    The following mapping is used to convert day of week or holiday to
+    integers.
+        Monday: 0
+        Tuesday, Wednesday, and Thursday: 2
+        Friday:4
+        Saturday: 5
+        Sunday: 6
+        Holiday: 7
+        Days before and after a holiday: 8
 
     Args:
-        datetime_col: Datetime column.
-        holiday_col: Holiday code column. Default value None.
-        semi_holiday_offset: Time difference between the date before (or after)
-            the holiday and the holiday. Default value timedelta(days=1).
+        df_config(dict): Configuration of the time series data frame to compute
+            features on.
+        holiday_col_name(str, optional): Name of the holiday column. The
+            holiday column should contain integers greater than 0 representing
+            holidays. The mapping between the holiday and the integer does
+            not matter for this featurizer.
+        semi_holiday_offset(datetime.timedelta, optional): The time range
+            before and after each holiday to be considered as semi-holiday.
+            Default value timedelta(days=1).
+        weekday_type_map(dict, optional): Mapping multiple weekdays to the same
+            number. By default, Tuesday (1) and Thursday (3) are mapped to 2,
+            so that Tuesday, Wednesday, and Thursday are treated the same.
 
-    Returns:
-        A numpy array containing converted datatime_col into day types.
+        holiday_code(int, optional): Integer used to represent holidays.
+            Default value is 7.
+        semi_holiday_code(int, optional): Integer used to represent days
+            before and after  holiday. Default value is 8
+
     """
     def __init__(self, df_config, holiday_col_name=None,
                  semi_holiday_offset=timedelta(days=1),
@@ -149,10 +193,12 @@ class DayTypeFeaturizer(BaseEstimator):
 
         self.holiday_col_name = holiday_col_name
         self.semi_holiday_offset = semi_holiday_offset
-        self.holidday_code = holiday_code
+        self.holiday_code = holiday_code
         self.semi_holiday_code = semi_holiday_code
 
     def fit(self, X, y=None):
+        """To be compatible with scikit-learn interface. Nothing needs to be
+        done at the fit stage for this transformer"""
         return self
 
     def transform(self, X):
@@ -168,7 +214,8 @@ class DayTypeFeaturizer(BaseEstimator):
             holiday_mask = holiday_col > 0
             datetype.loc[holiday_mask, 'day_type'] = self.holidday_code
 
-            # Create a temporary Date column to calculate dates near the holidays
+            # Create a temporary Date column to calculate dates near
+            # the holidays
             datetype['Date'] = pd.to_datetime(datetime_col.dt.date,
                                               format=self.time_format)
             holiday_dates = set(datetype.loc[holiday_mask, 'Date'])
@@ -201,9 +248,13 @@ def fourier_approximation(t, n, period):
     harmonies (n) and periods.
 
     Args:
-        t: Datetime column.
-        n: Harmonies, n=0, 1, 2, 3,...
-        period: Period of the datetime variable t.
+        t(int): Time position, e.g. for daily Fourier series, this is the
+            hour of day. For weekly Fourier, this is the day of week. \For
+            annual Fourier, this is the day of year.
+        n(int): Harmony to compute, n = 1, 2, 3,...
+        period(int): Period of the time series data. For hourly data with
+            daily seasonality, this is 24. For weekly seasonality, this is 7.
+            For yearly seasonality, this is the number of days in a year.
 
     Returns:
         float: Sine component
@@ -221,12 +272,9 @@ class AnnualFourierFeaturizer(BaseEstimator):
     Creates Annual Fourier Series at different harmonies (n).
 
     Args:
-        datetime_col: Datetime column.
-        n_harmonics: Harmonies, n=0, 1, 2, 3,...
-
-    Returns:
-        dict: Output dictionary containing sine and cosine components of
-            the Fourier series for all harmonies.
+        df_config(dict): Configuration of the time series data frame to compute
+            features on.
+        n_harmonics: Number of harmonies to compute, n=1, 2, 3,...
     """
 
     def __init__(self, df_config, n_harmonics):
@@ -238,6 +286,8 @@ class AnnualFourierFeaturizer(BaseEstimator):
         self.n_harmonics = n_harmonics
 
     def fit(self, X, y=None):
+        """To be compatible with scikit-learn interface. Nothing needs to be
+        done at the fit stage for this transformer"""
         return self
 
     def transform(self, X):
@@ -263,12 +313,10 @@ class WeeklyFourierFeaturizer(BaseEstimator):
     Creates Weekly Fourier Series at different harmonies (n).
 
     Args:
-        datetime_col: Datetime column.
-        n_harmonics: Harmonies, n=0, 1, 2, 3,...
+        df_config(dict): Configuration of the time series data frame to compute
+            features on.
+        n_harmonics: Number of harmonies to compute, n=1, 2, 3,...
 
-    Returns:
-        dict: Output dictionary containing sine and cosine components of
-            the Fourier series for all harmonies.
     """
     def __init__(self, df_config, n_harmonics):
         self.time_col_name = df_config['time_col_name']
@@ -279,6 +327,8 @@ class WeeklyFourierFeaturizer(BaseEstimator):
         self.n_harmonics = n_harmonics
 
     def fit(self, X, y=None):
+        """To be compatible with scikit-learn interface. Nothing needs to be
+        done at the fit stage for this transformer"""
         return self
 
     def transform(self, X):
@@ -304,12 +354,10 @@ class DailyFourierFeaturizer(BaseEstimator):
     Creates Daily Fourier Series at different harmonies (n).
 
     Args:
-        datetime_col: Datetime column.
-        n_harmonics: Harmonies, n=0, 1, 2, 3,...
+        df_config(dict): Configuration of the time series data frame to compute
+            features on.
+        n_harmonics: Number of harmonies to compute, n=1, 2, 3,...
 
-    Returns:
-        dict: Output dictionary containing sine and cosine components of
-            the Fourier series for all harmonies.
     """
     def __init__(self, df_config, n_harmonics):
         self.time_col_name = df_config['time_col_name']
@@ -320,6 +368,8 @@ class DailyFourierFeaturizer(BaseEstimator):
         self.n_harmonics = n_harmonics
 
     def fit(self, X, y=None):
+        """To be compatible with scikit-learn interface. Nothing needs to be
+        done at the fit stage for this transformer"""
         return self
 
     def transform(self, X):

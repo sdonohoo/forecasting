@@ -115,7 +115,7 @@ class SameWeekDayHourRollingFeaturizer(BaseEstimator):
     def transform(self, X):
         if self.training_df is not None:
             forecast_creation_time = max(self.training_df[self.time_col_name])
-            X = pd.concat([self.training_df, X])
+            X = pd.concat([self.training_df, X], sort=True)
         else:
             forecast_creation_time = max(X[self.time_col_name])
             X = X.copy()

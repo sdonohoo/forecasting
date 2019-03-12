@@ -21,7 +21,7 @@ test_file_prefix = 'test_round_'
 output_file = file.path(paste('energy_load/GEFCom2017_D_Prob_MT_hourly/submissions/fnn/submission_seed_', seed_value, '.csv', sep=""))
 
 # Data and forecast parameters
-normalize_columns = list('LoadLag', 'DryBulbLag')
+normalize_columns = list('load_lag', 'dry_bulb_lag')
 quantiles = seq(0.1, 0.9, by = 0.1)
 
 # Train and predict
@@ -43,30 +43,30 @@ for (iR in 1:6){
   }
   
   zones = unique(train_df[, Zone])
-  hours = unique(train_df[, Hour])
-  
-  test_df$AverageLoadRatio = rowMeans(test_df[,c('LoadRatio_10', 'LoadRatio_11', 'LoadRatio_12', 
-                                                 'LoadRatio_13', 'LoadRatio_14', 'LoadRatio_15', 'LoadRatio_16')], na.rm=TRUE)
-  
-  
-  test_df[, LoadRatio:=mean(AverageLoadRatio), by=list(Hour, MonthOfYear)]
-    
+  hours = unique(train_df[, hour_of_day])
+
+  test_df$average_load_ratio = rowMeans(test_df[,c('recent_load_ratio_10', 'recent_load_ratio_11', 'recent_load_ratio_12',
+                                                 'recent_load_ratio_13', 'recent_load_ratio_14', 'recent_load_ratio_15', 'recent_load_ratio_16')], na.rm=TRUE)
+
+
+  test_df[, load_ratio:=mean(average_load_ratio), by=list(hour_of_day, month_of_year)]
+
   for (z in zones){
     print(paste('Zone', z))
     
     for (h in hours){
-      train_df_sub = train_df[Zone == z & Hour == h]
-      test_df_sub = test_df[Zone == z & Hour == h]
+      train_df_sub = train_df[Zone == z & hour_of_day == h]
+      test_df_sub = test_df[Zone == z & hour_of_day == h]
       
       result = data.table(Zone=test_df_sub$Zone, Datetime = test_df_sub$Datetime, Round=iR)
       
-      train_x <- as.matrix(train_df_sub[, c('LoadLag', 'DryBulbLag',
+      train_x <- as.matrix(train_df_sub[, c('load_lag', 'dry_bulb_lag',
                            'annual_sin_1', 'annual_cos_1', 'annual_sin_2', 'annual_cos_2', 'annual_sin_3', 'annual_cos_3', 
                            'weekly_sin_1', 'weekly_cos_1', 'weekly_sin_2', 'weekly_cos_2', 'weekly_sin_3', 'weekly_cos_3'), 
                            drop=FALSE])
       train_y <- as.matrix(train_df_sub[, c('DEMAND'), drop=FALSE])
 
-      test_x <- as.matrix(test_df_sub[, c('LoadLag', 'DryBulbLag',
+      test_x <- as.matrix(test_df_sub[, c('load_lag', 'dry_bulb_lag',
                            'annual_sin_1', 'annual_cos_1', 'annual_sin_2', 'annual_cos_2', 'annual_sin_3', 'annual_cos_3', 
                            'weekly_sin_1', 'weekly_cos_1', 'weekly_sin_2', 'weekly_cos_2', 'weekly_sin_3', 'weekly_cos_3'), 
                            drop=FALSE])
@@ -79,7 +79,7 @@ for (iR in 1:6){
                           iter.max=1,
                           penalty=0)
        
-        result$Prediction = qrnn2.predict(model, x=test_x) * test_df_sub$LoadRatio
+        result$Prediction = qrnn2.predict(model, x=test_x) * test_df_sub$load_ratio
         result$q = tau
         
         result_all[[counter]] = result

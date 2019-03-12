@@ -56,8 +56,7 @@ FEATURE_MAP = {'temporal': TemporalFeaturizer,
                'recent_dew_pnt_lag': SameWeekDayHourRollingFeaturizer,
                'previous_year_load_lag': SameWeekDayHourLagFeaturizer,
                'previous_year_dew_pnt_lag':  SameDayHourLagFeaturizer,
-               'previous_year_dry_bulb_lag': SameDayHourLagFeaturizer,
-               'load_ratio': YearOverYearRatioFeaturizer}
+               'previous_year_dry_bulb_lag': SameDayHourLagFeaturizer}
 
 FEATURES_REQUIRE_TRAINING_DATA = \
     ['recent_load_lag', 'recent_dry_bulb_lag', 'recent_dew_pnt_lag',
@@ -129,11 +128,9 @@ def create_train_scoring_df(train_df, test_df=None,
 
 def compute_features_one_round(train_base_df, train_delta_df, test_df,
                                df_config, feature_config_list, feature_map,
-                               filter_by_month):
+                               filter_by_month, compute_load_ratio=False):
 
     train_round_df = pd.concat([train_base_df, train_delta_df], sort=True)
-
-    # train_df, scoring_df = create_train_scoring_df(train_round_df, test_df)
 
     train_features, feature_pipeline = \
         compute_training_features(train_round_df, df_config,
@@ -151,12 +148,55 @@ def compute_features_one_round(train_base_df, train_delta_df, test_df,
     test_features = \
         compute_testing_features(test_df, df_config, feature_pipeline)
 
-    train_features.dropna(inplace=True)
+    if compute_load_ratio:
+        same_week_day_hour_rolling_featurizer = \
+            SameWeekDayHourRollingFeaturizer(
+                df_config, input_col_name=df_config['value_col_name'],
+                window_size=4, start_week=10, agg_count=7,
+                output_col_prefix='recent_load_')
+        train_df_with_recent_load = \
+            same_week_day_hour_rolling_featurizer.transform(train_round_df)
+        same_week_day_hour_rolling_featurizer.training_df = train_round_df
+        test_df_with_recent_load = \
+            same_week_day_hour_rolling_featurizer.transform(test_df)
+
+        time_col_name = df_config['time_col_name']
+        grain_col_name = df_config['grain_col_name']
+        keep_col_names = [time_col_name]
+        if grain_col_name is not None:
+            if isinstance(grain_col_name, list):
+                keep_col_names = keep_col_names + grain_col_name
+            else:
+                keep_col_names.append(grain_col_name)
+        lag_df_list = []
+        for i in range(10, 17):
+            col_old = 'recent_load_' + str(i)
+            col_new = 'recent_load_lag_' + str(i)
+            col_ratio = 'recent_load_ratio_' + str(i)
+
+            same_week_day_hour_lag_featurizer = \
+                SameWeekDayHourLagFeaturizer(
+                    df_config, input_col_name=col_old,
+                    training_df=train_df_with_recent_load, n_years=5,
+                    week_window=0, output_col_name=col_new)
+
+            lag_df = same_week_day_hour_lag_featurizer\
+                .transform(test_df_with_recent_load)
+            lag_df[col_ratio] = lag_df[col_old] / lag_df[col_new]
+            lag_df_list.append(lag_df[keep_col_names + [col_ratio]].copy())
+
+        test_features = reduce(
+            lambda left, right: pd.merge(left, right, on=keep_col_names),
+            [test_features] + lag_df_list)
 
     if filter_by_month:
         test_month = test_features['month_of_year'].values[0]
         train_features = train_features.loc[
             train_features['month_of_year'] == test_month, ].copy()
+
+    train_features.dropna(inplace=True)
+    test_features.drop(['DewPnt', 'DryBulb', 'DEMAND'],
+                       inplace=True, axis=1)
 
     return train_features, test_features
 
@@ -187,6 +227,14 @@ def compute_features(train_dir, test_dir, output_dir, df_config,
     train_base_df = pd.read_csv(os.path.join(train_dir, TRAIN_BASE_FILE),
                                 parse_dates=[time_col_name])
 
+    compute_load_ratio = False
+
+    for feature_config in feature_config_list:
+        if feature_config[0] == 'load_ratio':
+            compute_load_ratio = True
+            feature_config_list.remove(feature_config)
+            break
+
     for i in range(1, NUM_ROUND + 1):
         train_file = os.path.join(train_dir,
                                   TRAIN_FILE_PREFIX + str(i) + '.csv')
@@ -200,11 +248,8 @@ def compute_features(train_dir, test_dir, output_dir, df_config,
                                        test_round_df, df_config,
                                        feature_config_list,
                                        FEATURE_MAP,
-                                       filter_by_month)
-        ## TODO: Move this to compute_features_one_round?
-        train_all_features.dropna(inplace=True)
-        test_all_features.drop(['DewPnt', 'DryBulb', 'DEMAND'],
-                               inplace=True, axis=1)
+                                       filter_by_month,
+                                       compute_load_ratio)
 
         train_output_file = os.path.join(output_dir, 'train',
                                          TRAIN_FILE_PREFIX + str(i) + '.csv')

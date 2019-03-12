@@ -18,8 +18,7 @@ from common.features.temporal import (TemporalFeaturizer,
                                       AnnualFourierFeaturizer,
                                       DailyFourierFeaturizer,
                                       WeeklyFourierFeaturizer)
-from common.features.rolling_window import (SameWeekDayHourRollingFeaturizer,
-                                            YearOverYearRatioFeaturizer)
+from common.features.rolling_window import SameWeekDayHourRollingFeaturizer
 from common.features.normalization import (YearNormalizer,
                                            DateNormalizer,
                                            DateHourNormalizer)

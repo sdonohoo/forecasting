@@ -63,6 +63,6 @@ The following chart compares the submissions performance on accuracy in %MAPE vs
  
 ![EnergyPBLvsTime](./docs/images/Retail-Cost.png)
 
-
+[![Build Status](https://dev.azure.com/best-practices/forecasting/_apis/build/status/Forecasting/unit_tests_prototype?branchName=chenhui/python_test_pipeline)](https://dev.azure.com/best-practices/forecasting/_build/latest?definitionId=4&branchName=chenhui/python_test_pipeline)
 
 

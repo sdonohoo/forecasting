@@ -58,10 +58,10 @@ for (iR in 1:6){
     train_df_sub = train_df[Zone == z & hour_of_day == h]
     test_df_sub = test_df[Zone == z & hour_of_day == h]
     
-    result = data.table(Zone=test_df_sub$Zone, Datetime = test_df_sub$Datetime, Round=iR)
     result_all_quantiles = list()
     q_counter = 1
     for (tau in quantiles){
+      result = data.table(Zone=test_df_sub$Zone, Datetime = test_df_sub$Datetime, Round=iR)
       
       model =  rq(DEMAND ~ load_lag + dry_bulb_lag +
                     annual_sin_1 + annual_cos_1 + annual_sin_2 + annual_cos_2 + annual_sin_3 + annual_cos_3 +

@@ -48,7 +48,8 @@ DATETIME_FORMAT = DF_CONFIG['time_format']
 # FeatureArgs is a dictionary of additional arguments passed to the feature
 # function
 feature_config_list = \
-    [('annual_fourier', {'n_harmonics': 3}),
+    [('temporal', {'feature_list': ['hour_of_day', 'month_of_year']}),
+     ('annual_fourier', {'n_harmonics': 3}),
      ('weekly_fourier', {'n_harmonics': 3}),
      ('previous_year_load_lag',
       {'input_col_name': 'DEMAND', 'output_col_name': 'load_lag'}),

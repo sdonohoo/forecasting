@@ -1,6 +1,7 @@
 pkgs <- c(
   'data.table',
-  'gbm'
+  'gbm',
+  'doParallel'
 )
 
 install.packages(pkgs)

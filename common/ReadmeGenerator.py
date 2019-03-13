@@ -97,8 +97,12 @@ print('\n\nThe following chart compares the submissions performance on accuracy 
 print('![EnergyPBLvsTime](./docs/images/Retail-Cost.png)' ,file=open(readmefile, "a"))
 print('\n\n\n',file=open(readmefile, "a"))
 
+#insertting build status badge
+print('## Build Status\n\n', file=open(readmefile, "a"))
+print('[![Build Status](https://dev.azure.com/best-practices/forecasting/_apis/build/status/Forecasting/unit_tests_prototype?branchName=chenhui/python_test_pipeline)](https://dev.azure.com/best-practices/forecasting/_build/latest?definitionId=4&branchName=chenhui/python_test_pipeline)' ,file=open(readmefile, "a"))
+print('\n\n\n',file=open(readmefile, "a"))
 
 
-print('A new Readme.md file has been generated successfuly.')     
+print('A new Readme.md file has been generated successfully.')     
 
 

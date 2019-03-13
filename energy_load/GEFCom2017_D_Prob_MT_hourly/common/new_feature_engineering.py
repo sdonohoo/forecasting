@@ -148,11 +148,13 @@ def compute_features_one_round(train_base_df, train_delta_df, test_df,
         compute_testing_features(test_df, df_config, feature_pipeline)
 
     if compute_load_ratio:
+        max_test_timestamp = max(test_df[df_config['time_col_name']])
         same_week_day_hour_rolling_featurizer = \
             SameWeekDayHourRollingFeaturizer(
                 df_config, input_col_name=df_config['value_col_name'],
                 window_size=4, start_week=10, agg_count=7,
-                output_col_prefix='recent_load_')
+                output_col_prefix='recent_load_',
+                max_test_timestamp=max_test_timestamp)
         train_df_with_recent_load = \
             same_week_day_hour_rolling_featurizer.transform(train_round_df)
         same_week_day_hour_rolling_featurizer.training_df = train_round_df
@@ -182,6 +184,8 @@ def compute_features_one_round(train_base_df, train_delta_df, test_df,
             lag_df = same_week_day_hour_lag_featurizer\
                 .transform(test_df_with_recent_load)
             lag_df[col_ratio] = lag_df[col_old] / lag_df[col_new]
+            # lag_df_list.append(lag_df[keep_col_names + [col_ratio, col_old,
+            #                                             col_new]].copy())
             lag_df_list.append(lag_df[keep_col_names + [col_ratio]].copy())
 
         test_features = reduce(
@@ -256,6 +260,42 @@ def compute_features(train_dir, test_dir, output_dir, df_config,
                                         TEST_FILE_PREFIX + str(i) + '.csv')
 
 ## temporary scripts for results verification
+
+#         train_all_features.rename(
+#             mapper={'hour_of_day': 'Hour',
+#                     'month_of_year': 'MonthOfYear',
+#                     'load_lag': 'LoadLag',
+#                     'dry_bulb_lag': 'DryBulbLag',
+#                     'recent_load_ratio_10': 'LoadRatio_10',
+#                     'recent_load_ratio_11': 'LoadRatio_11',
+#                     'recent_load_ratio_12': 'LoadRatio_12',
+#                     'recent_load_ratio_13': 'LoadRatio_13',
+#                     'recent_load_ratio_14': 'LoadRatio_14',
+#                     'recent_load_ratio_15': 'LoadRatio_15',
+#                     'recent_load_ratio_16': 'LoadRatio_16'},
+#             axis=1, inplace=True)
+#         test_all_features.rename(
+#             mapper={'hour_of_day': 'Hour',
+#                     'month_of_year': 'MonthOfYear',
+#                     'load_lag': 'LoadLag',
+#                     'dry_bulb_lag': 'DryBulbLag',
+#                     'recent_load_ratio_10': 'LoadRatio_10',
+#                     'recent_load_ratio_11': 'LoadRatio_11',
+#                     'recent_load_ratio_12': 'LoadRatio_12',
+#                     'recent_load_ratio_13': 'LoadRatio_13',
+#                     'recent_load_ratio_14': 'LoadRatio_14',
+#                     'recent_load_ratio_15': 'LoadRatio_15',
+#                     'recent_load_ratio_16': 'LoadRatio_16'},
+#             axis=1, inplace=True)
+#         train_all_features = train_all_features[['Datetime', 'Zone', 'Holiday', 'Hour', 'MonthOfYear',
+# 'DEMAND', 'DewPnt',	'DryBulb',
+# 'annual_sin_1', 'annual_cos_1', 'annual_sin_2', 'annual_cos_2', 'annual_sin_3', 'annual_cos_3',
+# 'weekly_sin_1', 'weekly_cos_1', 'weekly_sin_2', 'weekly_cos_2', 'weekly_sin_3', 'weekly_cos_3',
+# 'LoadLag', 'DryBulbLag']]
+#         test_all_features = test_all_features[['Datetime', 'Zone', 'Holiday', 'Hour', 'MonthOfYear',
+# 'annual_sin_1', 'annual_cos_1', 'annual_sin_2', 'annual_cos_2', 'annual_sin_3', 'annual_cos_3',
+# 'weekly_sin_1', 'weekly_cos_1', 'weekly_sin_2', 'weekly_cos_2', 'weekly_sin_3', 'weekly_cos_3',
+# 'LoadLag', 'DryBulbLag', 'LoadRatio_10', 'LoadRatio_11', 'LoadRatio_12', 'LoadRatio_13', 'LoadRatio_14', 'LoadRatio_15', 'LoadRatio_16']]
 #         train_all_features.rename(mapper={'hour_of_day': 'Hour', 'day_of_week': 'DayOfWeek', 'day_of_month': 'DayOfMonth', 'hour_of_year': 'TimeOfYear',	'week_of_year': 'WeekOfYear', 'month_of_year': 'MonthOfYear',
 # 'day_type': 'DayType', 'load_lag': 'LoadLag', 'dew_pnt_lag': 'DewPntLag', 'dry_bulb_lag': 'DryBulbLag',
 # 'recent_load_10': 'RecentLoad_10', 'recent_load_11': 'RecentLoad_11', 'recent_load_12': 'RecentLoad_12', 'recent_load_13': 'RecentLoad_13',

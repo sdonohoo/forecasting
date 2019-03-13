@@ -10,7 +10,8 @@ class SameWeekDayHourRollingFeaturizer(BaseEstimator):
     def __init__(self, df_config, input_col_name,
                  window_size, start_week, training_df=None,
                  agg_count=1, agg_func='mean', q=None,
-                 output_col_prefix='rolling_agg_lag_'):
+                 output_col_prefix='rolling_agg_lag_',
+                 max_test_timestamp=None):
         self.time_col_name = df_config['time_col_name']
         self.value_col_name = df_config['value_col_name']
         self.grain_col_name = df_config['grain_col_name']
@@ -28,6 +29,7 @@ class SameWeekDayHourRollingFeaturizer(BaseEstimator):
         self._is_fit = False
 
         self.training_df = training_df
+        self.max_test_timestamp = max_test_timestamp
 
     @property
     def training_df(self):
@@ -114,10 +116,13 @@ class SameWeekDayHourRollingFeaturizer(BaseEstimator):
 
     def transform(self, X):
         if self.training_df is not None:
-            forecast_creation_time = max(self.training_df[self.time_col_name])
+            forecast_creation_time = self.training_df[self.time_col_name].max()
             X = pd.concat([self.training_df, X], sort=True)
         else:
-            forecast_creation_time = max(X[self.time_col_name])
+            max_train_timestamp = X[self.time_col_name].max()
+            train_test_timestamp_diff = \
+                self.max_test_timestamp - max_train_timestamp
+            forecast_creation_time = max_train_timestamp - train_test_timestamp_diff
             X = X.copy()
 
         if self.grain_col_name is None:

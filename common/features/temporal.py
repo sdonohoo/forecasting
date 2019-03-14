@@ -212,7 +212,7 @@ class DayTypeFeaturizer(BaseEstimator):
         if self.holiday_col_name is not None:
             holiday_col = X[self.holiday_col_name].values
             holiday_mask = holiday_col > 0
-            datetype.loc[holiday_mask, 'day_type'] = self.holidday_code
+            datetype.loc[holiday_mask, 'day_type'] = self.holiday_code
 
             # Create a temporary Date column to calculate dates near
             # the holidays

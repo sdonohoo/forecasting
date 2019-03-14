@@ -152,71 +152,9 @@ class SameWeekDayHourRollingFeaturizer(BaseEstimator):
                                             forecast_creation_time].copy()
 
             X = pd.merge(X, output_tmp, on=merge_col_names)
-
+        if X.shape[0] == 0:
+            raise Exception('The featurizer output is empty. Set the '
+                            'training_df property of the featurizer to '
+                            'None if transforming training data.')
         return X
-
-
-class YearOverYearRatioFeaturizer(BaseEstimator):
-
-    def __init__(self, df_config, input_col_name,
-                 n_years, column_prefix, output_col_prefix, training_df=None):
-        self.time_col_name = df_config['time_col_name']
-        self.value_col_name = df_config['value_col_name']
-        self.grain_col_name = df_config['grain_col_name']
-        self.frequency = df_config['frequency']
-        self.time_format = df_config['time_format']
-        self.df_config = df_config
-
-        self.input_col_name = input_col_name
-        self.n_years = n_years
-        self.column_prefix = column_prefix
-        self.output_col_prefix = output_col_prefix
-
-        self.training_df = training_df
-
-    @property
-    def training_df(self):
-        return self._training_df
-
-    @training_df.setter
-    def training_df(self, val):
-        self._training_df = val
-
-    def fit(self, X, y=None):
-        return self
-
-    def transform(self, X):
-        column_prefix_new = self.column_prefix + 'lag_'
-        lag_df_list = []
-        columns_old = [col for col in X if col.startswith(self.column_prefix)]
-        for col_old in columns_old:
-            col_new = col_old.replace(self.column_prefix, column_prefix_new)
-            col_ratio = col_old.replace(self.column_prefix,
-                                        self.output_col_prefix)
-            same_weekday_hour_lag_featurizer = \
-                SameWeekDayHourLagFeaturizer(df_config=self.df_config,
-                                             input_col_name=col_old,
-                                             n_years=self.n_years,
-                                             week_window=0,
-                                             output_col_name=col_new,
-                                             training_df=self.training_df)
-
-            lag_df = same_weekday_hour_lag_featurizer.transform(X)
-
-            lag_df.reset_index(inplace=True)
-            lag_df[col_ratio] = X[col_old] / lag_df[col_new]
-            lag_df.drop(col_new, inplace=True, axis=1)
-            lag_df_list.append(lag_df)
-
-        if self.grain_col_name is None:
-            merge_col_names = self.time_col_name
-        elif isinstance(self.grain_col_name, list):
-            merge_col_names = [self.time_col_name] + self.grain_col_name
-        else:
-            merge_col_names = [self.time_col_name, self.grain_col_name]
-        output_df = reduce(
-            lambda left, right: pd.merge(left, right, on=merge_col_names),
-            [X] + lag_df_list)
-
-        return output_df
 

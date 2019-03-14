@@ -126,10 +126,10 @@ class SameWeekDayHourLagFeaturizer(BaseEstimator):
 
     def transform(self, X):
         if self.training_df is not None:
-            forecast_creation_time = max(self.training_df[self.time_col_name])
+            forecast_creation_time = self.training_df[self.time_col_name].max()
             X = pd.concat([self.training_df, X], sort=True)
         else:
-            forecast_creation_time = max(X[self.time_col_name])
+            forecast_creation_time = X[self.time_col_name].max()
             X = X.copy()
         if self.grain_col_name is None:
             X[self.output_col_name] = \
@@ -155,6 +155,10 @@ class SameWeekDayHourLagFeaturizer(BaseEstimator):
                                           forecast_creation_time].copy()
             X = pd.merge(X, X_lag_tmp, on=merge_col_names)
 
+        if X.shape[0] == 0:
+            raise Exception('The featurizer output is empty. Set the '
+                            'training_df property of the featurizer to '
+                            'None if transforming training data.')
         return X
 
 
@@ -241,8 +245,8 @@ class SameDayHourLagFeaturizer(BaseEstimator):
         day_lag_last_year = list(range(day_lag_base - self.day_window,
                                        day_lag_base + self.day_window + 1))
         day_lag_all = []
-        for y in range(self.n_years):
-            day_lag_all += [x + y * 365 for x in day_lag_last_year]
+        for i in range(self.n_years):
+            day_lag_all += [j + i * 365 for j in day_lag_last_year]
 
         day_lag_cols = []
         for d in day_lag_all:
@@ -258,13 +262,12 @@ class SameDayHourLagFeaturizer(BaseEstimator):
                 df.loc[valid_lag_mask, col_name] = \
                     df.loc[lag_datetime[valid_lag_mask], 'value'].values
 
-        # Additional aggregation options will be added as needed
-        if self.agg_func == 'mean' and self.q is None:
+        if self.agg_func == 'mean':
             df[self.output_col_name] = round(df[day_lag_cols].mean(axis=1))
         elif self.agg_func == 'quantile' and self.q is not None:
             df[self.output_col_name] = \
                 round(df[day_lag_cols].quantile(self.q, axis=1))
-        elif self.agg_func == 'std' and self.q is None:
+        elif self.agg_func == 'std':
             df[self.output_col_name] = round(df[day_lag_cols].std(axis=1))
 
         return df[[self.output_col_name]]
@@ -276,10 +279,10 @@ class SameDayHourLagFeaturizer(BaseEstimator):
 
     def transform(self, X):
         if self.training_df is not None:
-            forecast_creation_time = max(self.training_df[self.time_col_name])
+            forecast_creation_time = self.training_df[self.time_col_name].max()
             X = pd.concat([self.training_df, X], sort=True)
         else:
-            forecast_creation_time = max(X[self.time_col_name])
+            forecast_creation_time = X[self.time_col_name].max()
             X = X.copy()
 
         if self.grain_col_name is None:
@@ -306,7 +309,10 @@ class SameDayHourLagFeaturizer(BaseEstimator):
                                           forecast_creation_time].copy()
 
             X = pd.merge(X, X_lag_tmp, on=merge_col_names)
-
+        if X.shape[0] == 0:
+            raise Exception('The featurizer output is empty. Set the '
+                            'training_df property of the featurizer to '
+                            'None if transforming training data.')
         return X
 
 

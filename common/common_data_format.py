@@ -45,56 +45,58 @@ class TimeSeriesData:
             print(len(df))
             if len(df) == 0:
                 raise ValueError("Input time series dataframe should not be empty.")
-
         self.df = df
+
+        self._check_input_columns("timestamp", time_col_name)
+        self._check_input_columns("target", target_col_name)
+        self._check_input_columns("name_list", id_col_names)
+        self._check_input_columns("name_list", static_fea_names)
+        self._check_input_columns("name_list", dynamic_fea_names)
         self.time_col_name = time_col_name
         self.target_col_name = target_col_name
         self.id_col_names = id_col_names
         self.static_fea_names = static_fea_names
         self.dynamic_fea_names = dynamic_fea_names
+
+        self._check_frequency(frequency)
+        self._check_time_format(time_format)
         self.frequency = frequency
         self.time_format = time_format
         self.description = description
-
-        col_names = set(list(self.df))
-        self._check_input_columns([self.time_col_name], col_names, "timestamp")
-        self._check_input_columns([self.target_col_name], col_names, "target")
-        self._check_input_columns(self.id_col_names, col_names, "name_list")
-        self._check_input_columns(self.static_fea_names, col_names, "name_list")
-        self._check_input_columns(self.dynamic_fea_names, col_names, "name_list")
-        self._check_frequency()
-        self._check_time_format()
 
     def _get_ts_dataframe(self, data_prep_function, data_prep_function_args):
         """Get time series dataframe using the customized data preparation function.
         """
         return data_prep_function(**data_prep_function_args)
 
-    def _check_input_columns(self, input_col_names, df_col_names, input_type):   
+    def _check_input_columns(self, input_type, input_col_names):   
         """Check if input column/feature names are valid.
         """
-        if input_type == "name_list":
+        df_col_names = list(self.df)
+        if input_type in ["timestamp", "target"]:
+            assert isinstance(input_col_names, str)
+            if input_col_names not in df_col_names:
+                raise ValueError("Invalid {} column name. It cannot be found in the input dataframe.".format(input_type)) 
+        else: 
+            assert isinstance(input_col_names, list)
             for c in input_col_names:
                 if c not in df_col_names:
                     raise ValueError(c + " is an invalid column name. It cannot be found in the input dataframe.")
-        else:
-            if input_col_names[0] not in df_col_names:
-                raise ValueError("Invalid {} column name. It cannot be found in the input dataframe.".format(input_type)) 
-            
-    def _check_frequency(self):
+     
+    def _check_frequency(self, frequency):
         """Check if the data frequency is valid.
         """        
         try:
-            pd.date_range(self.df[self.time_col_name][0], periods=3, freq=self.frequency)
+            pd.date_range(self.df[self.time_col_name][0], periods=3, freq=frequency)
         except:
             raise ValueError("Input data frequency is invalid. Please use the aliases in " +
                              "https://pandas.pydata.org/pandas-docs/stable/user_guide/timeseries.html#timeseries-offset-aliases")
 
-    def _check_time_format(self):
+    def _check_time_format(self, time_format):
         """Check if the timestamp format is valid.
         """   
         try:
-            pd.to_datetime(self.df[self.time_col_name], format=self.time_format)
+            pd.to_datetime(self.df[self.time_col_name], format=time_format)
         except:
             raise ValueError("Incorrect date format is specified.")
     
@@ -136,9 +138,9 @@ def dummy_data_prep_function(df, n):
     return df
 
 if __name__ == "__main__":
-    sales = {'timestamp': ['01/01/2001', '02/01/2001'], 'sales': [1234, 2345],  
-             'store': ['1001', '1002'], 'brand': ['1', '2'], 
-             'income': [53000, 65000], 'price': [10, 12]}
+    sales = {"timestamp": ["01/01/2001", "02/01/2001"], "sales": [1234, 2345],  
+             "store": ["1001", "1002"], "brand": ["1", "2"], 
+             "income": [53000, 65000], "price": [10, 12]}
     # Option 1
     df = pd.DataFrame(sales)
     # Option 2

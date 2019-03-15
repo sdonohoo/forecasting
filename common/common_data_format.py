@@ -33,7 +33,7 @@ class TimeSeriesData:
             data_prep_function_args (dict): a dictionary including the input argument values 
                                             of the data_pre_function.
 
-            Note that static_fea_names and dynamic_fea_names should not include the timestamp
+            Note that neither static_fea_names or dynamic_fea_names should include the timestamp
             column and the target column. 
         """
         if df is None:
@@ -46,15 +46,6 @@ class TimeSeriesData:
             if len(df) == 0:
                 raise ValueError("Input time series dataframe should not be empty.")
 
-        col_names = set(list(df))
-
-        self._check_input_columns([time_col_name], col_names, "timestamp")
-        self._check_input_columns([target_col_name], col_names, "target")
-        self._check_input_columns(id_col_names, col_names, "name_list")
-        self._check_input_columns(static_fea_names, col_names, "name_list")
-        self._check_input_columns(dynamic_fea_names, col_names, "name_list")
-        self._check_frequency(frequency)
-
         self.df = df
         self.time_col_name = time_col_name
         self.target_col_name = target_col_name
@@ -64,6 +55,15 @@ class TimeSeriesData:
         self.frequency = frequency
         self.time_format = time_format
         self.description = description
+
+        col_names = set(list(self.df))
+        self._check_input_columns([self.time_col_name], col_names, "timestamp")
+        self._check_input_columns([self.target_col_name], col_names, "target")
+        self._check_input_columns(self.id_col_names, col_names, "name_list")
+        self._check_input_columns(self.static_fea_names, col_names, "name_list")
+        self._check_input_columns(self.dynamic_fea_names, col_names, "name_list")
+        self._check_frequency()
+        self._check_time_format()
 
     def _get_ts_dataframe(self, data_prep_function, data_prep_function_args):
         """Get time series dataframe using the customized data preparation function.
@@ -81,24 +81,45 @@ class TimeSeriesData:
             if input_col_names[0] not in df_col_names:
                 raise ValueError("Invalid {} column name. It cannot be found in the input dataframe.".format(input_type)) 
             
-    def _check_frequency(self, frequency):
+    def _check_frequency(self):
         """Check if the data frequency is valid.
         """        
         try:
-            pd.date_range(df[time_col_name][0], periods=3, freq=frequency)
+            pd.date_range(self.df[self.time_col_name][0], periods=3, freq=self.frequency)
         except:
             raise ValueError("Input data frequency is invalid. Please use the aliases in " +
                              "https://pandas.pydata.org/pandas-docs/stable/user_guide/timeseries.html#timeseries-offset-aliases")
 
-    def _check_time_format(self, time_format):
+    def _check_time_format(self):
         """Check if the timestamp format is valid.
         """   
-        pass
+        try:
+            pd.to_datetime(self.df[self.time_col_name], format=self.time_format)
+        except:
+            raise ValueError("Incorrect date format is specified.")
     
     def _auto_detect_frequency(self):
         """Automatically detect data frequency if it is not specified.
         """
         pass
+
+
+    @property
+    def config(self):
+        return {"time_col_name": self.time_col_name,
+                "target_col_name": self.target_col_name,
+                "id_col_names": self.id_col_names,
+                "static_fea_names": self.static_fea_names,
+                "dynamic_fea_names": self.dynamic_fea_names,
+                "frequency": self.frequency,
+                "time_format": self.time_format,
+                "description": self.description
+                }
+
+    @config.setter
+    def config(self, new_config):
+        for key, value in new_config.items():
+            setattr(self, key, value)
 
     def data_quality_check(self):
         """Check data quality.
@@ -135,3 +156,9 @@ if __name__ == "__main__":
                              static_fea_names, dynamic_fea_names, frequency, time_format, df=None, \
                              data_prep_function=data_prep_function, data_prep_function_args=data_prep_function_args)
     print(ts_data.df)
+
+    ts_data.time_col_name = "timestamp_new"
+    print(ts_data.config)
+
+    ts_data.config = {"time_col_name": "timestamp"}
+    print(ts_data.config)

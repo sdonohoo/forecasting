@@ -35,7 +35,7 @@ RUN conda env create --file conda_dependencies.yml
 
 RUN rm conda_dependencies.yml
 
-RUN mkdir /TSPerf
-WORKDIR /TSPerf
+RUN mkdir /Forecasting
+WORKDIR /Forecasting
 
 ENTRYPOINT ["/bin/bash"]

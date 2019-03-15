@@ -59,7 +59,7 @@ RUN Rscript install_R_dependencies.R
 RUN rm install_R_dependencies.R
 RUN rm conda_dependencies.yml
 
-RUN mkdir /TSPerf
-WORKDIR /TSPerf
+RUN mkdir /Forecasting
+WORKDIR /Forecasting
 
 ENTRYPOINT ["/bin/bash"]

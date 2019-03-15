@@ -17,7 +17,7 @@ class SameWeekDayHourLagFeaturizer(BaseEstimator):
     Creates a lag feature based on data from the same week of previous years.
 
     This feature is useful for data with daily, weekly, and yearly
-    seasonality and has hourly frequency. It is computed by calculating
+    seasonalities and has hourly frequency. It is computed by calculating
     quantiles, mean, or std of values of and around the same week, same day
     of week, and same hour of day, of previous years.
 
@@ -25,7 +25,7 @@ class SameWeekDayHourLagFeaturizer(BaseEstimator):
         df_config(dict): Configuration of the time series data frame to compute
             features on.
         input_col_name(str): Name of the column to create the lag feature on.
-        training_df(pd.DataFrame): training data needed to compute lag
+        training_df(pd.DataFrame): Training data needed to compute lag
             features on testing data.
             Note: this property must be None when transforming the
             training data, and training_df can only be passed after
@@ -82,8 +82,8 @@ class SameWeekDayHourLagFeaturizer(BaseEstimator):
         input_col = input_df[self.input_col_name]
         if not is_datetime_like(datetime_col):
             datetime_col = pd.to_datetime(datetime_col, format=self.time_format)
-        min_time_stamp = min(datetime_col)
-        max_time_stamp = max(datetime_col)
+        min_time_stamp = datetime_col.min()
+        max_time_stamp = datetime_col.max()
 
         df = pd.DataFrame({'Datetime': datetime_col, 'value': input_col})
         df.set_index('Datetime', inplace=True)
@@ -167,7 +167,7 @@ class SameDayHourLagFeaturizer(BaseEstimator):
     """
     Creates a lag feature based on data from the same day of previous years.
 
-    This feature is useful for data with daily and yearly seasonality and
+    This feature is useful for data with daily and yearly seasonalities and
     has hourly frequency. It is computed by calculating quantiles, mean,
     or std of values of and around the same day of year and same hour of
     day of previous years.
@@ -176,7 +176,7 @@ class SameDayHourLagFeaturizer(BaseEstimator):
         df_config(dict): Configuration of the time series data frame to compute
             features on.
         input_col_name(str): Name of the column to create the lag feature on.
-        training_df(pd.DataFrame): training data needed to compute lag
+        training_df(pd.DataFrame): Training data needed to compute lag
             features on testing data.
             Note: this property must be None when transforming the
             training data, and training_df can only be passed after
@@ -235,8 +235,8 @@ class SameDayHourLagFeaturizer(BaseEstimator):
         input_col = input_df[self.input_col_name]
         if not is_datetime_like(datetime_col):
             datetime_col = pd.to_datetime(datetime_col, format=self.time_format)
-        min_time_stamp = min(datetime_col)
-        max_time_stamp = max(datetime_col)
+        min_time_stamp = datetime_col.min()
+        max_time_stamp = datetime_col.max()
 
         df = pd.DataFrame({'Datetime': datetime_col, 'value': input_col})
         df.set_index('Datetime', inplace=True)

@@ -5,6 +5,7 @@ import numpy as np
 import warnings
 
 from sklearn.base import BaseEstimator
+from ..utils import is_datetime_like
 
 
 class TemporalFeaturizer(BaseEstimator):
@@ -106,7 +107,7 @@ class TemporalFeaturizer(BaseEstimator):
         are normalized to be between [0; 1].
 
         Args:
-            datetime_col: Datetime column.
+            time_col: Datetime column.
 
         Returns:
             A numpy array containing converted the time column to hour of year.
@@ -135,6 +136,8 @@ class TemporalFeaturizer(BaseEstimator):
     def transform(self, X):
         X = X.copy()
         time_col = X[self.time_col_name]
+        if not is_datetime_like(time_col):
+            time_col = pd.to_datetime(time_col, format=self.time_format)
         for feature in self.feature_list:
             if feature in X.columns:
                 warnings.warn('Column {} is already in the data frame, '
@@ -179,6 +182,8 @@ class DayTypeFeaturizer(BaseEstimator):
             before and after  holiday. Default value is 8
 
     """
+    # TODO: Update to use the Python holiday package to make this function
+    # more generic
     def __init__(self, df_config, holiday_col_name=None,
                  semi_holiday_offset=timedelta(days=1),
                  weekday_type_map={1: 2, 3: 2},
@@ -205,6 +210,9 @@ class DayTypeFeaturizer(BaseEstimator):
         X = X.copy()
 
         datetime_col = X[self.time_col_name]
+
+        if not is_datetime_like(datetime_col):
+            datetime_col = pd.to_datetime(datetime_col, format=self.time_format)
 
         datetype = pd.DataFrame({'day_type': datetime_col.dt.dayofweek})
         datetype.replace({'day_type': self.weekday_type_map}, inplace=True)
@@ -293,6 +301,9 @@ class AnnualFourierFeaturizer(BaseEstimator):
     def transform(self, X):
         X = X.copy()
         datetime_col = X[self.time_col_name]
+        if not is_datetime_like(datetime_col):
+            datetime_col = pd.to_datetime(datetime_col, format=self.time_format)
+
         day_of_year = datetime_col.dt.dayofyear
 
         output_dict = {}
@@ -334,6 +345,9 @@ class WeeklyFourierFeaturizer(BaseEstimator):
     def transform(self, X):
         X = X.copy()
         datetime_col = X[self.time_col_name]
+        if not is_datetime_like(datetime_col):
+            datetime_col = pd.to_datetime(datetime_col, format=self.time_format)
+
         day_of_week = datetime_col.dt.dayofweek + 1
 
         output_dict = {}
@@ -375,6 +389,9 @@ class DailyFourierFeaturizer(BaseEstimator):
     def transform(self, X):
         X = X.copy()
         datetime_col = X[self.time_col_name]
+        if not is_datetime_like(datetime_col):
+            datetime_col = pd.to_datetime(datetime_col, format=self.time_format)
+
         hour_of_day = datetime_col.dt.hour + 1
 
         output_dict = {}

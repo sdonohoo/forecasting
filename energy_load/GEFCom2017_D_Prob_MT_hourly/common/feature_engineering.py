@@ -312,100 +312,18 @@ def compute_features(train_dir, test_dir, output_dir, df_config,
         test_output_file = os.path.join(output_dir, 'test',
                                         TEST_FILE_PREFIX + str(i) + '.csv')
 
-## temporary scripts for results verification
-
-#         train_all_features.rename(
-#             mapper={'hour_of_day': 'Hour',
-#                     'month_of_year': 'MonthOfYear',
-#                     'load_lag': 'LoadLag',
-#                     'dry_bulb_lag': 'DryBulbLag',
-#                     'recent_load_ratio_10': 'LoadRatio_10',
-#                     'recent_load_ratio_11': 'LoadRatio_11',
-#                     'recent_load_ratio_12': 'LoadRatio_12',
-#                     'recent_load_ratio_13': 'LoadRatio_13',
-#                     'recent_load_ratio_14': 'LoadRatio_14',
-#                     'recent_load_ratio_15': 'LoadRatio_15',
-#                     'recent_load_ratio_16': 'LoadRatio_16'},
-#             axis=1, inplace=True)
-#         test_all_features.rename(
-#             mapper={'hour_of_day': 'Hour',
-#                     'month_of_year': 'MonthOfYear',
-#                     'load_lag': 'LoadLag',
-#                     'dry_bulb_lag': 'DryBulbLag',
-#                     'recent_load_ratio_10': 'LoadRatio_10',
-#                     'recent_load_ratio_11': 'LoadRatio_11',
-#                     'recent_load_ratio_12': 'LoadRatio_12',
-#                     'recent_load_ratio_13': 'LoadRatio_13',
-#                     'recent_load_ratio_14': 'LoadRatio_14',
-#                     'recent_load_ratio_15': 'LoadRatio_15',
-#                     'recent_load_ratio_16': 'LoadRatio_16'},
-#             axis=1, inplace=True)
-#         train_all_features = train_all_features[['Datetime', 'Zone', 'Holiday', 'Hour', 'MonthOfYear',
-# 'DEMAND', 'DewPnt',	'DryBulb',
-# 'annual_sin_1', 'annual_cos_1', 'annual_sin_2', 'annual_cos_2', 'annual_sin_3', 'annual_cos_3',
-# 'weekly_sin_1', 'weekly_cos_1', 'weekly_sin_2', 'weekly_cos_2', 'weekly_sin_3', 'weekly_cos_3',
-# 'LoadLag', 'DryBulbLag']]
-#         test_all_features = test_all_features[['Datetime', 'Zone', 'Holiday', 'Hour', 'MonthOfYear',
-# 'annual_sin_1', 'annual_cos_1', 'annual_sin_2', 'annual_cos_2', 'annual_sin_3', 'annual_cos_3',
-# 'weekly_sin_1', 'weekly_cos_1', 'weekly_sin_2', 'weekly_cos_2', 'weekly_sin_3', 'weekly_cos_3',
-# 'LoadLag', 'DryBulbLag', 'LoadRatio_10', 'LoadRatio_11', 'LoadRatio_12', 'LoadRatio_13', 'LoadRatio_14', 'LoadRatio_15', 'LoadRatio_16']]
-        train_all_features.rename(mapper={'hour_of_day': 'Hour', 'day_of_week': 'DayOfWeek', 'day_of_month': 'DayOfMonth', 'hour_of_year': 'TimeOfYear',	'week_of_year': 'WeekOfYear', 'month_of_year': 'MonthOfYear',
-'day_type': 'DayType', 'load_lag': 'LoadLag', 'dew_pnt_lag': 'DewPntLag', 'dry_bulb_lag': 'DryBulbLag',
-'recent_load_10': 'RecentLoad_10', 'recent_load_11': 'RecentLoad_11', 'recent_load_12': 'RecentLoad_12', 'recent_load_13': 'RecentLoad_13',
-'recent_load_14': 'RecentLoad_14', 'recent_load_15': 'RecentLoad_15', 'recent_load_16': 'RecentLoad_16', 'recent_load_17': 'RecentLoad_17',
-'recent_dry_bulb_9': 'RecentDryBulb_9',  'recent_dry_bulb_10': 'RecentDryBulb_10', 'recent_dry_bulb_11': 'RecentDryBulb_11', 'recent_dry_bulb_12': 'RecentDryBulb_12',
-'recent_dry_bulb_13': 'RecentDryBulb_13', 'recent_dry_bulb_14': 'RecentDryBulb_14',	'recent_dry_bulb_15': 'RecentDryBulb_15', 'recent_dry_bulb_16': 'RecentDryBulb_16',
-'recent_dew_pnt_9': 'RecentDewPnt_9', 'recent_dew_pnt_10': 'RecentDewPnt_10', 'recent_dew_pnt_11': 'RecentDewPnt_11', 'recent_dew_pnt_12': 'RecentDewPnt_12',
-'recent_dew_pnt_13': 'RecentDewPnt_13', 'recent_dew_pnt_14':
-                                              'RecentDewPnt_14',
-                                          'recent_dew_pnt_15':
-                                              'RecentDewPnt_15',
-                                          'recent_dew_pnt_16':
-                                              'RecentDewPnt_16'},
-                                  axis=1, inplace=True)
-
-        test_all_features.rename(mapper={'hour_of_day': 'Hour', 'day_of_week': 'DayOfWeek', 'day_of_month': 'DayOfMonth', 'hour_of_year': 'TimeOfYear',	'week_of_year': 'WeekOfYear', 'month_of_year': 'MonthOfYear',
-'day_type': 'DayType', 'load_lag': 'LoadLag', 'dew_pnt_lag': 'DewPntLag', 'dry_bulb_lag': 'DryBulbLag',
-'recent_load_10': 'RecentLoad_10', 'recent_load_11': 'RecentLoad_11', 'recent_load_12': 'RecentLoad_12', 'recent_load_13': 'RecentLoad_13',
-'recent_load_14': 'RecentLoad_14', 'recent_load_15': 'RecentLoad_15', 'recent_load_16': 'RecentLoad_16', 'recent_load_17': 'RecentLoad_17',
-'recent_dry_bulb_9': 'RecentDryBulb_9',  'recent_dry_bulb_10': 'RecentDryBulb_10', 'recent_dry_bulb_11': 'RecentDryBulb_11', 'recent_dry_bulb_12': 'RecentDryBulb_12',
-'recent_dry_bulb_13': 'RecentDryBulb_13', 'recent_dry_bulb_14': 'RecentDryBulb_14',	'recent_dry_bulb_15': 'RecentDryBulb_15', 'recent_dry_bulb_16': 'RecentDryBulb_16',
-'recent_dew_pnt_9': 'RecentDewPnt_9', 'recent_dew_pnt_10': 'RecentDewPnt_10', 'recent_dew_pnt_11': 'RecentDewPnt_11', 'recent_dew_pnt_12': 'RecentDewPnt_12',
-'recent_dew_pnt_13': 'RecentDewPnt_13', 'recent_dew_pnt_14':
-                                             'RecentDewPnt_14',
-                                         'recent_dew_pnt_15':
-                                             'RecentDewPnt_15',
-                                         'recent_dew_pnt_16':
-                                             'RecentDewPnt_16'},
-                                 axis=1, inplace=True)
-
-        train_all_features = train_all_features[['DEMAND', 'DewPnt', 'DryBulb', 'Zone', 'Holiday',
-'Hour', 'DayOfWeek', 'DayOfMonth', 'TimeOfYear', 'WeekOfYear', 'MonthOfYear',
-'annual_sin_1', 'annual_cos_1', 'annual_sin_2', 'annual_cos_2', 'annual_sin_3', 'annual_cos_3', 'weekly_sin_1', 'weekly_cos_1', 'weekly_sin_2', 'weekly_cos_2', 'weekly_sin_3', 'weekly_cos_3', 'daily_sin_1', 'daily_cos_1', 'daily_sin_2', 'daily_cos_2',
-'DayType', 'LoadLag', 'DewPntLag', 'DryBulbLag', 'RecentLoad_10', 'RecentLoad_11', 'RecentLoad_12', 'RecentLoad_13',	'RecentLoad_14', 'RecentLoad_15', 'RecentLoad_16', 'RecentLoad_17',
-'RecentDryBulb_10', 'RecentDryBulb_11', 'RecentDryBulb_12', 'RecentDryBulb_13', 'RecentDryBulb_14',	'RecentDryBulb_15',	'RecentDryBulb_16',
-'RecentDewPnt_10', 'RecentDewPnt_11',	'RecentDewPnt_12', 'RecentDewPnt_13', 'RecentDewPnt_14', 'RecentDewPnt_15',	'RecentDewPnt_16']]
-        test_all_features = test_all_features[['Zone', 'Holiday',
-'Hour', 'DayOfWeek', 'DayOfMonth', 'TimeOfYear', 'WeekOfYear', 'MonthOfYear',
-'annual_sin_1', 'annual_cos_1', 'annual_sin_2', 'annual_cos_2', 'annual_sin_3', 'annual_cos_3', 'weekly_sin_1', 'weekly_cos_1', 'weekly_sin_2', 'weekly_cos_2', 'weekly_sin_3', 'weekly_cos_3', 'daily_sin_1', 'daily_cos_1', 'daily_sin_2', 'daily_cos_2',
-'DayType', 'LoadLag', 'DewPntLag', 'DryBulbLag', 'RecentLoad_10', 'RecentLoad_11', 'RecentLoad_12', 'RecentLoad_13',	'RecentLoad_14', 'RecentLoad_15', 'RecentLoad_16', 'RecentLoad_17',
-'RecentDryBulb_10', 'RecentDryBulb_11', 'RecentDryBulb_12', 'RecentDryBulb_13', 'RecentDryBulb_14',	'RecentDryBulb_15',	'RecentDryBulb_16',
-'RecentDewPnt_10', 'RecentDewPnt_11',	'RecentDewPnt_12', 'RecentDewPnt_13', 'RecentDewPnt_14', 'RecentDewPnt_15',	'RecentDewPnt_16']]
-
         train_all_features.to_csv(train_output_file, index=False)
         test_all_features.to_csv(test_output_file, index=False)
 
         print('Round {}'.format(i))
-        print(train_all_features.columns)
-        print(test_all_features.columns)
-        # print('Training data size: {}'.format(train_all_features.shape))
-        # print('Testing data size: {}'.format(test_all_features.shape))
-        # print('Minimum training timestamp: {}'.
-        #       format(min(train_all_features[time_col_name])))
-        # print('Maximum training timestamp: {}'.
-        #       format(max(train_all_features[time_col_name])))
-        # print('Minimum testing timestamp: {}'.
-        #       format(min(test_all_features[time_col_name])))
-        # print('Maximum testing timestamp: {}'.
-        #       format(max(test_all_features[time_col_name])))
-        # print('')
+        print('Training data size: {}'.format(train_all_features.shape))
+        print('Testing data size: {}'.format(test_all_features.shape))
+        print('Minimum training timestamp: {}'.
+              format(min(train_all_features[time_col_name])))
+        print('Maximum training timestamp: {}'.
+              format(max(train_all_features[time_col_name])))
+        print('Minimum testing timestamp: {}'.
+              format(min(test_all_features[time_col_name])))
+        print('Maximum testing timestamp: {}'.
+              format(max(test_all_features[time_col_name])))
+        print('')

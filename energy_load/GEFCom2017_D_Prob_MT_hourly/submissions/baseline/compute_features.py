@@ -1,15 +1,14 @@
 """
-This script creates a set of commonly used features using the functions in
-common.feature_utils, which serve as a set of baseline features.
-Feel free to write your own feature engineering code to create new features by
-calling the feature_utils functions with alternative parameters.
+This script uses
+energy_load/GEFCom2017_D_Prob_MT_hourly/common/feature_engineering.py to
+compute a list of features needed by the Quantile Regression model.
 """
 import os, sys, getopt
 
 import localpath
 from energy_load.GEFCom2017_D_Prob_MT_hourly.common.benchmark_paths \
     import DATA_DIR, SUBMISSIONS_DIR
-from energy_load.GEFCom2017_D_Prob_MT_hourly.common.new_feature_engineering\
+from energy_load.GEFCom2017_D_Prob_MT_hourly.common.feature_engineering\
     import compute_features
 
 print('Data directory used: {}'.format(DATA_DIR))
@@ -17,11 +16,6 @@ print('Data directory used: {}'.format(DATA_DIR))
 OUTPUT_DIR = os.path.join(DATA_DIR, 'features')
 TRAIN_DATA_DIR = os.path.join(DATA_DIR, 'train')
 TEST_DATA_DIR = os.path.join(DATA_DIR, 'test')
-
-TRAIN_BASE_FILE = 'train_base.csv'
-TRAIN_FILE_PREFIX = 'train_round_'
-TEST_FILE_PREFIX = 'test_round_'
-NUM_ROUND = 6
 
 DF_CONFIG = {
     'time_col_name': 'Datetime',
@@ -31,22 +25,14 @@ DF_CONFIG = {
     'time_format': '%Y-%m-%d %H:%M:%S'
 }
 
-HOLIDAY_COLNAME = 'Holiday'
-
-DATETIME_FORMAT = DF_CONFIG['time_format']
-
-# Feature lists used to specify the features to be computed by compute_features.
-# The reason we have three lists is that they are handled differently by
+# Feature configuration list used to specify the features to be computed by
 # compute_features.
-# Each feature list includes a list of "feature configurations".
-# Each feature configuration is tuple in the format of (FeatureName,
-# FeatureCol, FeatureArgs)
-# FeatureName is used to determine the function to use,
-# see feature_function_dict in compute_features
-# FeatureCol is a string specifying the column to compute a feature on. It
-# can be done for features that only requires the datetime column
-# FeatureArgs is a dictionary of additional arguments passed to the feature
-# function
+# Each feature configuration is a tuple in the format of (feature_name,
+# featurizer_args)
+# feature_name is used to determine the featurizer to use, see FEATURE_MAP in
+# energy_load/GEFCom2017_D_Prob_MT_hourly/common/feature_engineering.py
+# featurizer_args is a dictionary of arguments passed to the
+# featurizer
 feature_config_list = \
     [('temporal', {'feature_list': ['hour_of_day', 'month_of_year']}),
      ('annual_fourier', {'n_harmonics': 3}),

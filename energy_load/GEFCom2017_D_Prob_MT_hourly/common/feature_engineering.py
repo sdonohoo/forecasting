@@ -188,7 +188,7 @@ def compute_features_one_round(train_base_df, train_delta_df, test_df,
         (pd.DataFrame, pd.DataFrame): (training features, testing features)
     """
 
-    train_round_df = pd.concat([train_base_df, train_delta_df], sort=True)
+    train_round_df = pd.concat([train_base_df, train_delta_df])
     max_test_timestamp = test_df[df_config['time_col_name']].max()
     train_features, feature_pipeline = \
         compute_training_features(train_round_df, df_config,
@@ -247,8 +247,6 @@ def compute_features_one_round(train_base_df, train_delta_df, test_df,
             train_features['month_of_year'] == test_month, ].copy()
 
     train_features.dropna(inplace=True)
-    test_features.drop(['DewPnt', 'DryBulb', 'DEMAND'],
-                       inplace=True, axis=1)
 
     return train_features, test_features
 

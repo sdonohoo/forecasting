@@ -125,28 +125,33 @@ class SameWeekDayHourLagFeaturizer(BaseEstimator):
         return self
 
     def transform(self, X):
+        if isinstance(self.grain_col_name, list):
+            col_names = [self.time_col_name, self.input_col_name] + \
+                        self.grain_col_name
+            merge_col_names = [self.time_col_name] + self.grain_col_name
+        else:
+            col_names = [self.time_col_name, self.input_col_name,
+                         self.grain_col_name]
+            merge_col_names = [self.time_col_name, self.grain_col_name]
+
         if self.training_df is not None:
             forecast_creation_time = self.training_df[self.time_col_name].max()
-            X = pd.concat([self.training_df, X], sort=True)
+            X_tmp = pd.concat([self.training_df, X], sort=True)
+            X_tmp = X_tmp[col_names].copy()
         else:
             forecast_creation_time = X[self.time_col_name].max()
-            X = X.copy()
+            X_tmp = X[col_names].copy()
+
         if self.grain_col_name is None:
-            X[self.output_col_name] = \
-                self.same_weekday_hour_lag(X).values
+            X_tmp[self.output_col_name] = \
+                self.same_weekday_hour_lag(X_tmp).values
             if self.training_df is not None:
-                X = X.loc[X[self.time_col_name] > forecast_creation_time].copy()
+                X_tmp = X_tmp.loc[X_tmp[self.time_col_name] >
+                                  forecast_creation_time].copy()
+            X = pd.merge(X, X_tmp, on=merge_col_names)
         else:
-            if isinstance(self.grain_col_name, list):
-                col_names = [self.time_col_name, self.input_col_name] + \
-                            self.grain_col_name
-                merge_col_names = [self.time_col_name] + self.grain_col_name
-            else:
-                col_names = [self.time_col_name, self.input_col_name,
-                             self.grain_col_name]
-                merge_col_names = [self.time_col_name, self.grain_col_name]
             X_lag_tmp = \
-                X[col_names].groupby(self.grain_col_name)\
+                X_tmp.groupby(self.grain_col_name)\
                     .apply(lambda g: self.same_weekday_hour_lag(g))
             X_lag_tmp.reset_index(inplace=True)
 
@@ -278,29 +283,34 @@ class SameDayHourLagFeaturizer(BaseEstimator):
         return self
 
     def transform(self, X):
+        if isinstance(self.grain_col_name, list):
+            col_names = [self.time_col_name, self.input_col_name] + \
+                        self.grain_col_name
+            merge_col_names = [self.time_col_name] + self.grain_col_name
+        else:
+            col_names = [self.time_col_name, self.input_col_name,
+                         self.grain_col_name]
+            merge_col_names = [self.time_col_name, self.grain_col_name]
+
         if self.training_df is not None:
             forecast_creation_time = self.training_df[self.time_col_name].max()
-            X = pd.concat([self.training_df, X], sort=True)
+            X_tmp = pd.concat([self.training_df, X], sort=True)
+            X_tmp = X_tmp[col_names].copy()
         else:
             forecast_creation_time = X[self.time_col_name].max()
-            X = X.copy()
+            X_tmp = X[col_names].copy()
 
         if self.grain_col_name is None:
-            X[self.output_col_name] = \
-                self.same_day_hour_lag(X).values
+            X_tmp[self.output_col_name] = \
+                self.same_day_hour_lag(X_tmp).values
             if self.training_df is not None:
-                X = X.loc[X[self.time_col_name] > forecast_creation_time].copy()
+                X_tmp = X_tmp.loc[X_tmp[self.time_col_name] >
+                           forecast_creation_time].copy()
+            X = pd.merge(X, X_tmp, on=merge_col_names)
+
         else:
-            if isinstance(self.grain_col_name, list):
-                col_names = [self.time_col_name, self.input_col_name] + \
-                            self.grain_col_name
-                merge_col_names = [self.time_col_name] + self.grain_col_name
-            else:
-                col_names = [self.time_col_name, self.input_col_name,
-                             self.grain_col_name]
-                merge_col_names = [self.time_col_name, self.grain_col_name]
             X_lag_tmp = \
-                X[col_names].groupby(self.grain_col_name)\
+                X_tmp.groupby(self.grain_col_name)\
                     .apply(lambda g: self.same_day_hour_lag(g))
             X_lag_tmp.reset_index(inplace=True)
 

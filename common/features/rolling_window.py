@@ -151,9 +151,19 @@ class SameWeekdayHourRollingAggFeaturizer(BaseEstimator):
         return self
 
     def transform(self, X):
+        if isinstance(self.grain_col_name, list):
+            col_names = [self.time_col_name, self.input_col_name] + \
+                        self.grain_col_name
+            merge_col_names = [self.time_col_name] + self.grain_col_name
+        else:
+            col_names = [self.time_col_name, self.input_col_name,
+                         self.grain_col_name]
+            merge_col_names = [self.time_col_name, self.grain_col_name]
+
         if self.training_df is not None:
             forecast_creation_time = self.training_df[self.time_col_name].max()
-            X = pd.concat([self.training_df, X], sort=True)
+            X_tmp = pd.concat([self.training_df, X], sort=True)
+            X_tmp = X_tmp[col_names].copy()
         else:
             # Compute an imaginary forecast creation time for the training
             # data based on the maximum timestamp to forecast on
@@ -163,26 +173,19 @@ class SameWeekdayHourRollingAggFeaturizer(BaseEstimator):
             forecast_creation_time = \
                 max_train_timestamp - train_test_timestamp_diff
 
-            X = X.copy()
+            X_tmp = X[col_names].copy()
 
         if self.grain_col_name is None:
             output_tmp = \
-                self.same_weekday_hour_rolling_agg(X, forecast_creation_time)
+                self.same_weekday_hour_rolling_agg(X_tmp,
+                                                   forecast_creation_time)
             if self.training_df is not None:
-                output_tmp = output_tmp.loc[X[self.time_col_name] >
+                output_tmp = output_tmp.loc[output_tmp[self.time_col_name] >
                                             forecast_creation_time].copy()
             X = pd.merge(X, output_tmp, on=self.time_col_name)
         else:
-            if isinstance(self.grain_col_name, list):
-                col_names = [self.time_col_name, self.input_col_name] + \
-                            self.grain_col_name
-                merge_col_names = [self.time_col_name] + self.grain_col_name
-            else:
-                col_names = [self.time_col_name, self.input_col_name,
-                             self.grain_col_name]
-                merge_col_names = [self.time_col_name, self.grain_col_name]
             output_tmp = \
-                X[col_names].groupby(self.grain_col_name).apply(
+                X_tmp.groupby(self.grain_col_name).apply(
                     lambda g: self.same_weekday_hour_rolling_agg(
                         g, forecast_creation_time))
             output_tmp.reset_index(inplace=True)

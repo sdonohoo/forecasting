@@ -133,7 +133,7 @@ From the `~/Forecasting` directory on the VM create a conda environment named `t
   * Python
     - python==3.6    
   * R
-    - r-base==3.5.1  
+    - r-base==3.5.3  
     - gbm==2.1.3
     - data.table==1.11.4
 
@@ -145,34 +145,34 @@ Please follow the instructions below to deploy the Linux DSVM.
 ## Implementation evaluation
 **Quality:**  
 
-* Pinball loss run 1: 78.71
-* Pinball loss run 2: 78.72
-* Pinball loss run 3: 78.69
-* Pinball loss run 4: 78.71
-* Pinball loss run 5: 78.71
+* Pinball loss run 1: 78.85
+* Pinball loss run 2: 78.84
+* Pinball loss run 3: 78.86
+* Pinball loss run 4: 78.76
+* Pinball loss run 5: 78.82
 
-Median Pinball loss: **78.71**
+Median Pinball loss: **78.84**
 
 **Time:**
 
-* Run time 1: 878 seconds
-* Run time 2: 888 seconds
-* Run time 3: 894 seconds
-* Run time 4: 894 seconds
-* Run time 5: 878 seconds
+* Run time 1: 233 seconds
+* Run time 2: 239 seconds
+* Run time 3: 228 seconds
+* Run time 4: 229 seconds
+* Run time 5: 231 seconds
 
-Median run time: **888 seconds**
+Median run time: **231 seconds**
 
 **Cost:**  
 The hourly cost of the Standard D8s Ubuntu Linux VM in East US Azure region is 0.3840 USD, based on the price at the submission date. Thus, the total cost is `888/3600 * 0.3840 = $0.0947`.
 
 **Average relative improvement (in %) over GEFCom2017 benchmark model**  (measured over the first run)  
-Round 1: 9.57  
-Round 2: 18.17  
-Round 3: 17.83   
-Round 4: 8.58  
-Round 5: 7.54  
-Round 6: 6.96  
+Round 1: 9.55  
+Round 2: 18.24  
+Round 3: 17.90   
+Round 4: 8.27  
+Round 5: 7.22  
+Round 6: 6.80  
 
 **Ranking in the qualifying round of GEFCom2017 competition**  
 4

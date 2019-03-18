@@ -27,7 +27,7 @@ def specify_data_schema(
             column and the target column. 
 
         Returns:
-            df_config (dict): Configuration of the time series data 
+            df_config (dict): configuration of the time series data 
         """
         if len(df) == 0:
             raise ValueError("Input time series dataframe should not be empty.")
@@ -67,7 +67,6 @@ def _check_col_names(df_col_names, input_col_names, input_type):
             if c not in df_col_names:
                 raise ValueError(c + " is an invalid column name. It cannot be found in the input dataframe.")
 
-
 def _check_frequency_format(df, time_col_name, frequency):
     """Check if the data frequency is valid.
     """        
@@ -86,13 +85,14 @@ def _check_time_format(df, time_col_name, time_format):
         raise ValueError("Incorrect date format is specified.")
 
 def _check_static_fea(df, id_col_names, static_fea_names):
-    """Check if the input static features change over time.
+    """Check if the input static features change over time and include id_col_names.
     """ 
     for fea in static_fea_names:
         if df.groupby(id_col_names)[fea].nunique().max() > 1:
             raise ValueError("Input feature column {} is supposed to be static but it is not.".format(fea))
+    if not set(id_col_names) <= set(static_fea_names):
+        raise ValueError("Static features do not include all the columns necessary for uniquely specifying each target time series.")
     
-
 if __name__ == "__main__":
     sales = {"timestamp": ["01/01/2001", "02/01/2001", "02/01/2001"], "sales": [1234, 2345, 1324],  
             "store": ["1001", "1002", "1001"], "brand": ["1", "2", "1"], 

@@ -1,7 +1,6 @@
 name: tsperf
 channels:
   - defaults
-  - r
 dependencies:
   - python=3.6
   - numpy=1.15.1
@@ -9,6 +8,3 @@ dependencies:
   - xlrd=1.1.0
   - urllib3=1.21.1
   - scikit-learn=0.20.3
-  - r-gbm
-  - r-data.table
-  - r-doparallel

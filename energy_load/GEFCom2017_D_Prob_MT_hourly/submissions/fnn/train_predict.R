@@ -5,7 +5,6 @@
 
 args = commandArgs(trailingOnly=TRUE)
 seed_value = args[1]
-set.seed(seed_value)
 
 library('data.table')
 library('qrnn')
@@ -14,7 +13,7 @@ library('doParallel')
 n_cores = detectCores()
 
 cl <- parallel::makeCluster(n_cores)
-parallel::clusterEvalQ(cl, lapply(c("quantreg", "data.table"), library, character.only = TRUE))
+parallel::clusterEvalQ(cl, lapply(c("qrnn", "data.table"), library, character.only = TRUE))
 registerDoParallel(cl)
 
 # Specify data directory
@@ -60,6 +59,7 @@ for (iR in 1:6){
   test_df[, load_ratio:=mean(average_load_ratio), by=list(hour_of_day, month_of_year)]
 
   result_all_zones_hours = foreach(i = 1:nrow(all_zones_hours), .combine = rbind) %dopar%{
+    set.seed(seed_value)
     z = all_zones_hours[i, 'Zone']
     h = all_zones_hours[i, 'hour_of_day']
     train_df_sub = train_df[Zone == z & hour_of_day == h]

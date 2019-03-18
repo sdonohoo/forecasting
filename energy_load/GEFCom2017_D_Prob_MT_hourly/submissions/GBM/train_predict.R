@@ -1,8 +1,6 @@
 args = commandArgs(trailingOnly=TRUE)
 seed_value = args[1]
 
-set.seed(seed_value)
-
 library('data.table')
 library('gbm')
 library('doParallel')
@@ -10,7 +8,7 @@ library('doParallel')
 n_cores = detectCores()
 
 cl <- parallel::makeCluster(n_cores)
-parallel::clusterEvalQ(cl, lapply(c("quantreg", "data.table"), library, character.only = TRUE))
+parallel::clusterEvalQ(cl, lapply(c("gbm", "data.table"), library, character.only = TRUE))
 registerDoParallel(cl)
 
 data_dir = 'energy_load/GEFCom2017_D_Prob_MT_hourly/submissions/GBM/data/features'
@@ -58,6 +56,8 @@ for (iR in 1:N_ROUNDS){
   shrinkage = 0.005
 
   result_all_zones_hours = foreach(i = 1:nrow(all_zones_hours), .combine = rbind) %dopar%{
+    set.seed(seed_value)
+
     z = all_zones_hours[i, 'Zone']
     h = all_zones_hours[i, 'hour_of_day']
     train_df_sub = train_df[Zone == z & hour_of_day == h]

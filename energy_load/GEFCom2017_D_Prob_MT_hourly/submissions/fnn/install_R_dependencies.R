@@ -1,6 +1,6 @@
 pkgs <- c(
   'data.table',
-  'gbm',
+  'qrnn',
   'doParallel'
 )
 

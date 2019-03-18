@@ -1,6 +1,6 @@
 pkgs <- c(
   'data.table',
-  'qrnn',
+  'quantreg',
   'doParallel'
 )
 

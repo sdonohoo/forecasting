@@ -107,7 +107,7 @@ Then, you can go to `~/Forecasting` directory in the VM and create a conda envir
    4.2 Pull the Docker image from ACR to your VM
 
    ```bash
-   sudo docker pull tsperf.azurecr.io/energy_load/gefcom2017_d_prob_mt_hourly/fnn_image:v1
+   sudo docker pull tsperf.azurecr.io/energy_load/gefcom2017_d_prob_mt_hourly/fnn_image
    ```
 
 5. Tune Hyperparameters **within Docker container** or **with AzureML hyperdrive**.
@@ -115,7 +115,7 @@ Then, you can go to `~/Forecasting` directory in the VM and create a conda envir
    5.1.1 Start a Docker container from the image  
 
    ```bash
-   sudo docker run -it -v ~/Forecasting:/Forecasting --name fnn_cv_container tsperf.azurecr.io/energy_load/gefcom2017_d_prob_mt_hourly/fnn_image:v1
+   sudo docker run -it -v ~/Forecasting:/Forecasting --name fnn_cv_container tsperf.azurecr.io/energy_load/gefcom2017_d_prob_mt_hourly/fnn_image
    ```
 
    Note that option `-v ~/Forecasting:/Forecasting` mounts the `~/Forecasting` folder (the one you cloned) to the container so that you can access the code and data on your VM within the container.
@@ -147,7 +147,7 @@ Then, you can go to `~/Forecasting` directory in the VM and create a conda envir
    6.1 Start a Docker container from the image  
 
    ```bash
-   sudo docker run -it -v ~/Forecasting:/Forecasting --name fnn_container tsperf.azurecr.io/energy_load/gefcom2017_d_prob_mt_hourly/fnn_image:v1
+   sudo docker run -it -v ~/Forecasting:/Forecasting --name fnn_container tsperf.azurecr.io/energy_load/gefcom2017_d_prob_mt_hourly/fnn_image
    ```
 
    Note that option `-v ~/Forecasting:/Forecasting` mounts the `~/Forecasting` folder (the one you cloned) to the container so that you can access the code and data on your VM within the container.
@@ -182,7 +182,7 @@ Then, you can go to `~/Forecasting` directory in the VM and create a conda envir
 **Resource location:** East US region   
 **Hardware:** Standard D8s v3 (8 vcpus, 32 GB memory) Ubuntu Linux VM  
 **Data storage:** Premium SSD  
-**Docker image:** tsperf.azurecr.io/energy_load/gefcom2017_d_prob_mt_hourly/fnn_image:v1  
+**Docker image:** tsperf.azurecr.io/energy_load/gefcom2017_d_prob_mt_hourly/fnn_image 
 
 **Key packages/dependencies:**
   * Python

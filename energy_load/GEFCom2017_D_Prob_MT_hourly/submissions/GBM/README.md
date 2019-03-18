@@ -91,7 +91,7 @@ From the `~/Forecasting` directory on the VM create a conda environment named `t
    4.2 Pull the Docker image from ACR to your VM
 
    ```bash
-   sudo docker pull tsperf.azurecr.io/energy_load/gefcom2017_d_prob_mt_hourly/gbm_image:v1
+   sudo docker pull tsperf.azurecr.io/energy_load/gefcom2017_d_prob_mt_hourly/gbm_image
    ```
 
 5. Train and predict **within Docker container**
@@ -99,7 +99,7 @@ From the `~/Forecasting` directory on the VM create a conda environment named `t
     5.1 Start a Docker container from the image  
 
    ```bash
-   sudo docker run -it -v ~/Forecasting:/Forecasting --name gbm_container tsperf.azurecr.io/energy_load/gefcom2017_d_prob_mt_hourly/gbm_image:v1
+   sudo docker run -it -v ~/Forecasting:/Forecasting --name gbm_container tsperf.azurecr.io/energy_load/gefcom2017_d_prob_mt_hourly/gbm_image
    ```
 
    Note that option `-v ~/Forecasting:/Forecasting` mounts the `~/Forecasting` folder (the one you cloned) to the container so that you can access the code and data on your VM within the container.

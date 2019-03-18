@@ -1,7 +1,6 @@
 ## Download base image
 FROM continuumio/anaconda3:4.4.0
-ADD TSPerf/energy_load/GEFCom2017_D_Prob_MT_hourly/submissions/baseline/conda_dependencies.yml /tmp/conda_dependencies.yml
-ADD TSPerf/energy_load/GEFCom2017_D_Prob_MT_hourly/submissions/baseline/install_R_dependencies.R /tmp/install_R_dependencies.R
+ADD conda_dependencies.yml /tmp/conda_dependencies.yml
 WORKDIR /tmp
 
 ## Install basic packages
@@ -34,32 +33,9 @@ RUN conda update -y conda
 RUN conda update -y conda
 RUN conda env create --file conda_dependencies.yml
 
-## Install R
-ENV R_BASE_VERSION 3.5.1
-RUN apt-get install -y aptitude
-RUN echo "deb http://http.debian.net/debian sid main" > /etc/apt/sources.list.d/debian-unstable.list \
-        && aptitude install -y debian-keyring debian-archive-keyring
-RUN apt-get remove -y binutils
-RUN apt-get update \
-        && apt-get install -t unstable -y --no-install-recommends \
-                r-base=${R_BASE_VERSION}-*
-
-# Install prerequisites of R packages
-RUN apt-get install -y \
-    gfortran \
-    liblapack-dev \
-    liblapack3 \
-    libopenblas-base \
-    libopenblas-dev
-## Mount R dependency file into the docker container and install dependencies
-# Use a MRAN snapshot URL to download packages archived on a specific date
-RUN echo 'options(repos = list(CRAN = "http://mran.revolutionanalytics.com/snapshot/2018-09-01/"))' >> /etc/R/Rprofile.site
-RUN Rscript install_R_dependencies.R
-
-RUN rm install_R_dependencies.R
 RUN rm conda_dependencies.yml
 
-RUN mkdir /Forecasting
-WORKDIR /Forecasting
+RUN mkdir /TSPerf
+WORKDIR /TSPerf
 
 ENTRYPOINT ["/bin/bash"]

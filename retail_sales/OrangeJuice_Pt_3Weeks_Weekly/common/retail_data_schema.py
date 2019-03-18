@@ -18,7 +18,7 @@ def specify_retail_data_schema(
     dynamic_fea_names = DEFAULT_DYNAMIC_FEA,
     description = None
     ):
-    """Specify data schema of the retail dataset.
+    """Specify data schema of OrangeJuice dataset.
 
     Args:
         sales (Pandas DataFrame): sales data in the current forecast round
@@ -31,10 +31,15 @@ def specify_retail_data_schema(
         df_config (dict): configuration of the time series data 
         df (Pandas DataFrame): sales data combined with store demographic features
     """
-    # Read all the sales data if it is not specified
+    # Read the 1st round training data if "sales" is not specified
     if sales is None:
-        print("Sales dataframe is not given! All the sales data in OrangeJuice dataset will be used.")
-        sales = pd.read_csv(os.path.join(DATA_DIR, "yx.csv"), index_col=False)
+        print("Sales dataframe is not given! The 1st round training data will be used.")
+        sales = pd.read_csv(os.path.join(DATA_DIR, "train", "train_round_1.csv"), index_col=False)
+        aux = pd.read_csv(os.path.join(DATA_DIR, "train", "aux_round_1.csv"), index_col=False)  
+        # Merge with future price, deal, and advertisement info
+        aux_features = ["price1", "price2", "price3", "price4", "price5", "price6", \
+                        "price7", "price8", "price9", "price10", "price11", "deal", "feat"]
+        sales = pd.merge(sales, aux, how="right", on=["store", "brand", "week"]+aux_features)
 
     # Read store demographic data
     storedemo = pd.read_csv(os.path.join(DATA_DIR, "storedemo.csv"), index_col=False)
@@ -50,8 +55,6 @@ def specify_retail_data_schema(
     item_df = pd.DataFrame.from_records(item_list, columns=["store", "brand", "week"])
     sales = item_df.merge(sales, how="left", on=["store", "brand", "week"])
 
-    sales = item_df.merge(sales, how="left", on=["store", "brand", "week"])
-
     # Merge with storedemo
     df = sales.merge(storedemo, how="left", left_on="store", right_on="STORE")
     df.drop("STORE", axis=1, inplace=True)
@@ -59,7 +62,7 @@ def specify_retail_data_schema(
     # Create timestamp
     df["timestamp"] = df["week"].apply(lambda x: FIRST_WEEK_START + datetime.timedelta(days=(x-1)*7))
 
-    #print(sales.head())    
+    print(sales.head())    
     df_config = specify_data_schema(df, time_col_name="timestamp", target_col_name=target_col_name, \
                                     id_col_names=["store", "brand"], static_fea_names=static_fea_names, \
                                     dynamic_fea_names=dynamic_fea_names, frequency="W", \

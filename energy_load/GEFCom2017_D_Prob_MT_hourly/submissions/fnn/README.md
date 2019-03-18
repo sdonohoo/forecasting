@@ -202,43 +202,43 @@ Please follow the instructions below to deploy the Linux DSVM.
 ## Implementation evaluation
 **Quality:**  
 
-* Pinball loss run 1: 79.27
+* Pinball loss run 1: 79.54
 
-* Pinball loss run 2: 79.32
+* Pinball loss run 2: 78.32
 
-* Pinball loss run 3: 79.25
+* Pinball loss run 3: 80.06
 
-* Pinball loss run 4: 79.24
+* Pinball loss run 4: 80.12
 
-* Pinball loss run 5: 79.32
+* Pinball loss run 5: 80.13
 
-* Median Pinball loss: 79.27
+* Median Pinball loss: 80.06
 
 **Time:**
 
-* Run time 1: 4611 seconds
+* Run time 1: 1065 seconds
 
-* Run time 2: 4604 seconds
+* Run time 2: 1072 seconds
 
-* Run time 3: 4587 seconds
+* Run time 3: 1057 seconds
 
-* Run time 4: 4630 seconds
+* Run time 4: 1054 seconds
 
-* Run time 5: 4583 seconds
+* Run time 5: 1055 seconds
 
-* Median run time: 4604 seconds
+* Median run time: 1057 seconds
 
 **Cost:**  
 The hourly cost of the Standard D8s Ubuntu Linux VM in East US Azure region is 0.3840 USD, based on the price at the submission date.   
-Thus, the total cost is 4604/3600 * 0.3840 = $0.4911.
+Thus, the total cost is 1057/3600 * 0.3840 = $0.1127.
 
 **Average relative improvement (in %) over GEFCom2017 benchmark model**  (measured over the first run)  
-Round 1: 6.64  
-Round 2: 20.13  
-Round 3: 19.75   
-Round 4: 5.01  
-Round 5: 4.21  
-Round 6: 10.68  
+Round 1: 6.13  
+Round 2: 19.20  
+Round 3: 18.86   
+Round 4: 3.84  
+Round 5: 2.76  
+Round 6: 11.10  
 
 **Ranking in the qualifying round of GEFCom2017 competition**  
 4

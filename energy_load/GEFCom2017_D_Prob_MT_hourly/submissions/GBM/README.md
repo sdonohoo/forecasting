@@ -164,7 +164,7 @@ Median Pinball loss: **78.84**
 Median run time: **231 seconds**
 
 **Cost:**  
-The hourly cost of the Standard D8s Ubuntu Linux VM in East US Azure region is 0.3840 USD, based on the price at the submission date. Thus, the total cost is `888/3600 * 0.3840 = $0.0947`.
+The hourly cost of the Standard D8s Ubuntu Linux VM in East US Azure region is 0.3840 USD, based on the price at the submission date. Thus, the total cost is `231/3600 * 0.3840 = $0.0246`.
 
 **Average relative improvement (in %) over GEFCom2017 benchmark model**  (measured over the first run)  
 Round 1: 9.55  

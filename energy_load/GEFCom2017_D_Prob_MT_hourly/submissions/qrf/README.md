@@ -83,30 +83,28 @@ Then, you can go to `~/Forecasting` directory in the VM and create a conda envir
     python energy_load/GEFCom2017_D_Prob_MT_hourly/common/extract_data.py
     ```
 
-4. Prepare Docker container for model training and predicting.  
-   4.1 Log into Azure Container Registry (ACR)
+4. Prepare Docker container for model training and predicting.
+
+   4.1 Make sure Docker is installed
+    
+   You can check if Docker is installed on your VM by running
 
    ```bash
-   sudo docker login --username tsperf --password <ACR Access Key> tsperf.azurecr.io
+   sudo docker -v
    ```
+   You will see the Docker version if Docker is installed. If not, you can install it by following the instructions [here](https://docs.docker.com/install/linux/docker-ce/ubuntu/). Note that if you want to execute Docker commands without sudo as a non-root user, you need to create a Unix group and add users to it by following the instructions [here](https://docs.docker.com/install/linux/linux-postinstall/#manage-docker-as-a-non-root-user).  
 
-   The `<ACR Acccess Key>` can be found [here](https://github.com/Microsoft/Forecasting/blob/master/common/key.txt).   
-   If want to execute docker commands without
-   sudo as a non-root user, you need to create a
-   Unix group and add users to it by following the instructions
-   [here](https://docs.docker.com/install/linux/linux-postinstall/#manage-docker-as-a-non-root-user).
-
-   4.2 Pull the Docker image from ACR to your VM
+   4.2 Build a local Docker image
 
    ```bash
-   sudo docker pull tsperf.azurecr.io/energy_load/gefcom2017_d_prob_mt_hourly/qrf_image
+   sudo docker build -t qrf_image:v1 ./energy_load/GEFCom2017_D_Prob_MT_hourly/submissions/qrf
    ```
 
 5. Train and predict **within Docker container**  
   5.1 Start a Docker container from the image  
 
    ```bash
-   sudo docker run -it -v ~/Forecasting:/Forecasting --name qrf_container tsperf.azurecr.io/energy_load/gefcom2017_d_prob_mt_hourly/qrf_image
+   sudo docker run -it -v ~/Forecasting:/Forecasting --name qrf_container qrf_image:v1
    ```
 
    Note that option `-v ~/Forecasting:/Forecasting` mounts the `~/Forecasting` folder (the one you cloned) to the container so that you can access the code and data on your VM within the container.
@@ -141,7 +139,7 @@ Then, you can go to `~/Forecasting` directory in the VM and create a conda envir
 **Resource location:** East US region   
 **Hardware:** F72s v2 (72 vcpus, 144 GB memory) Ubuntu Linux VM  
 **Data storage:** Standard SSD  
-**Docker image:** tsperf.azurecr.io/energy_load/gefcom2017_d_prob_mt_hourly/qrf_image  
+**Dockerfile:** [energy_load/GEFCom2017_D_Prob_MT_hourly/submissions/qrf/Dockerfile](https://github.com/Microsoft/Forecasting/blob/master/energy_load/GEFCom2017_D_Prob_MT_hourly/submissions/qrf/Dockerfile)  
 
 **Key packages/dependencies:**
   * Python

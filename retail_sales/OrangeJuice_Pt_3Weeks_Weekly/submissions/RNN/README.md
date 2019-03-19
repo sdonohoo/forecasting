@@ -151,7 +151,7 @@ to check if conda has been installed by runnning command `conda -V`. If it is in
 
 **Data storage:** Standard HDD
 
-**Dockerfile:** [here](https://github.com/Microsoft/Forecasting/blob/master/retail_sales/OrangeJuice_Pt_3Weeks_Weekly/submissions/RNN/Dockerfile)
+**Dockerfile:** [retail_sales/OrangeJuice_Pt_3Weeks_Weekly/submissions/RNN/Dockerfile](https://github.com/Microsoft/Forecasting/blob/master/retail_sales/OrangeJuice_Pt_3Weeks_Weekly/submissions/RNN/Dockerfile)
 
 **Key packages/dependencies:**  
   * Python

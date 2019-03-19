@@ -52,7 +52,7 @@ Fill out this form before making a submission. Save it as README.md in the submi
 
 **Data storage:** <*e.g. Premium SSD, blob storage*>
 
-**Dockerfile:** <Link of the implementation Dockerfile e.g. [here](https://github.com/Microsoft/Forecasting/blob/master/energy_load/GEFCom2017_D_Prob_MT_hourly/submissions/submission1/Dockerfile)>
+**Dockerfile:** <Link of the implementation Dockerfile e.g. [energy_load/GEFCom2017_D_Prob_MT_hourly/submissions/submission1/Dockerfile](https://github.com/Microsoft/Forecasting/blob/master/energy_load/GEFCom2017_D_Prob_MT_hourly/submissions/submission1/Dockerfile)>
 
 **Key packages/dependencies:**
 List the key packages, deep learning frameworks included in the docker image. Only include the packages that are important for implementing the model. Exclude packages used for data manipulation, feature engineering etc. E.g.:

@@ -140,7 +140,7 @@ to check if conda has been installed by runnning command `conda -V`. If it is in
 
 **Data storage:** Premium SSD
 
-**Dockerfile:** [here](https://github.com/Microsoft/Forecasting/blob/master/retail_sales/OrangeJuice_Pt_3Weeks_Weekly/submissions/SeasonalNaive/Dockerfile)
+**Dockerfile:** [retail_sales/OrangeJuice_Pt_3Weeks_Weekly/submissions/SeasonalNaive/Dockerfile](https://github.com/Microsoft/Forecasting/blob/master/retail_sales/OrangeJuice_Pt_3Weeks_Weekly/submissions/SeasonalNaive/Dockerfile)
 
 **Key packages/dependencies:**  
   * R

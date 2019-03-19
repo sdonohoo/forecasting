@@ -128,7 +128,7 @@ From the `~/Forecasting` directory on the VM create a conda environment named `t
 **Resource location:** East US region   
 **Hardware:** Standard D8s v3 (8 vcpus, 32 GB memory) Ubuntu Linux VM 
 **Data storage:** Premium SSD   
-**Dockerfile:** [here](https://github.com/Microsoft/Forecasting/blob/master/energy_load/GEFCom2017_D_Prob_MT_hourly/submissions/GBM/Dockerfile)  
+**Dockerfile:** [energy_load/GEFCom2017_D_Prob_MT_hourly/submissions/GBM/Dockerfile](https://github.com/Microsoft/Forecasting/blob/master/energy_load/GEFCom2017_D_Prob_MT_hourly/submissions/GBM/Dockerfile)  
 
 **Key packages/dependencies:**
   * Python

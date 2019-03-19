@@ -457,7 +457,7 @@ benchmark implementation, information about the scripts, obtained results, and s
     * benchmark path, e.g. `/Forecasting/energy_load/problem1`
     * path to submission directory, e.g. `/Forecasting/energy_load/problem1/submissions/submission1`
     * instructions for provisioning the architecture components (e.g. DSVM, Batch AI)
-    * link to Dockerfile stored in submission folder, for example [here](https://github.com/Microsoft/Forecasting/blob/master/energy_load/GEFCom2017_D_Prob_MT_hourly/submissions/baseline/Dockerfile)
+    * link to Dockerfile stored in submission folder, for example [energy_load/GEFCom2017_D_Prob_MT_hourly/submissions/baseline/Dockerfile](https://github.com/Microsoft/Forecasting/blob/master/energy_load/GEFCom2017_D_Prob_MT_hourly/submissions/baseline/Dockerfile)
     * benchmark quality values obtained with random seeds 1 through 5
     * running time in each run
     * cost in each run 
@@ -565,7 +565,7 @@ reviewer needs to complete the following three steps:
     * benchmark path, for example /Forecasting/energy_load/problem1
     * path to submission directory, for example  /Forecasting/energy_load/problem1/benchmarks/submission1
     * instructions for provisioning the architecture components (e.g. DSVM, Batch AI)
-    * link to Dockerfile stored in submission folder, for example [here](https://github.com/Microsoft/Forecasting/blob/master/energy_load/GEFCom2017_D_Prob_MT_hourly/submissions/baseline/Dockerfile)
+    * link to Dockerfile stored in submission folder, for example [energy_load/GEFCom2017_D_Prob_MT_hourly/submissions/baseline/Dockerfile](https://github.com/Microsoft/Forecasting/blob/master/energy_load/GEFCom2017_D_Prob_MT_hourly/submissions/baseline/Dockerfile)
 
 In the following sections all occurences of "README file" refer to README file in the submission, unless 
 specified otherwise.

@@ -90,24 +90,24 @@ Then, you can go to `~/Forecasting` directory in the VM and create a conda envir
    python energy_load/GEFCom2017_D_Prob_MT_hourly/common/extract_data.py
    ```
 
-4. Prepare Docker container for model training and predicting.  
-   > NOTE: To execute docker commands without
-   sudo as a non-root user, you need to create a
-   Unix group and add users to it by following the instructions
+4. Prepare Docker container for model training and predicting.
+
+   > NOTE: To execute docker commands without sudo as a non-root user, you need to create a Unix group and add users to it by following the instructions
    [here](https://docs.docker.com/install/linux/linux-postinstall/#manage-docker-as-a-non-root-user). Otherwise, simply prefix all docker commands with sudo.
 
-   4.1 Log into Azure Container Registry (ACR)
+   4.1 Make sure Docker is installed
+    
+   You can check if Docker is installed on your VM by running
 
    ```bash
-   sudo docker login --username tsperf --password <ACR Access Key> tsperf.azurecr.io
+   sudo docker -v
    ```
+   You will see the Docker version if Docker is installed. If not, you can install it by following the instructions [here](https://docs.docker.com/install/linux/docker-ce/ubuntu/).
 
-   The `<ACR Acccess Key>` can be found [here](https://github.com/Microsoft/Forecasting/blob/master/common/key.txt).   
-
-   4.2 Pull the Docker image from ACR to your VM
+   4.2 Build a local Docker image
 
    ```bash
-   sudo docker pull tsperf.azurecr.io/energy_load/gefcom2017_d_prob_mt_hourly/fnn_image:v1
+   sudo docker build -t fnn_image:v1 ./energy_load/GEFCom2017_D_Prob_MT_hourly/submissions/fnn_image:v1
    ```
 
 5. Tune Hyperparameters **within Docker container** or **with AzureML hyperdrive**.
@@ -115,7 +115,7 @@ Then, you can go to `~/Forecasting` directory in the VM and create a conda envir
    5.1.1 Start a Docker container from the image  
 
    ```bash
-   sudo docker run -it -v ~/Forecasting:/Forecasting --name fnn_cv_container tsperf.azurecr.io/energy_load/gefcom2017_d_prob_mt_hourly/fnn_image:v1
+   sudo docker run -it -v ~/Forecasting:/Forecasting --name fnn_cv_container fnn_image:v1
    ```
 
    Note that option `-v ~/Forecasting:/Forecasting` mounts the `~/Forecasting` folder (the one you cloned) to the container so that you can access the code and data on your VM within the container.
@@ -147,7 +147,7 @@ Then, you can go to `~/Forecasting` directory in the VM and create a conda envir
    6.1 Start a Docker container from the image  
 
    ```bash
-   sudo docker run -it -v ~/Forecasting:/Forecasting --name fnn_container tsperf.azurecr.io/energy_load/gefcom2017_d_prob_mt_hourly/fnn_image:v1
+   sudo docker run -it -v ~/Forecasting:/Forecasting --name fnn_container fnn_image:v1
    ```
 
    Note that option `-v ~/Forecasting:/Forecasting` mounts the `~/Forecasting` folder (the one you cloned) to the container so that you can access the code and data on your VM within the container.
@@ -182,7 +182,7 @@ Then, you can go to `~/Forecasting` directory in the VM and create a conda envir
 **Resource location:** East US region   
 **Hardware:** Standard D8s v3 (8 vcpus, 32 GB memory) Ubuntu Linux VM  
 **Data storage:** Premium SSD  
-**Docker image:** tsperf.azurecr.io/energy_load/gefcom2017_d_prob_mt_hourly/fnn_image:v1  
+**Dockerfile:** [energy_load/GEFCom2017_D_Prob_MT_hourly/submissions/fnn/Dockerfile](https://github.com/Microsoft/Forecasting/blob/master/energy_load/GEFCom2017_D_Prob_MT_hourly/submissions/fnn/Dockerfile)  
 
 **Key packages/dependencies:**
   * Python

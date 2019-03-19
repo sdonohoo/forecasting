@@ -1,7 +1,7 @@
 ## Download base image
 FROM continuumio/anaconda3:4.4.0
-ADD TSPerf/energy_load/GEFCom2017_D_Prob_MT_hourly/submissions/baseline/conda_dependencies.yml /tmp/conda_dependencies.yml
-ADD TSPerf/energy_load/GEFCom2017_D_Prob_MT_hourly/submissions/baseline/install_R_dependencies.R /tmp/install_R_dependencies.R
+ADD ./conda_dependencies.yml /tmp/conda_dependencies.yml
+ADD ./install_R_dependencies.R /tmp/install_R_dependencies.R
 WORKDIR /tmp
 
 ## Install basic packages
@@ -59,7 +59,7 @@ RUN Rscript install_R_dependencies.R
 RUN rm install_R_dependencies.R
 RUN rm conda_dependencies.yml
 
-RUN mkdir /TSPerf
-WORKDIR /TSPerf
+RUN mkdir /Forecasting
+WORKDIR /Forecasting
 
 ENTRYPOINT ["/bin/bash"]

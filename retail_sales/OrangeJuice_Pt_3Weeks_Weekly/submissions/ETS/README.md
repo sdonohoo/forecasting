@@ -84,27 +84,25 @@ to check if conda has been installed by runnning command `conda -V`. If it is in
    `/test` under the data directory, respectively. After running the above command, you can deactivate the conda environment by running
    `source deactivate`.
 
-5. Log into Azure Container Registry (ACR):
+5. Make sure Docker is installed
+    
+   You can check if Docker is installed on your VM by running
 
    ```bash
-   sudo docker login --username tsperf --password <ACR Access Key> tsperf.azurecr.io
+   sudo docker -v
    ```
+   You will see the Docker version if Docker is installed. If not, you can install it by following the instructions [here](https://docs.docker.com/install/linux/docker-ce/ubuntu/). Note that if you want to execute Docker commands without sudo as a non-root user, you need to create a Unix group and add users to it by following the instructions [here](https://docs.docker.com/install/linux/linux-postinstall/#manage-docker-as-a-non-root-user).  
 
-   The `<ACR Acccess Key>` can be found [here](https://github.com/Microsoft/Forecasting/blob/master/common/key.txt). If want to execute docker commands without
-   sudo as a non-root user, you need to create a
-   Unix group and add users to it by following the instructions
-   [here](https://docs.docker.com/install/linux/linux-postinstall/#manage-docker-as-a-non-root-user).
-
-6. Pull a Docker image from ACR using the following command   
+6. Build a local Docker image by running the following command from `~/Forecasting` directory
 
    ```bash
-   sudo docker pull tsperf.azurecr.io/retail_sales/orangejuice_pt_3weeks_weekly/baseline_image:v1
+   sudo docker build -t baseline_image:v1 ./retail_sales/OrangeJuice_Pt_3Weeks_Weekly/submissions/ETS
    ```
 
 7. Choose a name for a new Docker container (e.g. ets_container) and create it using command:   
 
    ```bash
-   sudo docker run -it -v ~/Forecasting:/Forecasting --name ets_container tsperf.azurecr.io/retail_sales/orangejuice_pt_3weeks_weekly/baseline_image:v1
+   sudo docker run -it -v ~/Forecasting:/Forecasting --name ets_container baseline_image:v1
    ```
 
    Note that option `-v ~/Forecasting:/Forecasting` allows you to mount `~/Forecasting` folder (the one you cloned) to the container so that you will have
@@ -142,7 +140,7 @@ to check if conda has been installed by runnning command `conda -V`. If it is in
 
 **Data storage:** Premium SSD
 
-**Docker image:** tsperf.azurecr.io/retail_sales/orangejuice_pt_3weeks_weekly/baseline_image:v1
+**Dockerfile:** [retail_sales/OrangeJuice_Pt_3Weeks_Weekly/submissions/ETS/Dockerfile](https://github.com/Microsoft/Forecasting/blob/master/retail_sales/OrangeJuice_Pt_3Weeks_Weekly/submissions/ETS/Dockerfile)
 
 **Key packages/dependencies:**  
   * R

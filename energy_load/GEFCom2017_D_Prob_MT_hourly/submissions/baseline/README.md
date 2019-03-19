@@ -42,10 +42,10 @@ No parameter tuning was done.
 
 ### Steps to reproduce results
 
-0. Follow the instructions [here](#resource-deployment-instructions) to provision a Linux virtual machine and log into the provisioned
+1. Follow the instructions [here](#resource-deployment-instructions) to provision a Linux virtual machine and log into the provisioned
 VM.
 
-1. Clone the Forecasting repo to the home directory of your machine
+2. Clone the Forecasting repo to the home directory of your machine
 
    ```bash
    cd ~
@@ -60,8 +60,7 @@ VM.
    * [Git Credential Managers](https://github.com/Microsoft/Git-Credential-Manager-for-Windows)
    * [Authenticate with SSH](https://help.github.com/articles/connecting-to-github-with-ssh/)
 
-
-2. Create a conda environment for running the scripts of data downloading, data preparation, and result evaluation.   
+3. Create a conda environment for running the scripts of data downloading, data preparation, and result evaluation.   
 To do this, you need to check if conda has been installed by runnning command `conda -V`. If it is installed, you will see the conda version in the terminal. Otherwise, please follow the instructions [here](https://conda.io/docs/user-guide/install/linux.html) to install conda.  
 Then, you can go to `~/Forecasting` directory in the VM and create a conda environment named `tsperf` by running
 
@@ -70,7 +69,7 @@ Then, you can go to `~/Forecasting` directory in the VM and create a conda envir
    conda env create --file ./common/conda_dependencies.yml
    ```
 
-3. Download and extract data **on the VM**.
+4. Download and extract data **on the VM**.
 
     ```bash
     source activate tsperf
@@ -78,9 +77,9 @@ Then, you can go to `~/Forecasting` directory in the VM and create a conda envir
     python energy_load/GEFCom2017_D_Prob_MT_hourly/common/extract_data.py
     ```
 
-4. Prepare Docker container for model training and predicting.
+5. Prepare Docker container for model training and predicting.
 
-   4.1 Make sure Docker is installed
+   5.1 Make sure Docker is installed
     
    You can check if Docker is installed on your VM by running
 
@@ -89,15 +88,15 @@ Then, you can go to `~/Forecasting` directory in the VM and create a conda envir
    ```
    You will see the Docker version if Docker is installed. If not, you can install it by following the instructions [here](https://docs.docker.com/install/linux/docker-ce/ubuntu/). Note that if you want to execute Docker commands without sudo as a non-root user, you need to create a Unix group and add users to it by following the instructions [here](https://docs.docker.com/install/linux/linux-postinstall/#manage-docker-as-a-non-root-user).  
 
-   4.2 Build a local Docker image
+   5.2 Build a local Docker image
 
    ```bash
    sudo docker build -t baseline_image ./energy_load/GEFCom2017_D_Prob_MT_hourly/submissions/baseline
    ```
 
-5. Train and predict **within Docker container**
+6. Train and predict **within Docker container**
 
-   5.1 Start a Docker container from the image  
+   6.1 Start a Docker container from the image  
 
    ```bash
    sudo docker run -it -v ~/Forecasting:/Forecasting --name baseline_container baseline_image
@@ -105,7 +104,7 @@ Then, you can go to `~/Forecasting` directory in the VM and create a conda envir
 
    Note that option `-v ~/Forecasting:/Forecasting` mounts the `~/Forecasting` folder (the one you cloned) to the container so that you can access the code and data on your VM within the container.
 
-   5.2 Train and predict  
+   6.2 Train and predict  
 
    ```
    source activate tsperf
@@ -113,7 +112,7 @@ Then, you can go to `~/Forecasting` directory in the VM and create a conda envir
    bash ./energy_load/GEFCom2017_D_Prob_MT_hourly/submissions/baseline/train_score_vm.sh
    ```
    After generating the forecast results, you can exit the Docker container by command `exit`.
-6. Model evaluation **on the VM**
+7. Model evaluation **on the VM**
 
    ```bash
    source activate tsperf
@@ -131,9 +130,9 @@ Then, you can go to `~/Forecasting` directory in the VM and create a conda envir
 
 **Key packages/dependencies:**
   * Python
-    - python==3.6    
+    - python==3.7    
   * R
-    - r-base==3.5.1  
+    - r-base==3.5.3  
     - quantreg==5.34
     - data.table==1.10.4.3
 

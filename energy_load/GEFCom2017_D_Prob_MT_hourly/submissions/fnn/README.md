@@ -53,10 +53,10 @@ Tune hyperparameters using AzureML HyperDrive:
 
 ### Steps to reproduce results
 
-0. Follow the instructions [here](#resource-deployment-instructions) to provision a Linux virtual machine and log into the provisioned
+1. Follow the instructions [here](#resource-deployment-instructions) to provision a Linux virtual machine and log into the provisioned
 VM.
 
-1. Clone the Forecasting repo to the home directory of your machine
+2. Clone the Forecasting repo to the home directory of your machine
 
    ```bash
    cd ~
@@ -72,8 +72,7 @@ VM.
    * [Git Credential Managers](https://docs.microsoft.com/en-us/vsts/repos/git/set-up-credential-managers?view=vsts)
    * [Authenticate with SSH](https://docs.microsoft.com/en-us/vsts/repos/git/use-ssh-keys-to-authenticate?view=vsts)
 
-
-2. Create a conda environment for running the scripts of data downloading, data preparation, and result evaluation.   
+3. Create a conda environment for running the scripts of data downloading, data preparation, and result evaluation.   
 To do this, you need to check if conda has been installed by runnning command `conda -V`. If it is installed, you will see the conda version in the terminal. Otherwise, please follow the instructions [here](https://conda.io/docs/user-guide/install/linux.html) to install conda.  
 Then, you can go to `~/Forecasting` directory in the VM and create a conda environment named `tsperf` by running
 
@@ -82,7 +81,7 @@ Then, you can go to `~/Forecasting` directory in the VM and create a conda envir
    conda env create --file ./common/conda_dependencies.yml
    ```
 
-3. Download and extract data **on the VM**.
+4. Download and extract data **on the VM**.
 
    ```bash
    source activate tsperf
@@ -90,12 +89,12 @@ Then, you can go to `~/Forecasting` directory in the VM and create a conda envir
    python energy_load/GEFCom2017_D_Prob_MT_hourly/common/extract_data.py
    ```
 
-4. Prepare Docker container for model training and predicting.
+5. Prepare Docker container for model training and predicting.
 
    > NOTE: To execute docker commands without sudo as a non-root user, you need to create a Unix group and add users to it by following the instructions
    [here](https://docs.docker.com/install/linux/linux-postinstall/#manage-docker-as-a-non-root-user). Otherwise, simply prefix all docker commands with sudo.
 
-   4.1 Make sure Docker is installed
+   5.1 Make sure Docker is installed
     
    You can check if Docker is installed on your VM by running
 
@@ -104,23 +103,23 @@ Then, you can go to `~/Forecasting` directory in the VM and create a conda envir
    ```
    You will see the Docker version if Docker is installed. If not, you can install it by following the instructions [here](https://docs.docker.com/install/linux/docker-ce/ubuntu/).
 
-   4.2 Build a local Docker image
+   5.2 Build a local Docker image
 
    ```bash
-   sudo docker build -t fnn_image:v1 ./energy_load/GEFCom2017_D_Prob_MT_hourly/submissions/fnn_image:v1
+   sudo docker build -t fnn_image ./energy_load/GEFCom2017_D_Prob_MT_hourly/submissions/fnn
    ```
 
-5. Tune Hyperparameters **within Docker container** or **with AzureML hyperdrive**.
+6. Tune Hyperparameters **within Docker container** or **with AzureML hyperdrive**.
 
-   5.1.1 Start a Docker container from the image  
+   6.1.1 Start a Docker container from the image  
 
    ```bash
-   sudo docker run -it -v ~/Forecasting:/Forecasting --name fnn_cv_container fnn_image:v1
+   sudo docker run -it -v ~/Forecasting:/Forecasting --name fnn_cv_container fnn_image
    ```
 
    Note that option `-v ~/Forecasting:/Forecasting` mounts the `~/Forecasting` folder (the one you cloned) to the container so that you can access the code and data on your VM within the container.
 
-   5.1.2 Train and validate
+   6.1.2 Train and validate
 
    ```
    source activate tsperf
@@ -129,7 +128,7 @@ Then, you can go to `~/Forecasting` directory in the VM and create a conda envir
    ```
    After generating the cross validation results, you can exit the Docker container by command `exit`.
 
-   5.2 Do hyperparameter tuning with AzureML hyperdrive
+   6.2 Do hyperparameter tuning with AzureML hyperdrive
 
    To tune hyperparameters with AzureML hyperdrive, you don't need to create a local Docker container. You can do feature engineering on the VM by the command
 
@@ -142,17 +141,17 @@ Then, you can go to `~/Forecasting` directory in the VM and create a conda envir
 
    Based on the average pinball loss obtained at each set of hyperparameters, you can choose the best set of hyperparameters and use it in the Rscript of `train_predict.R`.
 
-6. Train and predict **within Docker container**.
+7. Train and predict **within Docker container**.
 
-   6.1 Start a Docker container from the image  
+   7.1 Start a Docker container from the image  
 
    ```bash
-   sudo docker run -it -v ~/Forecasting:/Forecasting --name fnn_container fnn_image:v1
+   sudo docker run -it -v ~/Forecasting:/Forecasting --name fnn_container fnn_image
    ```
 
    Note that option `-v ~/Forecasting:/Forecasting` mounts the `~/Forecasting` folder (the one you cloned) to the container so that you can access the code and data on your VM within the container.
 
-   6.2 Train and predict  
+   7.2 Train and predict  
 
    ```
    source activate tsperf
@@ -168,7 +167,7 @@ Then, you can go to `~/Forecasting` directory in the VM and create a conda envir
    to connect to the running container and check the status of the run.  
    After generating the forecast results, you can exit the Docker container by command `exit`.
 
-7. Model evaluation **on the VM**.
+8. Model evaluation **on the VM**.
 
    ```bash
    source activate tsperf
@@ -186,9 +185,9 @@ Then, you can go to `~/Forecasting` directory in the VM and create a conda envir
 
 **Key packages/dependencies:**
   * Python
-    - python==3.6    
+    - python==3.7    
   * R
-    - r-base==3.5.1  
+    - r-base==3.5.3  
     - qrnn==2.0.2
     - data.table==1.10.4.3
     - rjson==0.2.20 (optional for cv)

@@ -162,43 +162,43 @@ Please follow the instructions below to deploy the Linux DSVM.
 ## Implementation evaluation
 **Quality:**  
 
-* Pinball loss run 1: 76.48
+* Pinball loss run 1: 76.25
 
-* Pinball loss run 2: 76.49
+* Pinball loss run 2: 76.25
 
-* Pinball loss run 3: 76.43
+* Pinball loss run 3: 76.13
 
-* Pinball loss run 4: 76.47
+* Pinball loss run 4: 76.22
 
-* Pinball loss run 5: 76.6
+* Pinball loss run 5: 76.34
 
-* Median Pinball loss: 76.48
+* Median Pinball loss: 76.25
 
 **Time:**
 
-* Run time 1: 22289 seconds
+* Run time 1: 20352 seconds
 
-* Run time 2: 22493 seconds
+* Run time 2: 20120 seconds
 
-* Run time 3: 22859 seconds
+* Run time 3: 20262 seconds
 
-* Run time 4: 22709 seconds
+* Run time 4: 20724 seconds
 
-* Run time 5: 23197 seconds
+* Run time 5: 20538 seconds
 
-* Median run time: 22709 seconds (6.3 hours)
+* Median run time: 20352 seconds (5.65 hours)
 
 **Cost:**  
 The hourly cost of the F72s v2 Ubuntu Linux VM in East US Azure region is 3.045 USD, based on the price at the submission date.   
-Thus, the total cost is 22709/3600 * 3.045 = 19.21 USD.
+Thus, the total cost is 20352/3600 * 3.045 = 17.21 USD.
 
 **Average relative improvement (in %) over GEFCom2017 benchmark model**  (measured over the first run)  
-Round 1: 16.84  
-Round 2: 14.98  
-Round 3: 12.08  
-Round 4: 14.97  
+Round 1: 16.91  
+Round 2: 15.06  
+Round 3: 12.41  
+Round 4: 15.00  
 Round 5: 16.16  
-Round 6: -2.52  
+Round 6: -0.17  
 
 **Ranking in the qualifying round of GEFCom2017 competition**  
 3

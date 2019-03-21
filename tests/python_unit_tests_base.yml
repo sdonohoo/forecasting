@@ -23,10 +23,10 @@ steps:
 #   displayName: 'Build Configuration'
 
 - bash: |
-  . /anaconda/etc/profile.d/conda.sh && \
-  conda activate forecasting_base && \
-  pytest tests/unit -m "not notebooks and not spark and not gpu" --junitxml=reports/test-unit.xml && \
-  conda deactivate
+    . /anaconda/etc/profile.d/conda.sh && \
+    conda activate forecasting_base && \
+    pytest tests/unit -m "not notebooks and not spark and not gpu" --junitxml=reports/test-unit.xml && \
+    conda deactivate
   displayName: 'Run Unit tests'
 
 - task: PublishTestResults@2

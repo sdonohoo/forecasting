@@ -15,19 +15,18 @@ pool:
 steps:
 
 - bash: |
-    #echo "##vso[task.prependpath]/data/anaconda/bin"
-    echo ". /data/anaconda/etc/profile.d/conda.sh" >> ~./bashrc
+    echo "##vso[task.prependpath]/data/anaconda/bin"
   displayName: Add Conda to PATH
 
-- bash: |
-    . /anaconda/etc/profile.d/conda.sh
-    conda activate forecasting_base
-  displayName: 'Build Configuration'
+# - bash: |
+#     conda activate forecasting_base
+#   displayName: 'Build Configuration'
 
 - bash: |
-    #cd image_classification
-    pytest tests/unit -m "not notebooks and not spark and not gpu" --junitxml=reports/test-unit.xml
-    conda deactivate
+  . /anaconda/etc/profile.d/conda.sh && \
+  conda activate forecasting_base && \
+  pytest tests/unit -m "not notebooks and not spark and not gpu" --junitxml=reports/test-unit.xml && \
+  conda deactivate
   displayName: 'Run Unit tests'
 
 - task: PublishTestResults@2

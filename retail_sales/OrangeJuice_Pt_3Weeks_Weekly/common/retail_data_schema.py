@@ -1,4 +1,5 @@
 import os
+import sys
 import math
 import datetime
 import itertools
@@ -14,8 +15,8 @@ DEFAULT_DYNAMIC_FEA = ["deal", "feat"]
 def specify_retail_data_schema(
     sales = None,
     target_col_name = DEFAULT_TARGET_COL,
-    static_fea_names = DEFAULT_STATIC_FEA,
-    dynamic_fea_names = DEFAULT_DYNAMIC_FEA,
+    static_feat_names = DEFAULT_STATIC_FEA,
+    dynamic_feat_names = DEFAULT_DYNAMIC_FEA,
     description = None
     ):
     """Specify data schema of OrangeJuice dataset.
@@ -23,8 +24,8 @@ def specify_retail_data_schema(
     Args:
         sales (Pandas DataFrame): sales data in the current forecast round
         target_col_name (str): name of the target column that need to be forecasted
-        static_fea_names (list): names of the feature columns that do not change over time
-        dynamic_fea_names (list): names of the feature columns that can change over time
+        static_feat_names (list): names of the feature columns that do not change over time
+        dynamic_feat_names (list): names of the feature columns that can change over time
         description (str): description of the data (e.g., "training set", "testing set")
 
     Returns:
@@ -61,12 +62,14 @@ def specify_retail_data_schema(
 
     # Create timestamp
     df["timestamp"] = df["week"].apply(lambda x: FIRST_WEEK_START + datetime.timedelta(days=(x-1)*7))
-
-    print(sales.head())    
-    df_config = specify_data_schema(df, time_col_name="timestamp", target_col_name=target_col_name, \
-                                    id_col_names=["store", "brand"], static_fea_names=static_fea_names, \
-                                    dynamic_fea_names=dynamic_fea_names, frequency="W", \
-                                    time_format="%Y-%m-%d", description=description)
+ 
+    df_config = specify_data_schema(df, time_col_name="timestamp", 
+                                    target_col_name=target_col_name, 
+                                    frequency="W-THU", time_format="%Y-%m-%d", 
+                                    ts_id_col_names=["store", "brand"],
+                                    static_feat_names=static_feat_names, 
+                                    dynamic_feat_names=dynamic_feat_names, 
+                                    description=description)
     return df_config, df
 
 if __name__ == "__main__":

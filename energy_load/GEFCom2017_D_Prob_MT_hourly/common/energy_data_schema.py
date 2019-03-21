@@ -10,8 +10,8 @@ DEFAULT_DYNAMIC_FEA = ["DewPnt", "DryBulb", "Holiday"]
 def specify_energy_data_schema(
     df = None,
     target_col_name = DEFAULT_TARGET_COL,
-    static_fea_names = DEFAULT_STATIC_FEA,
-    dynamic_fea_names = DEFAULT_DYNAMIC_FEA,
+    static_feat_names = DEFAULT_STATIC_FEA,
+    dynamic_feat_names = DEFAULT_DYNAMIC_FEA,
     description = None
     ):
     """Specify data schema of GEFCom2017 dataset.
@@ -19,8 +19,8 @@ def specify_energy_data_schema(
     Args:
         df (Pandas DataFrame): energy demand data in the current forecast round
         target_col_name (str): name of the target column that need to be forecasted
-        static_fea_names (list): names of the feature columns that do not change over time
-        dynamic_fea_names (list): names of the feature columns that can change over time
+        static_feat_names (list): names of the feature columns that do not change over time
+        dynamic_feat_names (list): names of the feature columns that can change over time
         description (str): description of the data (e.g., "training set", "testing set")
 
     Returns:
@@ -34,10 +34,15 @@ def specify_energy_data_schema(
         df = pd.concat([train_base, train_round_1]).reset_index(drop=True)
 
     print(df.head())    
-    df_config = specify_data_schema(df, time_col_name="Datetime", target_col_name=target_col_name, \
-                                    id_col_names=["Zone"], static_fea_names=static_fea_names, \
-                                    dynamic_fea_names=dynamic_fea_names, frequency="H", \
-                                    time_format="%Y-%m-%d %H:%M:%S", description=description)
+    df_config = specify_data_schema(df, 
+                                    time_col_name="Datetime", 
+                                    target_col_name=target_col_name, 
+                                    frequency="H", 
+                                    time_format="%Y-%m-%d %H:%M:%S",
+                                    ts_id_col_names=["Zone"], 
+                                    static_feat_names=static_feat_names, 
+                                    dynamic_feat_names=dynamic_feat_names,  
+                                    description=description)
     return df_config
 
 if __name__ == "__main__":

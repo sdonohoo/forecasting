@@ -1,10 +1,13 @@
 import pandas as pd
 
 def specify_data_schema(
-        df, time_col_name, target_col_name, 
-        id_col_names, static_fea_names, 
-        dynamic_fea_names, frequency, 
-        time_format, description=None
+        df, time_col_name, 
+        target_col_name, 
+        frequency, time_format,
+        ts_id_col_names=None, 
+        static_feat_names=None, 
+        dynamic_feat_names=None,  
+        description=None
         ):
         """Specify the schema of a time series dataset.
 
@@ -12,18 +15,18 @@ def specify_data_schema(
             df (Pandas DataFrame): input time series dataframe
             time_col_name (str): name of the timestamp column
             target_col_name (str): name of the target column that need to be forecasted
-            id_col_names (list): names of the columns for identifying a unique time series of
-                                 the target variable
-            static_fea_names (list): names of the feature columns that do not change over time
-            dynamic_fea_names (list): names of the feature columns that can change over time
             frequency (str): frequency of the timestamps represented by the time series offset
                              aliases used in Pandas (e.g. "W" for weekly frequency). Please see
                              https://pandas.pydata.org/pandas-docs/stable/user_guide/timeseries.html#timeseries-offset-aliases 
                              for details.
             time_format (str): format of the timestamps (e.g., "%d.%m.%Y %H:%M:%S")
+            ts_id_col_names (list): names of the columns for identifying a unique time series of
+                                 the target variable
+            static_feat_names (list): names of the feature columns that do not change over time
+            dynamic_feat_names (list): names of the feature columns that can change over time
             description (str): description of the data (e.g., "training set", "testing set")
 
-            Note that neither static_fea_names nor dynamic_fea_names should include the timestamp
+            Note that neither static_feat_names nor dynamic_feat_names should include the timestamp
             column and the target column. 
 
         Returns:
@@ -35,21 +38,24 @@ def specify_data_schema(
         df_col_names = list(df)  
         _check_col_names(df_col_names, time_col_name, "timestamp")
         _check_col_names(df_col_names, target_col_name, "target")
-        _check_col_names(df_col_names, id_col_names, "name_list")
-        _check_col_names(df_col_names, static_fea_names, "name_list")
-        _check_col_names(df_col_names, dynamic_fea_names, "name_list")
-        _check_frequency_format(df, time_col_name, frequency)
         _check_time_format(df, time_col_name, time_format)
-        _check_static_fea(df, id_col_names, static_fea_names)
+        _check_frequency(df, time_col_name, frequency, time_format, ts_id_col_names)
+        if ts_id_col_names is not None:
+            _check_col_names(df_col_names, ts_id_col_names, "name_list")
+        if static_feat_names is not None:
+            _check_col_names(df_col_names, static_feat_names, "name_list")
+            _check_static_fea(df, ts_id_col_names, static_feat_names)
+        if dynamic_feat_names is not None:
+            _check_col_names(df_col_names, dynamic_feat_names, "name_list")
 
         # Configuration of the time series data
         df_config = {"time_col_name": time_col_name,
                      "target_col_name": target_col_name,
-                     "id_col_names": id_col_names,
-                     "static_fea_names": static_fea_names,
-                     "dynamic_fea_names": dynamic_fea_names,
                      "frequency": frequency,
                      "time_format": time_format,
+                     "ts_id_col_names": ts_id_col_names,
+                     "static_feat_names": static_feat_names,
+                     "dynamic_feat_names": dynamic_feat_names,
                      "description": description
                     }
         return df_config
@@ -67,15 +73,6 @@ def _check_col_names(df_col_names, input_col_names, input_type):
             if c not in df_col_names:
                 raise ValueError(c + " is an invalid column name. It cannot be found in the input dataframe.")
 
-def _check_frequency_format(df, time_col_name, frequency):
-    """Check if the data frequency is valid.
-    """        
-    try:
-        pd.date_range(df[time_col_name][0], periods=3, freq=frequency)
-    except:
-        raise ValueError("Input data frequency is invalid. Please use the aliases in " +
-                         "https://pandas.pydata.org/pandas-docs/stable/user_guide/timeseries.html#timeseries-offset-aliases")
-
 def _check_time_format(df, time_col_name, time_format):
     """Check if the timestamp format is valid.
     """   
@@ -83,28 +80,47 @@ def _check_time_format(df, time_col_name, time_format):
         pd.to_datetime(df[time_col_name], format=time_format)
     except:
         raise ValueError("Incorrect date format is specified.")
+        
+def _check_frequency(df, time_col_name, frequency, time_format, ts_id_col_names):
+    """Check if the data frequency is valid.
+    """        
+    try:
+        df[time_col_name] = pd.to_datetime(df[time_col_name], format=time_format)
+        timestamps_all = pd.date_range(min(df[time_col_name]), end=max(df[time_col_name]), freq=frequency)
+    except:
+        raise ValueError("Input data frequency is invalid. Please use the aliases in " +
+                         "https://pandas.pydata.org/pandas-docs/stable/user_guide/timeseries.html#timeseries-offset-aliases")
 
-def _check_static_fea(df, id_col_names, static_fea_names):
-    """Check if the input static features change over time and include id_col_names.
+    if not all(df.groupby(ts_id_col_names).apply(lambda x: set(x[time_col_name]) <= set(timestamps_all))):
+        raise ValueError("Timestamp(s) with irregular frequency in the input dataframe. Please make sure the frequency " + 
+                         "of each time series is as what specified by \'frequency\'.")
+
+def _check_static_fea(df, ts_id_col_names, static_feat_names):
+    """Check if the input static features change over time and include ts_id_col_names.
     """ 
-    for fea in static_fea_names:
-        if df.groupby(id_col_names)[fea].nunique().max() > 1:
+    for fea in static_feat_names:
+        if df.groupby(ts_id_col_names)[fea].nunique().max() > 1:
             raise ValueError("Input feature column {} is supposed to be static but it is not.".format(fea))
-    if not set(id_col_names) <= set(static_fea_names):
+    if not set(ts_id_col_names) <= set(static_feat_names):
         raise ValueError("Static features do not include all the columns necessary for uniquely specifying each target time series.")
     
 if __name__ == "__main__":
-    sales = {"timestamp": ["01/01/2001", "02/01/2001", "02/01/2001"], "sales": [1234, 2345, 1324],  
-            "store": ["1001", "1002", "1001"], "brand": ["1", "2", "1"], 
-            "income": [53000, 65000, 53000], "price": [10, 12, 11]}
+    sales = {"timestamp": ["01/01/2001", "03/01/2001", "02/01/2001"], 
+             "sales": [1234, 2345, 1324],  
+             "store": ["1001", "1002", "1001"], 
+             "brand": ["1", "2", "1"], 
+             "income": [53000, 65000, 53000], 
+             "price": [10, 12, 11]}
     df = pd.DataFrame(sales)
     time_col_name = "timestamp"
     target_col_name = "sales"
-    id_col_names = ["store", "brand"]
-    static_fea_names = id_col_names + ["income"]
-    dynamic_fea_names = ["price"]
+    ts_id_col_names = ["store", "brand"]
+    static_feat_names = ts_id_col_names + ["income"]
+    dynamic_feat_names = ["price"]
     frequency = "MS" #monthly start
     time_format = "%m/%d/%Y"
-    df_config = specify_data_schema(df, time_col_name, target_col_name, id_col_names, \
-                                    static_fea_names, dynamic_fea_names, frequency, time_format)
+    df_config = specify_data_schema(df, time_col_name, \
+                                    target_col_name, frequency, \
+                                    time_format, ts_id_col_names, \
+                                    static_feat_names, dynamic_feat_names)
     print(df_config)

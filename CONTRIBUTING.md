@@ -40,7 +40,7 @@ This project has adopted the [Microsoft Open Source Code of Conduct](https://ope
 
 For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
 
-Apart from the official Code of Conduct developed by Microsoft, in the Recommenders team we adopt the following behaviors, to ensure a great working environment:
+Apart from the official Code of Conduct developed by Microsoft, in the Forecasting team we adopt the following behaviors, to ensure a great working environment:
 
 #### Do not point fingers
 Let’s be constructive.

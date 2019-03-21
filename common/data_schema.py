@@ -91,7 +91,9 @@ def _check_frequency(df, time_col_name, frequency, time_format, ts_id_col_names)
         raise ValueError("Input data frequency is invalid. Please use the aliases in " +
                          "https://pandas.pydata.org/pandas-docs/stable/user_guide/timeseries.html#timeseries-offset-aliases")
 
-    if not all(df.groupby(ts_id_col_names).apply(lambda x: set(x[time_col_name]) <= set(timestamps_all))):
+    condition1 = (ts_id_col_names is None) and (not set(df[time_col_name]) <= set(timestamps_all))
+    condition2 = (ts_id_col_names is not None) and (not all(df.groupby(ts_id_col_names).apply(lambda x: set(x[time_col_name]) <= set(timestamps_all))))
+    if condition1 or condition2:
         raise ValueError("Timestamp(s) with irregular frequency in the input dataframe. Please make sure the frequency " + 
                          "of each time series is as what specified by \'frequency\'.")
 
@@ -99,12 +101,15 @@ def _check_static_fea(df, ts_id_col_names, static_feat_names):
     """Check if the input static features change over time and include ts_id_col_names.
     """ 
     for fea in static_feat_names:
-        if df.groupby(ts_id_col_names)[fea].nunique().max() > 1:
+        condition1 = (ts_id_col_names is None) and (df[fea].nunique() > 1)
+        condition2 = (ts_id_col_names is not None) and (df.groupby(ts_id_col_names)[fea].nunique().max() > 1)
+        if condition1 or condition2:
             raise ValueError("Input feature column {} is supposed to be static but it is not.".format(fea))
-    if not set(ts_id_col_names) <= set(static_feat_names):
+    if (ts_id_col_names is not None) and (not set(ts_id_col_names) <= set(static_feat_names)):
         raise ValueError("Static features do not include all the columns necessary for uniquely specifying each target time series.")
     
 if __name__ == "__main__":
+    # Case 1
     sales = {"timestamp": ["01/01/2001", "03/01/2001", "02/01/2001"], 
              "sales": [1234, 2345, 1324],  
              "store": ["1001", "1002", "1001"], 
@@ -116,6 +121,26 @@ if __name__ == "__main__":
     target_col_name = "sales"
     ts_id_col_names = ["store", "brand"]
     static_feat_names = ts_id_col_names + ["income"]
+    dynamic_feat_names = ["price"]
+    frequency = "MS" #monthly start
+    time_format = "%m/%d/%Y"
+    df_config = specify_data_schema(df, time_col_name, \
+                                    target_col_name, frequency, \
+                                    time_format, ts_id_col_names, \
+                                    static_feat_names, dynamic_feat_names)
+    print(df_config)
+    # Case 2
+    sales = {"timestamp": ["01/01/2001", "02/01/2001", "03/02/2001"], 
+             "sales": [1234, 2345, 1324],  
+             "store": ["1001", "1001", "1001"], 
+             "brand": ["1", "1", "1"], 
+             "income": [53000, 53000, 53000], 
+             "price": [10, 12, 11]}
+    df = pd.DataFrame(sales)
+    time_col_name = "timestamp"
+    target_col_name = "sales"
+    ts_id_col_names = None
+    static_feat_names = ["store", "brand", "income"]
     dynamic_feat_names = ["price"]
     frequency = "MS" #monthly start
     time_format = "%m/%d/%Y"

@@ -33,7 +33,7 @@ def specify_energy_data_schema(
         train_round_1 = pd.read_csv(os.path.join(DATA_DIR, "train", "train_round_1.csv"),parse_dates=["Datetime"])
         df = pd.concat([train_base, train_round_1]).reset_index(drop=True)
 
-    print(df.head())    
+    #print(df.head())    
     df_config = specify_data_schema(df, 
                                     time_col_name="Datetime", 
                                     target_col_name=target_col_name, 

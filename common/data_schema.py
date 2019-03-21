@@ -91,8 +91,10 @@ def _check_frequency(df, time_col_name, frequency, time_format, ts_id_col_names)
         raise ValueError("Input data frequency is invalid. Please use the aliases in " +
                          "https://pandas.pydata.org/pandas-docs/stable/user_guide/timeseries.html#timeseries-offset-aliases")
 
-    condition1 = (ts_id_col_names is None) and (not set(df[time_col_name]) <= set(timestamps_all))
-    condition2 = (ts_id_col_names is not None) and (not all(df.groupby(ts_id_col_names).apply(lambda x: set(x[time_col_name]) <= set(timestamps_all))))
+    condition1 = (ts_id_col_names is None) and \
+                 (not set(df[time_col_name]) <= set(timestamps_all))
+    condition2 = (ts_id_col_names is not None) and \
+                 (not all(df.groupby(ts_id_col_names).apply(lambda x: set(x[time_col_name]) <= set(timestamps_all))))
     if condition1 or condition2:
         raise ValueError("Timestamp(s) with irregular frequency in the input dataframe. Please make sure the frequency " + 
                          "of each time series is as what specified by \'frequency\'.")
@@ -130,7 +132,7 @@ if __name__ == "__main__":
                                     static_feat_names, dynamic_feat_names)
     print(df_config)
     # Case 2
-    sales = {"timestamp": ["01/01/2001", "02/01/2001", "03/02/2001"], 
+    sales = {"timestamp": ["01/01/2001", "02/01/2001", "03/01/2001"], 
              "sales": [1234, 2345, 1324],  
              "store": ["1001", "1001", "1001"], 
              "brand": ["1", "1", "1"], 

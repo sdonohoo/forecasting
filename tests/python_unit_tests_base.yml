@@ -15,11 +15,11 @@ pool:
 steps:
 
 - bash: |
-    echo Hello
     echo "##vso[task.prependpath]/data/anaconda/bin"
   displayName: Add Conda to PATH
 
 - bash: |
+    . /anaconda/etc/profile.d/conda.sh
     conda activate forecasting_base
   displayName: 'Build Configuration'
 

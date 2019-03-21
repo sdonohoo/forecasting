@@ -15,7 +15,8 @@ pool:
 steps:
 
 - bash: |
-    echo "##vso[task.prependpath]/data/anaconda/bin"
+    #echo "##vso[task.prependpath]/data/anaconda/bin"
+    echo ". /data/anaconda/etc/profile.d/conda.sh" >> ~./bashrc
   displayName: Add Conda to PATH
 
 - bash: |

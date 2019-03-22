@@ -1,10 +1,81 @@
-from sklearn.base import BaseEstimator
+"""
+A set of classes  for creating normalized time features. These types of
+features are useful for capturing trend in time series data.
+"""
+from abc import abstractmethod
 import warnings
 import pandas as pd
 from ..utils import is_datetime_like
+from base_ts_featurizer import BaseTSFeaturizer
 
 
-class YearNormalizer(BaseEstimator):
+class TemporalNormalizer(BaseTSFeaturizer):
+    """
+    Base abstract class for creating normalized time features.
+    Child class should implement _get_min_max_time and _normalize_time to
+    create normalized features at a specific granularity, e.g. normalized
+    year, normalized day.
+    """
+    @abstractmethod
+    def _get_min_max_time(self, time_col):
+        """
+        Returns (min_time, max_time) used by _normalize_time to normalize
+        time.
+        """
+        pass
+
+    @abstractmethod
+    def _normalize_time(self, time_col):
+        """Returns normalized time_col."""
+        pass
+
+    def fit(self, X, y=None):
+        """
+        Computes and returns the minimum and maximum time on the training data.
+
+        Args:
+             X(pandas.DataFrame): Input data frame to fit on.
+
+        Returns:
+            TemporalNormalizer: The fitted temporal normalizer.
+        """
+        time_col = self._get_time_col(X)
+        self.min_time, self.max_time = self._get_min_max_time(time_col)
+
+        self._is_fit = True
+
+        return self
+
+    def transform(self, X):
+        """
+        Creates a new column by normalizing the time column of the input data
+        at certain granularity, e.g. day, hour, year, etc.
+        Args:
+            X(pandas.DataFrame): Input data frame with the time column to
+                normalize.
+        Returns:
+            pandas.DataFrame: Output data frame with the normalized time
+            added to the input data frame.
+        """
+        if not self._is_fit:
+            raise Exception('The featurizer needs to be fitted first to be '
+                            'used to transform data.')
+        self._check_config_cols_exist(X)
+        if self._output_col_name in X.columns:
+            warnings.warn('Column {} is already in the data frame, '
+                          'it will be overwritten.'.
+                          format(self._output_col_name))
+
+        time_col = X[self.time_col_name]
+        if not is_datetime_like(time_col):
+            time_col = pd.to_datetime(time_col, format=self.time_format)
+
+        X[self._output_col_name] = self._normalize_time(time_col)
+
+        return X
+
+
+class YearNormalizer(BaseTSFeaturizer):
     """
     Creates a temporal feature indicating the position of the year of a record
     in the entire time period under consideration, normalized to be between
@@ -16,43 +87,29 @@ class YearNormalizer(BaseEstimator):
 
     """
     def __init__(self, df_config):
-        self.time_col_name = df_config['time_col_name']
-        self.time_format = df_config['time_format']
+        super(YearNormalizer, self).__init__(df_config)
         self._is_fit = False
+        self._output_col_name = 'normalized_year'
 
-    def fit(self, X, y=None):
-        datetime_col = X[self.time_col_name]
-        if not is_datetime_like(datetime_col):
-            datetime_col = pd.to_datetime(datetime_col, format=self.time_format)
-        self.min_year = datetime_col.dt.year.min()
-        self.max_year = datetime_col.dt.year.max()
-        self._is_fit = True
+    @classmethod
+    def _get_min_max_time(cls, time_col):
+        min_year = time_col.dt.year.min()
+        max_year = time_col.dt.year.max()
 
-        return self
+        return min_year, max_year
 
-    def transform(self, X):
-        if not self._is_fit:
-            raise Exception('The featurizer needs to be fitted first to be '
-                            'used to transform data.')
-
-        if 'normalized_year' in X.columns:
-            warnings.warn('Column {} is already in the data frame, '
-                          'it will be overwritten.'.format('normalized_year'))
-
-        datetime_col = X[self.time_col_name]
-        if not is_datetime_like(datetime_col):
-            datetime_col = pd.to_datetime(datetime_col, format=self.time_format)
-        year = datetime_col.dt.year
-        if self.max_year != self.min_year:
-            X['normalized_year'] = \
-                (year - self.min_year) / (self.max_year - self.min_year)
+    def _normalize_time(self, time_col):
+        year = time_col.dt.year
+        if self.max_time != self.min_time:
+            normalized_time = \
+                (year - self.min_time) / (self.max_time - self.min_time)
         else:
-            X['normalized_year'] = 0
+            normalized_time = 0
 
-        return X
+        return normalized_time
 
 
-class DateNormalizer(BaseEstimator):
+class DateNormalizer(BaseTSFeaturizer):
     """
     Creates a temporal feature indicating the position of the date of a record
     in the entire time period under consideration, normalized to be between
@@ -64,45 +121,31 @@ class DateNormalizer(BaseEstimator):
     """
 
     def __init__(self, df_config):
-        self.time_col_name = df_config['time_col_name']
-        self.time_format = df_config['time_format']
+        super(DateNormalizer, self).__init__(df_config)
         self._is_fit = False
+        self._output_col_name = 'normalized_date'
 
-    def fit(self, X, y=None):
-        datetime_col = X[self.time_col_name]
-        if not is_datetime_like(datetime_col):
-            datetime_col = pd.to_datetime(datetime_col, format=self.time_format)
-        self.min_date = datetime_col.dt.date.min()
-        self.max_date = datetime_col.dt.date.max()
-        self._is_fit = True
+    @classmethod
+    def _get_min_max_time(cls, time_col):
+        min_date = time_col.dt.date.min()
+        max_date = time_col.dt.date.max()
 
-        return self
+        return min_date, max_date
 
-    def transform(self, X):
-        if not self._is_fit:
-            raise Exception('The featurizer needs to be fitted first to be '
-                            'used to transform data.')
+    def _normalize_time(self, time_col):
+        date = time_col.dt.date
+        current_date = (date - self.min_time).apply(lambda x: x.days)
 
-        if 'normalized_date' in X.columns:
-            warnings.warn('Column {} is already in the data frame, '
-                          'it will be overwritten.'.format('normalized_date'))
-
-        datetime_col = X[self.time_col_name]
-        if not is_datetime_like(datetime_col):
-            datetime_col = pd.to_datetime(datetime_col, format=self.time_format)
-        date = datetime_col.dt.date
-        current_date = (date - self.min_date).apply(lambda x: x.days)
-
-        if self.max_date != self.min_date:
-            X['normalized_date'] = \
-                current_date / (self.max_date - self.min_date).days
+        if self.max_time != self.min_time:
+            normalized_time = \
+                current_date / (self.max_time - self.min_time).days
         else:
-            X['normalized_date'] = 0
+            normalized_time = 0
 
-        return X
+        return normalized_time
 
 
-class DateHourNormalizer(BaseEstimator):
+class DateHourNormalizer(BaseTSFeaturizer):
     """
     Creates a temporal feature indicating the position of the hour of a record
     in the entire time period under consideration, normalized to be between
@@ -113,43 +156,28 @@ class DateHourNormalizer(BaseEstimator):
             features on.
     """
     def __init__(self, df_config):
-        self.time_col_name = df_config['time_col_name']
-        self.time_format = df_config['time_format']
+        super(DateHourNormalizer, self).__init__(df_config)
         self._is_fit = False
+        self._output_col_name = 'normalized_datehour'
 
-    def fit(self, X, y=None):
-        datetime_col = X[self.time_col_name]
-        if not is_datetime_like(datetime_col):
-            datetime_col = pd.to_datetime(datetime_col, format=self.time_format)
-        self.min_datehour = datetime_col.min()
-        self.max_datehour = datetime_col.max()
-        self._is_fit = True
+    @classmethod
+    def _get_min_max_time(cls, time_col):
+        min_datehour = time_col.min()
+        max_datehour = time_col.max()
 
-        return self
+        return min_datehour, max_datehour
 
-    def transform(self, X):
-        if not self._is_fit:
-            raise Exception('The featurizer needs to be fitted first to be '
-                            'used to transform data.')
-
-        if 'normalized_datehour' in X.columns:
-            warnings.warn(
-                'Column {} is already in the data frame, '
-                'it will be overwritten.'.format('normalized_datehour'))
-
-        datetime_col = X[self.time_col_name]
-        if not is_datetime_like(datetime_col):
-            datetime_col = pd.to_datetime(datetime_col, format=self.time_format)
-        current_datehour = (datetime_col - self.min_datehour)\
+    def _normalize_time(self, time_col):
+        current_datehour = (time_col - self.min_time)\
             .apply(lambda x: x.days * 24 + x.seconds / 3600)
 
-        max_min_diff = self.max_datehour - self.min_datehour
+        max_min_diff = self.max_time - self.min_time
 
         if max_min_diff != 0:
-            X['normalized_datehour'] = \
+            normalized_time = \
                 current_datehour/(
                         max_min_diff.days * 24 + max_min_diff.seconds / 3600)
         else:
-            X['normalized_datehour'] = 0
+            normalized_time = 0
 
-        return X
+        return normalized_time

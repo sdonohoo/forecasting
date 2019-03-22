@@ -1,10 +1,10 @@
 # Pull request against these branches will trigger this build
-pr:
+#pr:
 #- staging
 #- master
 
 # Any commit to these branches will trigger the build.
-trigger:
+#trigger:
 #- staging
 #- master
 

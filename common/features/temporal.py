@@ -3,6 +3,7 @@ import calendar
 import pandas as pd
 import numpy as np
 import warnings
+from math import ceil
 
 from abc import ABC, abstractmethod
 from base_ts_estimators import BaseTSFeaturizer
@@ -90,9 +91,12 @@ class TemporalFeaturizer(BaseTSFeaturizer):
         return time_col.dt.dayofyear
 
     def week_of_month(self, time_col):
-        """Returns the week of month from a datetime column"""
-        #Placeholder for week of month feature
-        pass
+        """Returns the week of month from a datetime column."""
+        first_day = time_col.dt.replace(day=1)
+        dom = time_col.dt.day
+        adjusted_dom = dom + first_day.weekday()
+        wom = int(ceil(adjusted_dom / 7.0))
+        return wom
 
     def hour_of_year(self, time_col):
         """

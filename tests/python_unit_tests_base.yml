@@ -1,12 +1,12 @@
-# Pull request against these pipelines will trigger this build
+# Pull request against these branches will trigger this build
 pr:
-- staging
-- master
+#- staging
+#- master
 
-# Any commit to this branch will trigger the build.
+# Any commit to these branches will trigger the build.
 trigger:
-- staging
-- master
+#- staging
+#- master
 
 pool:
   name: ForecastingBP
@@ -16,18 +16,14 @@ steps:
 
 - bash: |
     echo "##vso[task.prependpath]/data/anaconda/bin"
-  displayName: Add Conda to PATH
-
-# - bash: |
-#     conda activate forecasting_base
-#   displayName: 'Build Configuration'
+  displayName: Add conda to PATH
 
 - bash: |
     . /anaconda/etc/profile.d/conda.sh && \
     conda activate forecasting_base && \
     pytest tests/unit -m "not notebooks and not spark and not gpu" --junitxml=reports/test-unit.xml && \
     conda deactivate
-  displayName: 'Run Unit tests'
+  displayName: 'Run unit tests'
 
 - task: PublishTestResults@2
   inputs:

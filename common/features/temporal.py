@@ -7,8 +7,6 @@ from math import ceil
 
 from abc import ABC, abstractmethod
 from base_ts_estimators import BaseTSFeaturizer
-from common.utils import is_datetime_like
-
 
 class TemporalFeaturizer(BaseTSFeaturizer):
     """
@@ -317,9 +315,7 @@ class BaseFourierFeaturizer(BaseTSFeaturizer, ABC):
         """
         self._check_config_cols_exist(X)
         X = X.copy()
-        datetime_col = X[self.time_col_name]
-        if not is_datetime_like(datetime_col):
-            datetime_col = pd.to_datetime(datetime_col, format=self.time_format)
+        datetime_col = self._get_time_values(X)
 
         time_values = self._get_time_values(datetime_col)
         output_dict = {}

@@ -6,10 +6,10 @@ from abc import abstractmethod
 import warnings
 import pandas as pd
 from ..utils import is_datetime_like
-from base_ts_featurizer import BaseTSFeaturizer
+from .base_ts_estimators import BaseTSFeaturizer
 
 
-class TemporalNormalizer(BaseTSFeaturizer):
+class BaseTemporalNormalizer(BaseTSFeaturizer):
     """
     Base abstract class for creating normalized time features.
     Child class should implement _get_min_max_time and _normalize_time to
@@ -75,7 +75,7 @@ class TemporalNormalizer(BaseTSFeaturizer):
         return X
 
 
-class YearNormalizer(BaseTSFeaturizer):
+class YearNormalizer(BaseTemporalNormalizer):
     """
     Creates a temporal feature indicating the position of the year of a record
     in the entire time period under consideration, normalized to be between
@@ -109,7 +109,7 @@ class YearNormalizer(BaseTSFeaturizer):
         return normalized_time
 
 
-class DateNormalizer(BaseTSFeaturizer):
+class DateNormalizer(BaseTemporalNormalizer):
     """
     Creates a temporal feature indicating the position of the date of a record
     in the entire time period under consideration, normalized to be between
@@ -145,7 +145,7 @@ class DateNormalizer(BaseTSFeaturizer):
         return normalized_time
 
 
-class DateHourNormalizer(BaseTSFeaturizer):
+class DateHourNormalizer(BaseTemporalNormalizer):
     """
     Creates a temporal feature indicating the position of the hour of a record
     in the entire time period under consideration, normalized to be between

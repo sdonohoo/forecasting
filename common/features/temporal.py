@@ -8,6 +8,7 @@ from math import ceil
 from abc import ABC, abstractmethod
 from base_ts_estimators import BaseTSFeaturizer
 
+
 class TemporalFeaturizer(BaseTSFeaturizer):
     """
     Computes commonly used time-related features.
@@ -24,7 +25,7 @@ class TemporalFeaturizer(BaseTSFeaturizer):
                 day_of_week
                 day_of_month
                 day_of_year
-                hour_of_year
+                normalized_hour_of_year
                 week_of_year
 
             If feature_list is not specified, a default set of features are
@@ -61,7 +62,8 @@ class TemporalFeaturizer(BaseTSFeaturizer):
                                       'day_of_week': self.day_of_week,
                                       'day_of_month': self.day_of_month,
                                       'day_of_year': self.day_of_year,
-                                      'hour_of_year': self.hour_of_year,
+                                      'normalized_hour_of_year':
+                                          self.normalized_hour_of_year,
                                       'week_of_month': self.week_of_month}
 
     def hour_of_day(self, time_col):
@@ -96,9 +98,9 @@ class TemporalFeaturizer(BaseTSFeaturizer):
         wom = int(ceil(adjusted_dom / 7.0))
         return wom
 
-    def hour_of_year(self, time_col):
+    def normalized_hour_of_year(self, time_col):
         """
-        Hour of year is a cyclic variable that indicates the annual
+        Normalized hour of year is a cyclic variable that indicates the annual
         position of a particular hour on a particular day and repeats each
         year. It is each year linearly increasing over time going from 0 on
         January 1 at 00:00 to 1 on December 31st at 23:00. The values
@@ -114,17 +116,18 @@ class TemporalFeaturizer(BaseTSFeaturizer):
         time_of_year = pd.DataFrame({'day_of_year': time_col.dt.dayofyear,
                                      'hour_of_day': time_col.dt.hour,
                                      'year': time_col.dt.year})
-        time_of_year['hour_of_year'] = \
+        time_of_year['normalized_hour_of_year'] = \
             (time_of_year['day_of_year'] - 1) * 24 + time_of_year['hour_of_day']
 
         time_of_year['year_length'] = \
             time_of_year['year'].apply(
                 lambda y: 366 if calendar.isleap(y) else 365)
 
-        time_of_year['hour_of_year'] = \
-            time_of_year['hour_of_year'] / (time_of_year['year_length'] * 24 - 1)
+        time_of_year['normalized_hour_of_year'] = \
+            time_of_year['normalized_hour_of_year'] / \
+            (time_of_year['year_length'] * 24 - 1)
 
-        return time_of_year['hour_of_year'].values
+        return time_of_year['normalized_hour_of_year'].values
 
     def fit(self, X, y=None):
         """
@@ -182,7 +185,6 @@ class DayTypeFeaturizer(BaseTSFeaturizer):
         weekday_type_map(dict, optional): Mapping multiple weekdays to the same
             number. By default, Tuesday (1) and Thursday (3) are mapped to 2,
             so that Tuesday, Wednesday, and Thursday are treated the same.
-
         holiday_code(int, optional): Integer used to represent holidays.
             Default value is 7.
         semi_holiday_code(int, optional): Integer used to represent days

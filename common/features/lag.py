@@ -5,7 +5,7 @@ import numpy as np
 from functools import reduce
 
 from base_ts_estimators import BaseTSFeaturizer
-from common.utils import is_datetime_like, convert_to_tsdf
+from common.utils import convert_to_tsdf
 
 
 class BaseLagFeaturizer(BaseTSFeaturizer):
@@ -26,35 +26,15 @@ class BaseLagFeaturizer(BaseTSFeaturizer):
             self._input_col_names = [val]
 
     @property
-    def max_test_timestamp(self):
-        return self._max_test_timestamp
+    def max_horizon(self):
+        return self._max_horizon
 
-    @max_test_timestamp.setter
-    def max_test_timestamp(self, val):
-        if val is not None and not is_datetime_like(val):
-            self._max_test_timestamp = \
-                pd.to_datetime(val, format=self.time_format)
-        else:
-            self._max_test_timestamp = val
-
-    @property
-    def future_value_available(self):
-        return self._future_value_available
-
-    @future_value_available.setter
-    def future_value_available(self, val):
-        if not val and not self.max_test_timestamp:
-            raise Exception('max_test_timestamp must be set when '
+    @max_horizon.setter
+    def max_horizon(self, val):
+        if not val and not self.future_value_available:
+            raise Exception('max_horizon must be set when '
                             'future_value_available is False')
-        self._future_value_available = val
-
-    @property
-    def training_df(self):
-        return self._training_df
-
-    @training_df.setter
-    def training_df(self, val):
-        self._training_df = val
+        self._max_horizon = val
 
     @abstractmethod
     def _lag_single_ts(self, input_df, forecast_creation_time):
@@ -88,7 +68,7 @@ class BaseLagFeaturizer(BaseTSFeaturizer):
         for lag in lags:
             df_shifted = input_df[self.input_col_names] \
                 .shift(lag, freq=frequency)
-            df_shifted.columns = [x + '_lag' + str(lag) for x in
+            df_shifted.columns = [x + '_lag_' + str(lag) for x in
                                   df_shifted.columns]
             df_list.append(df_shifted)
         lag_df = reduce(
@@ -102,7 +82,7 @@ class BaseLagFeaturizer(BaseTSFeaturizer):
     def fit(self, X, y=None):
         """
         To be compatible with scikit-learn interface. Nothing needs to be
-        done at the fit stage for this transformer
+        done at the fit stage for this featurizer.
         """
         return self
 
@@ -122,25 +102,26 @@ class BaseLagFeaturizer(BaseTSFeaturizer):
                     self.ts_id_col_names
         merge_col_names = [self.time_col_name] + self.ts_id_col_names
 
-        if self.training_df is not None:
-            self._check_config_cols_exist(self.training_df)
-            forecast_creation_time = self.training_df[self.time_col_name].max()
-            X_tmp = pd.concat([self.training_df, X], sort=True)
+        if self.train_df is not None:
+            self._check_config_cols_exist(self.train_df)
+            time_col = self._get_time_col(self.train_df)
+            forecast_creation_time = time_col.max()
+            X_tmp = pd.concat([self.train_df, X], sort=True)
             X_tmp = X_tmp[col_names].copy()
         else:
+            time_col = self._get_time_col(X)
             if not self.future_value_available:
                 # Compute an imaginary forecast creation time for the training
-                # data based on the maximum timestamp to forecast on
-                max_train_timestamp = X[self.time_col_name].max()
-                train_test_timestamp_diff = \
-                    self.max_test_timestamp - max_train_timestamp
+                # data based on the maximum horizon to forecast on
+                max_train_timestamp = time_col.max()
                 forecast_creation_time = \
-                    max_train_timestamp - train_test_timestamp_diff
+                    max_train_timestamp - pd.to_timedelta(self.max_horizon,
+                                                          self.frequency)
             else:
-                forecast_creation_time = X[self.time_col_name].max()
+                forecast_creation_time = time_col.max()
             X_tmp = X[col_names].copy()
 
-        if self.ts_id_col_names is None:
+        if len(self.ts_id_col_names) == 0:
             X_lag_tmp = self._lag_single_ts(X_tmp, forecast_creation_time)
         else:
             X_lag_tmp = X_tmp.groupby(self.ts_id_col_names).\
@@ -148,14 +129,14 @@ class BaseLagFeaturizer(BaseTSFeaturizer):
 
             X_lag_tmp.reset_index(inplace=True)
 
-        if self.training_df is not None:
+        if self.train_df is not None:
             X_lag_tmp = X_lag_tmp.loc[X_lag_tmp[self.time_col_name] >
                                       forecast_creation_time].copy()
         X = pd.merge(X, X_lag_tmp, on=merge_col_names)
 
         if X.shape[0] == 0:
             raise Exception('The featurizer output is empty. Set the '
-                            'training_df property of the featurizer to '
+                            'train_df property of the featurizer to '
                             'None if transforming training data.')
         return X
 
@@ -237,21 +218,24 @@ class LagFeaturizer(BaseLagFeaturizer):
         future_value_available(bool): Whether future values of the input
             columns are available at the forecast creation time. Default
             value is False.
-        max_test_timestamp(pandas.datetime): Maximum timestamp of the testing
-            data to generate forecasting on. This value is needed to prevent
-            creating lag features on the training data that are not available
-            for the testing data. For example, the features and models are
-            created on week 7 to forecast week 8 to week 10. It would not make
-            sense to create a lag feature using data from week 8 and
-            week 9, because they are not available at the forecast creation
-            time. Thus, it does not make sense to create a lag
-            feature using data from week 5 and week 6 for week 7.
-        training_df(pandas.DataFrame): Training data needed to compute lag
+        max_horizon(int): Maximum number of steps ahead to forecast. The step
+            unit is the frequency of the data.
+            This value is needed to prevent creating features on the
+            training data that are not available for the testing data. For
+            example, the features and models are created on week 7 to
+            forecast week 8 to week 10. It would not make sense to create a
+            feature using data from week 8 and week 9, because they are not
+            available at the forecast creation  time. Thus, it does not make
+            sense to create a feature using data from week 5 and week 6 for
+            week 7.
+            When future_value_available is False, max_horizon must be
+            specified.
+        train_df(pandas.DataFrame): Training data needed to compute lag
             features on testing data.
             Note: this property must be None when transforming the
-            training data, and training_df can only be passed after
+            training data, and train_df can only be passed after
             transforming the training data.  It's not recommended to save a
-            pipeline with training_df not set to None, because it results in a
+            pipeline with train_df not set to None, because it results in a
             large pipeline object, especially when you have multiple
             featurizers requiring the training data at scoring time.
             To set this value on in a pipeline, use the following code
@@ -261,22 +245,34 @@ class LagFeaturizer(BaseLagFeaturizer):
             creating the pipeline.
     """
     def __init__(self, df_config, input_col_names, lags,
-                 future_value_available=False, max_test_timestamp=None,
-                 training_df=None):
+                 future_value_available=False, max_horizon=None,
+                 train_df=None):
         super(LagFeaturizer, self).__init__(df_config)
 
         self.input_col_names = input_col_names
-        self.lags = lags
-        self.max_test_timestamp = max_test_timestamp
         self.future_value_available = future_value_available
 
+        # max_horizon and lags must be set after future_value_available is set,
+        # because they depends on it.
+        self.max_horizon = max_horizon
+        self.lags = lags
+
+        self.train_df = train_df
+
+    @property
+    def lags(self):
+        return self._lags
+
+    @lags.setter
+    def lags(self, val):
+        if not isinstance(val, list):
+            val = [val]
         if not self.future_value_available:
-            for lag in lags:
+            for lag in val:
                 if lag < 0:
                     raise Exception('lag can not be negative when '
                                     'future_value_available is False')
-
-        self.training_df = training_df
+        self._lags = val
 
     def _lag_single_ts(self, input_df, forecast_creation_time):
         """
@@ -323,12 +319,12 @@ class SameWeekOfYearLagFeaturizer(BasePeriodicLagFeaturizer):
             features on.
         input_col_names(str or list of str): Names of the columns to create the
             lag feature on.
-        training_df(pd.DataFrame): Training data needed to compute lag
+        train_df(pd.DataFrame): Training data needed to compute lag
             features on testing data.
             Note: this property must be None when transforming the
-            training data, and training_df can only be passed after
+            training data, and train_df can only be passed after
             transforming the training data.  It's not recommended to save a
-            pipeline with training_df not set to None, because it results in a
+            pipeline with train_df not set to None, because it results in a
             large pipeline object, especially when you have multiple
             featurizers requiring the training data at scoring time.
             To set this value on in a pipeline, use the following code
@@ -347,24 +343,25 @@ class SameWeekOfYearLagFeaturizer(BasePeriodicLagFeaturizer):
         future_value_available(bool): Whether future values of the input
             columns are available at the forecast creation time. Default
             value is False.
-        max_test_timestamp(pandas.datetime): Maximum timestamp of the testing
-            data to generate forecasting on. This value is needed to prevent
-            creating lag features on the training data that are not available
-            for the testing data. For example, the features and models are
-            created on week 7 to forecast week 8 to week 10. It would not make
-            sense to create a lag feature using data from week 8 and
-            week 9, because they are not available at the forecast creation
-            time. Thus, it does not make sense to create a lag
-            feature using data from week 5 and week 6 for week 7.
-            When future_value_available is False, max_test_timestamp must be
+        max_horizon(int): Maximum number of steps ahead to forecast. The step
+            unit is the frequency of the data.
+            This value is needed to prevent creating features on the
+            training data that are not available for the testing data. For
+            example, the features and models are created on week 7 to
+            forecast week 8 to week 10. It would not make sense to create a
+            feature using data from week 8 and week 9, because they are not
+            available at the forecast creation  time. Thus, it does not make
+            sense to create a feature using data from week 5 and week 6 for
+            week 7.
+            When future_value_available is False, max_horizon must be
             specified.
         output_col_suffix(str): Name suffix of the output lag feature column.
             Default value is 'same_woy_lag'.
     """
 
-    def __init__(self, df_config, input_col_names, training_df=None, n_years=3,
+    def __init__(self, df_config, input_col_names, train_df=None, n_years=3,
                  week_window=1, agg_func='mean', agg_args={},
-                 future_value_available=False, max_test_timestamp=None,
+                 future_value_available=False, max_horizon=None,
                  output_col_suffix='same_woy_lag'):
         super(SameWeekOfYearLagFeaturizer, self).__init__(df_config)
 
@@ -373,11 +370,13 @@ class SameWeekOfYearLagFeaturizer(BasePeriodicLagFeaturizer):
         self.week_window = week_window
         self.agg_func = agg_func
         self.agg_args = agg_args
-        self.max_test_timestamp = max_test_timestamp
         self.future_value_available = future_value_available
         self.output_col_suffix = output_col_suffix
+        self.train_df = train_df
 
-        self.training_df = training_df
+        # max_horizon must be set after future_value_available is set,
+        # because it depends on it.
+        self.max_horizon = max_horizon
 
         self._lag_frequency = 'W'
 
@@ -408,12 +407,12 @@ class SameDayOfYearLagFeaturizer(BasePeriodicLagFeaturizer):
             features on.
         input_col_names(str or list of str): Names of the columns to create the
             lag feature on.
-        training_df(pd.DataFrame): Training data needed to compute lag
+        train_df(pd.DataFrame): Training data needed to compute lag
             features on testing data.
             Note: this property must be None when transforming the
-            training data, and training_df can only be passed after
+            training data, and train_df can only be passed after
             transforming the training data.  It's not recommended to save a
-            pipeline with training_df not set to None, because it results in a
+            pipeline with train_df not set to None, because it results in a
             large pipeline object, especially when you have multiple
             featurizers requiring the training data at scoring time.
             To set this value on in a pipeline, use the following code
@@ -432,25 +431,26 @@ class SameDayOfYearLagFeaturizer(BasePeriodicLagFeaturizer):
         future_value_available(bool): Whether future values of the input
             columns are available at the forecast creation time. Default
             value is False.
-        max_test_timestamp(pandas.datetime): Maximum timestamp of the testing
-            data to generate forecasting on. This value is needed to prevent
-            creating lag features on the training data that are not available
-            for the testing data. For example, the features and models are
-            created on week 7 to forecast week 8 to week 10. It would not make
-            sense to create a lag feature using data from week 8 and
-            week 9, because they are not available at the forecast creation
-            time. Thus, it does not make sense to create a lag
-            feature using data from week 5 and week 6 for week 7.
-            When future_value_available is False, max_test_timestamp must be
-            specified
+        max_horizon(int): Maximum number of steps ahead to forecast. The step
+            unit is the frequency of the data.
+            This value is needed to prevent creating features on the
+            training data that are not available for the testing data. For
+            example, the features and models are created on week 7 to
+            forecast week 8 to week 10. It would not make sense to create a
+            feature using data from week 8 and week 9, because they are not
+            available at the forecast creation  time. Thus, it does not make
+            sense to create a feature using data from week 5 and week 6 for
+            week 7.
+            When future_value_available is False, max_horizon must be
+            specified.
         output_col_suffix(str): Name suffix of the output lag feature column.
             Default value is 'same_doy_lag'.
 
     """
 
-    def __init__(self, df_config, input_col_names, training_df=None,
+    def __init__(self, df_config, input_col_names, train_df=None,
                  n_years=3, day_window=1, agg_func='mean', agg_args={},
-                 future_value_available=False, max_test_timestamp=None,
+                 future_value_available=False, max_horizon=None,
                  output_col_suffix='same_doy_lag'):
         super(SameDayOfYearLagFeaturizer, self).__init__(df_config)
         self.input_col_names = input_col_names
@@ -458,11 +458,13 @@ class SameDayOfYearLagFeaturizer(BasePeriodicLagFeaturizer):
         self.day_window = day_window
         self.agg_func = agg_func
         self.agg_args = agg_args
-        self.max_test_timestamp = max_test_timestamp
         self.future_value_available = future_value_available
         self.output_col_suffix = output_col_suffix
+        self.train_df = train_df
 
-        self.training_df = training_df
+        # max_horizon must be set after future_value_available is set,
+        # because it depends on it.
+        self.max_horizon = max_horizon
 
         self._lag_frequency = 'D'
 
@@ -480,6 +482,8 @@ class SameDayOfYearLagFeaturizer(BasePeriodicLagFeaturizer):
 
 ## Temporary testing code
 if __name__ == '__main__':
+    pd.set_option('display.max_columns', None)
+
     tsdf = pd.DataFrame({'store': [1] * 10 + [2] * 10,
                          'date': list(pd.date_range('2011-01-01', '2011-01-10')) +
                                  list(pd.date_range('2011-01-01', '2011-01-10')),
@@ -496,6 +500,6 @@ if __name__ == '__main__':
 
     lag_featurizer = LagFeaturizer(df_config, input_col_names='sales',
                                    lags=[1, 2, 3, 4],
-                                   max_test_timestamp='2011-01-12')
+                                   max_horizon=2)
     lag_featurizer.transform(tsdf)
 

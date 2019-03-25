@@ -32,7 +32,9 @@ class BaseTSEstimator(BaseEstimator, ABC):
         self.target_col_name = df_config['target_col_name']
         # If ts_id_col_names is not a list, convert it to a list to simplify
         # downstream code that use it.
-        if isinstance(df_config['ts_id_col_names'], list):
+        if df_config['ts_id_col_names'] is None:
+            self.ts_id_col_names = []
+        elif isinstance(df_config['ts_id_col_names'], list):
             self.ts_id_col_names = df_config['ts_id_col_names']
         else:
             self.ts_id_col_names = [df_config['ts_id_col_names']]

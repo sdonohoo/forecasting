@@ -16,8 +16,8 @@ source_entire_folder <- function(folderName, verbose=FALSE, showWarnings=TRUE) {
   # Returns:
   #   NULL.
   files <- list.files(folderName, full.names=TRUE)
-  # Grab only R files
-  files <- files[grepl("\\.[rR]$", files)]
+  # Grab only R files that start with the word 'test'
+  files <- files[grepl("^test(.*)[rR]$", files)]
   if (!length(files) && showWarnings)
     warning("No R files in ", folderName)
   for (f in files) {

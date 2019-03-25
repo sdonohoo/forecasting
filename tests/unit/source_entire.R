@@ -16,13 +16,10 @@ source_entire_folder <- function(folderName, verbose=FALSE, showWarnings=TRUE) {
   # Returns:
   #   NULL.
   files <- list.files(folderName, full.names=TRUE)
-
   # Grab only R files
-  files <- files[ grepl("\\.[rR]$", files) ]
-
+  files <- files[grepl("\\.[rR]$", files)]
   if (!length(files) && showWarnings)
     warning("No R files in ", folderName)
-
   for (f in files) {
     if (verbose)
       cat("sourcing: ", f, "\n")
@@ -32,5 +29,5 @@ source_entire_folder <- function(folderName, verbose=FALSE, showWarnings=TRUE) {
   return(invisible(NULL))
 }
 
-## Source all .R files within the folder of test/unit
+## Source all .R files within the folder of tests/unit
 source_entire_folder('./tests/unit')

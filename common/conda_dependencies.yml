@@ -11,7 +11,7 @@ dependencies:
   - urllib3=1.21.1
   - jupyter=1.0.0
   - r-essentials=3.5.1
-  - r-basesm=3.1_0.1
+  - r-bayesm=3.1_0.1
   - matplotlib=2.2.3
   - pip:
     - csvtomd==0.3.0

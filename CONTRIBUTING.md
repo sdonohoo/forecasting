@@ -30,7 +30,7 @@ Once the features included in a milestone are complete we will merge staging int
 
 ## Coding Guidelines
 
-We strive to maintain high quality code to make the utilities in the repository easy to understand, use, and extend. We also work hard to maintain a friendly and constructive environment. We've found that having clear expectations on the development process and consistent style helps to ensure everyone can contribute and collaborate effectively.
+We strive to maintain high quality code to make it easy to understand, use, and extend. We also work hard to maintain a friendly and constructive environment. We've found that having clear expectations on the development process and consistent style helps to ensure everyone can contribute and collaborate effectively.
 
 Please review the [coding guidelines](https://github.com/Microsoft/Forecasting/wiki/Coding-Guidelines) wiki page to see more details about the expectations for development approach and style.
 

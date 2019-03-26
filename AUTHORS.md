@@ -1,4 +1,4 @@
-Contributors to Forecasting 
+Contributors to TSPerf 
 ============================
 Forecasting is developed and maintained by a community of people interested in exploring forecasting algorithms and how best to deploy them in industry settings. The goal is to accelerate the workflow of any individual or organization working on forecasting systems. Everyone is encouraged to contribute at any level to add and improve the implemented algorithms, notebooks and utilities. 
 

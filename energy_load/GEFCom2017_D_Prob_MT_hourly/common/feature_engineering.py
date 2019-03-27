@@ -4,18 +4,19 @@ parameterized so that a selected set of features specified by a feature
 configuration list are computed and saved as csv files.
 """
 import os
+from math import ceil
 import pandas as pd
 from functools import reduce
 from sklearn.pipeline import Pipeline
 
-from common.features.lag import (SameDayHourLagFeaturizer,
-                                 SameWeekDayHourLagFeaturizer)
+from common.features.lag import (SameWeekOfYearLagFeaturizer,
+                                 SameDayOfYearLagFeaturizer)
 from common.features.temporal import (TemporalFeaturizer,
                                       DayTypeFeaturizer,
                                       AnnualFourierFeaturizer,
                                       DailyFourierFeaturizer,
                                       WeeklyFourierFeaturizer)
-from common.features.rolling_window import SameWeekdayHourRollingAggFeaturizer
+from common.features.rolling_window import SameDayOfWeekRollingWindowFeaturizer
 from common.features.normalization import (YearNormalizer,
                                            DateNormalizer,
                                            DateHourNormalizer)
@@ -45,19 +46,50 @@ FEATURE_MAP = {'temporal': TemporalFeaturizer,
                'normalized_datehour': DateHourNormalizer,
                'normalized_year': YearNormalizer,
                'day_type': DayTypeFeaturizer,
-               'recent_load_lag': SameWeekdayHourRollingAggFeaturizer,
-               'recent_dry_bulb_lag': SameWeekdayHourRollingAggFeaturizer,
-               'recent_dew_pnt_lag': SameWeekdayHourRollingAggFeaturizer,
-               'previous_year_load_lag': SameWeekDayHourLagFeaturizer,
-               'previous_year_dew_pnt_lag':  SameDayHourLagFeaturizer,
-               'previous_year_dry_bulb_lag': SameDayHourLagFeaturizer}
+               'recent_load_lag': SameDayOfWeekRollingWindowFeaturizer,
+               'recent_temp_lag': SameDayOfWeekRollingWindowFeaturizer,
+               'previous_year_load_lag': SameWeekOfYearLagFeaturizer,
+               'previous_year_temp_lag':  SameDayOfYearLagFeaturizer}
 
 # List of features that requires the training data when computing them on the
 # testing data
 FEATURES_REQUIRE_TRAINING_DATA = \
-    ['recent_load_lag', 'recent_dry_bulb_lag', 'recent_dew_pnt_lag',
-     'previous_year_load_lag', 'previous_year_dew_pnt_lag',
-     'previous_year_dry_bulb_lag', 'load_ratio']
+    ['recent_load_lag', 'recent_temp_lag',
+     'previous_year_load_lag', 'previous_year_temp_lag']
+
+# List of features that requires the max_horizon argument to be set
+FEATURES_REQUIRE_MAX_HORIZON = \
+    ['recent_load_lag', 'recent_temp_lag',
+     'previous_year_load_lag', 'previous_year_temp_lag']
+
+# Configuration for computing a scaling factor that captures year over year
+# trend. These scaling factors can be used to scale forecasting results if no
+# features for capturing the year over year trend are included in the model.
+# To compute the load ratios, first, SameDayOfWeekRollingWindowFeaturizer is
+# used to compute moving average of the DEMAND of the same hour of day and same
+# day of week of seven four-week windows. There is a 10 week gap between the
+# latest four-week window and the current week, because of the forecasting
+# horizon of this problem.
+# Second SameWeekOfYearLagFeaturizer is used to compute the moving average
+# features of the same week of year of previous 5 years.
+# Finally, the load ratios are computed by dividing the moving average DEMAND
+# of previous years by the moving average DEMAND of the current year. The
+# idea is that there is a correlation between the DEMAND between the
+# current time point and earlier time point, and the ratio between the DEMAND
+# of earlier time point of previous years and the current year can be used to
+# scale the forecasting results of the current year.
+LOAD_RATIO_CONFIG = {'same_day_of_week_rolling_args':
+                         {'window_size': 4,
+                          'start_week': 10,
+                          'agg_count': 7,
+                          'output_col_suffix': 'recent_moving_average',
+                          'round_agg_result': True},
+                     'same_week_of_year_lag_args': {
+                         'n_years': 5,
+                         'week_window': 0,
+                         'output_col_suffix': 'lag',
+                         'round_agg_result': True}
+                     }
 
 
 def parse_feature_config(feature_config, feature_map):
@@ -74,7 +106,7 @@ def parse_feature_config(feature_config, feature_map):
 
 def compute_training_features(train_df, df_config,
                               feature_config_list, feature_map,
-                              max_test_timestamp):
+                              max_horizon):
     """
     Creates a pipeline based on the input feature configuration list and the
     feature_map. Fit the pipeline on the training data and transform
@@ -91,27 +123,27 @@ def compute_training_features(train_df, df_config,
             to the featurizer corresponding the feature name in feature_map.
         feature_map(dict): Maps each feature name (key) to corresponding
             featurizer(value).
-        max_test_timestamp(pd.datetime): Maximum timestamp of the testing
-            data to generate forecasting on. This value is needed by a small
-            number of featurizers to prevent creating lag features on the
+        max_horizon(int): Maximum number of steps ahead to forecast.
+            The step unit is the frequency of the data.
+            This value is needed to prevent creating features on the
             training data that are not available for the testing data. For
-            example, for SameWeekdayHourRollingAggFeaturizer, the features are
-            created on week 7 to forecast week 8 to week 10. It would not make
-            sense to create an aggregation feature using data from week 8 and
-            week 9, because they are not available at the forecast creation
-            time. Thus, it does not make sense to create an aggregation
-            feature using data from week 5 and week 6 for week 7.
+            example, the features and models are created on week 7 to
+            forecast week 8 to week 10. It would not make sense to create a
+            feature using data from week 8 and week 9, because they are not
+            available at the forecast creation  time. Thus, it does not make
+            sense to create a feature using data from week 5 and week 6 for
+            week 7.
 
     Returns:
-        (pd.DataFrame, sklearn.pipeeline): (training features, feature
+        (pd.DataFrame, sklearn.pipeline): (training features, feature
             engineering pipeline fitted on the training data.
     """
     pipeline_steps = []
     for feature_config in feature_config_list:
         feature_name, feature_args, featurizer = \
             parse_feature_config(feature_config, feature_map)
-        if featurizer.__name__ == 'SameWeekdayHourRollingAggFeaturizer':
-            feature_args['max_test_timestamp'] = max_test_timestamp
+        if feature_name in FEATURES_REQUIRE_MAX_HORIZON:
+            feature_args['max_horizon'] = max_horizon
         pipeline_steps.append(
             (feature_name, featurizer(df_config=df_config, **feature_args)))
 
@@ -146,14 +178,14 @@ def compute_testing_features(test_df, feature_engineering_pipeline,
         pd.DataFrame: Testing features.
     """
     if train_df is not None and feature_config_list is not None:
-        training_df_arguments = {}
+        train_df_arguments = {}
         for feature_config in feature_config_list:
             feature_step_name = feature_config[0]
             if feature_step_name in FEATURES_REQUIRE_TRAINING_DATA:
-                training_df_arguments[feature_step_name + '__training_df'] = \
+                train_df_arguments[feature_step_name + '__train_df'] = \
                     train_df
-        if len(training_df_arguments) > 0:
-            feature_engineering_pipeline.set_params(**training_df_arguments)
+        if len(train_df_arguments) > 0:
+            feature_engineering_pipeline.set_params(**train_df_arguments)
 
     test_features = feature_engineering_pipeline.transform(test_df)
 
@@ -183,54 +215,66 @@ def compute_features_one_round(train_base_df, train_delta_df, test_df,
             the testing data.
         compute_load_ratio(bool): If computes a scaling factor that capture
             the year over year trend and can be used to scale the forecasting
-            result.
+            result. If True, load ratios are computed on the testing data
+            according to the LOAD_RATIO_CONFIG.
     Returns:
         (pd.DataFrame, pd.DataFrame): (training features, testing features)
     """
 
     train_round_df = pd.concat([train_base_df, train_delta_df])
+    max_train_timestamp = train_round_df[df_config['time_col_name']].max()
     max_test_timestamp = test_df[df_config['time_col_name']].max()
+    train_test_diff = max_test_timestamp - max_train_timestamp
+    max_horizon = ceil(train_test_diff.days * 24 + train_test_diff.seconds/3600)
     train_features, feature_pipeline = \
         compute_training_features(train_round_df, df_config,
                                   feature_config_list, feature_map,
-                                  max_test_timestamp)
+                                  max_horizon)
 
     test_features = \
         compute_testing_features(test_df, feature_pipeline,
                                  feature_config_list, train_round_df)
 
     if compute_load_ratio:
+        rolling_window_args = \
+            LOAD_RATIO_CONFIG['same_day_of_week_rolling_args']
+        previous_years_lag_args = \
+            LOAD_RATIO_CONFIG['same_week_of_year_lag_args']
         same_week_day_hour_rolling_featurizer = \
-            SameWeekdayHourRollingAggFeaturizer(
-                df_config, input_col_name=df_config['value_col_name'],
-                window_size=4, start_week=10, agg_count=7,
-                output_col_prefix='recent_load_',
-                max_test_timestamp=max_test_timestamp)
+            SameDayOfWeekRollingWindowFeaturizer(
+                df_config, input_col_names=df_config['target_col_name'],
+                max_horizon=max_horizon,
+                **rolling_window_args)
         train_df_with_recent_load = \
             same_week_day_hour_rolling_featurizer.transform(train_round_df)
-        same_week_day_hour_rolling_featurizer.training_df = train_round_df
+        same_week_day_hour_rolling_featurizer.train_df = train_round_df
         test_df_with_recent_load = \
             same_week_day_hour_rolling_featurizer.transform(test_df)
 
         time_col_name = df_config['time_col_name']
-        grain_col_name = df_config['grain_col_name']
+        ts_id_col_names = df_config['ts_id_col_names']
         keep_col_names = [time_col_name]
-        if grain_col_name is not None:
-            if isinstance(grain_col_name, list):
-                keep_col_names = keep_col_names + grain_col_name
+        if ts_id_col_names is not None:
+            if isinstance(ts_id_col_names, list):
+                keep_col_names = keep_col_names + ts_id_col_names
             else:
-                keep_col_names.append(grain_col_name)
+                keep_col_names.append(ts_id_col_names)
         lag_df_list = []
-        for i in range(10, 17):
-            col_old = 'recent_load_' + str(i)
-            col_new = 'recent_load_lag_' + str(i)
+        start_week = rolling_window_args['start_week']
+        end_week = start_week + rolling_window_args['agg_count']
+        for i in range(start_week, end_week):
+            col_old = df_config['target_col_name'] + '_' + \
+                      rolling_window_args['output_col_suffix'] + '_' + str(i)
+            col_new = col_old + '_' + previous_years_lag_args[
+                'output_col_suffix']
             col_ratio = 'recent_load_ratio_' + str(i)
 
             same_week_day_hour_lag_featurizer = \
-                SameWeekDayHourLagFeaturizer(
-                    df_config, input_col_name=col_old,
-                    training_df=train_df_with_recent_load, n_years=5,
-                    week_window=0, output_col_name=col_new)
+                SameWeekOfYearLagFeaturizer(
+                    df_config, input_col_names=col_old,
+                    train_df=train_df_with_recent_load,
+                    max_horizon=max_horizon,
+                    **previous_years_lag_args)
 
             lag_df = same_week_day_hour_lag_featurizer\
                 .transform(test_df_with_recent_load)
@@ -253,7 +297,8 @@ def compute_features_one_round(train_base_df, train_delta_df, test_df,
 
 def compute_features(train_dir, test_dir, output_dir, df_config,
                      feature_config_list,
-                     filter_by_month=True):
+                     filter_by_month=True,
+                     compute_load_ratio=False):
     """
     Computes training and testing features of all rounds on the
     GEFCom2017_D dataset and save as csv files.
@@ -269,6 +314,10 @@ def compute_features(train_dir, test_dir, output_dir, df_config,
             to the featurizer corresponding the feature name in feature_map.
         filter_by_month(bool): If filter the training data by the month of
             the testing data. Default value is True.
+        compute_load_ratio(bool): If computes a scaling factor that capture
+            the year over year trend and can be used to scale the forecasting
+            result. If True, load ratios are computed on the testing data
+            according to the LOAD_RATIO_CONFIG.
     """
     time_col_name = df_config['time_col_name']
 
@@ -281,13 +330,6 @@ def compute_features(train_dir, test_dir, output_dir, df_config,
 
     train_base_df = pd.read_csv(os.path.join(train_dir, TRAIN_BASE_FILE),
                                 parse_dates=[time_col_name])
-
-    compute_load_ratio = False
-    for feature_config in feature_config_list:
-        if feature_config[0] == 'load_ratio':
-            compute_load_ratio = True
-            feature_config_list.remove(feature_config)
-            break
 
     for i in range(1, NUM_ROUND + 1):
         train_file = os.path.join(train_dir,

@@ -48,9 +48,6 @@ class BaseTSEstimator(BaseEstimator, ABC):
         if self.time_col_name not in df.columns:
             raise Exception('time_col_name {} does not exist in the input '
                             'data frame'.format(self.time_col_name))
-        if self.target_col_name not in df.columns:
-            raise Exception('target_col_name {} does not exist in the input '
-                            'data frame'.format(self.target_col_name))
         for id_col_name in self.ts_id_col_names:
             if id_col_name not in df.columns:
                 raise Exception('ts_id_col_names {} does not exist in the '

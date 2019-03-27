@@ -2,9 +2,7 @@ from abc import abstractmethod
 import pandas as pd
 import numpy as np
 
-from functools import reduce
-
-from base_ts_estimators import BaseTSFeaturizer
+from .base_ts_estimators import BaseTSFeaturizer
 from common.utils import convert_to_tsdf
 
 
@@ -31,7 +29,7 @@ class BaseLagFeaturizer(BaseTSFeaturizer):
 
     @max_horizon.setter
     def max_horizon(self, val):
-        if not val and not self.future_value_available:
+        if val is None and not self.future_value_available:
             raise Exception('max_horizon must be set when '
                             'future_value_available is False')
         self._max_horizon = val
@@ -55,7 +53,7 @@ class BaseLagFeaturizer(BaseTSFeaturizer):
         """
         Creates a data frame with lags.
         Args:
-            input_df(pandas.DataFrame): Input data frame with a time column
+            input_df(pandas.DataFrame): Input data frame with a time index
                 and columns to create lag features on.
             lags(int or list of int): Lags to compute.
             frequency(str): Frequency of the shift operation.
@@ -64,19 +62,23 @@ class BaseLagFeaturizer(BaseTSFeaturizer):
         Returns:
             pandas.DataFrame: Data frame with time column and lag features.
         """
-        df_list = [input_df]
+        if not isinstance(input_df.index, pd.DatetimeIndex):
+            raise Exception('The index of input_df must be '
+                            'pandas.DatetimeIndex. Use utils.convert_to_tsdf '
+                            'to convert it first.')
+        input_col_names = input_df.columns
+        tmp_df = pd.DataFrame({input_df.index.name:
+                                   input_df.index.get_level_values(0)})
+        lag_df = pd.DataFrame({input_df.index.name:
+                                   input_df.index.get_level_values(0)})
         for lag in lags:
-            df_shifted = input_df[self.input_col_names] \
-                .shift(lag, freq=frequency)
-            df_shifted.columns = [x + '_lag_' + str(lag) for x in
-                                  df_shifted.columns]
-            df_list.append(df_shifted)
-        lag_df = reduce(
-            lambda left, right:
-            pd.merge(left, right, how='left',
-                     left_index=True, right_index=True),
-            df_list)
-        lag_df.drop(self.input_col_names, inplace=True, axis=1)
+            tmp_df['lag_time'] = input_df.index.get_level_values(0) - \
+                           pd.to_timedelta(lag, frequency)
+            lag_df_cur = pd.merge(tmp_df, input_df, how='left',
+                                  left_on='lag_time', right_index=True)
+            for col in input_col_names:
+                lag_df[col + '_lag_' + str(lag)] = lag_df_cur[col]
+
         return lag_df
 
     def fit(self, X, y=None):
@@ -172,6 +174,7 @@ class BasePeriodicLagFeaturizer(BaseLagFeaturizer):
         Returns:
             pandas.DataFrame: Data frame with time column and lag features.
         """
+        input_df = input_df.copy()
         input_df = convert_to_tsdf(input_df,
                                    time_col_name=self.time_col_name,
                                    time_format=self.time_format,
@@ -193,15 +196,19 @@ class BasePeriodicLagFeaturizer(BaseLagFeaturizer):
                        pd.to_timedelta(lag, self._lag_frequency)) >=
                    min_time_stamp]
 
-        lag_df = self._create_lag_df(input_df, lags=lag_all,
+        lag_df = self._create_lag_df(input_df[self.input_col_names],
+                                     lags=lag_all,
                                      frequency=self._lag_frequency)
         for col in self.input_col_names:
-            lag_cols = [c for c in lag_df.columns if c.startwith(col)]
+            lag_cols = [c for c in lag_df.columns if c.startswith(col)]
             output_col_name = col + '_' + self.output_col_suffix
 
             output_df[output_col_name] = lag_df[lag_cols].apply(
                 self.agg_func, axis=1, **self.agg_args)
-
+            if self.round_agg_result:
+                output_df[output_col_name] = \
+                    round(output_df[output_col_name])
+        output_df.set_index(self.time_col_name, inplace=True)
         return output_df
 
 
@@ -247,7 +254,7 @@ class LagFeaturizer(BaseLagFeaturizer):
     def __init__(self, df_config, input_col_names, lags,
                  future_value_available=False, max_horizon=None,
                  train_df=None):
-        super(LagFeaturizer, self).__init__(df_config)
+        super().__init__(df_config)
 
         self.input_col_names = input_col_names
         self.future_value_available = future_value_available
@@ -296,9 +303,9 @@ class LagFeaturizer(BaseLagFeaturizer):
             input_df.loc[input_df.index.get_level_values(0) >
                          forecast_creation_time, self.input_col_names] = np.nan
 
-        lag_df = self._create_lag_df(input_df, lags=self.lags,
+        lag_df = self._create_lag_df(input_df[self.input_col_names],
+                                     lags=self.lags,
                                      frequency=self.frequency)
-        lag_df.drop(self.ts_id_col_names, inplace=True, axis=1)
 
         return lag_df
 
@@ -357,13 +364,16 @@ class SameWeekOfYearLagFeaturizer(BasePeriodicLagFeaturizer):
             specified.
         output_col_suffix(str): Name suffix of the output lag feature column.
             Default value is 'same_woy_lag'.
+        round_agg_result(bool): If round the final aggregation result.
+            Default value is False.
     """
 
     def __init__(self, df_config, input_col_names, train_df=None, n_years=3,
                  week_window=1, agg_func='mean', agg_args={},
                  future_value_available=False, max_horizon=None,
-                 output_col_suffix='same_woy_lag'):
-        super(SameWeekOfYearLagFeaturizer, self).__init__(df_config)
+                 output_col_suffix='same_woy_lag',
+                 round_agg_result=False):
+        super().__init__(df_config)
 
         self.input_col_names = input_col_names
         self.n_years = n_years
@@ -373,6 +383,7 @@ class SameWeekOfYearLagFeaturizer(BasePeriodicLagFeaturizer):
         self.future_value_available = future_value_available
         self.output_col_suffix = output_col_suffix
         self.train_df = train_df
+        self.round_agg_result = round_agg_result
 
         # max_horizon must be set after future_value_available is set,
         # because it depends on it.
@@ -445,14 +456,16 @@ class SameDayOfYearLagFeaturizer(BasePeriodicLagFeaturizer):
             specified.
         output_col_suffix(str): Name suffix of the output lag feature column.
             Default value is 'same_doy_lag'.
-
+        round_agg_result(bool): If round the final aggregation result.
+            Default value is False.
     """
 
     def __init__(self, df_config, input_col_names, train_df=None,
                  n_years=3, day_window=1, agg_func='mean', agg_args={},
                  future_value_available=False, max_horizon=None,
-                 output_col_suffix='same_doy_lag'):
-        super(SameDayOfYearLagFeaturizer, self).__init__(df_config)
+                 output_col_suffix='same_doy_lag',
+                 round_agg_result=False):
+        super().__init__(df_config)
         self.input_col_names = input_col_names
         self.n_years = n_years
         self.day_window = day_window
@@ -461,6 +474,7 @@ class SameDayOfYearLagFeaturizer(BasePeriodicLagFeaturizer):
         self.future_value_available = future_value_available
         self.output_col_suffix = output_col_suffix
         self.train_df = train_df
+        self.round_agg_result = round_agg_result
 
         # max_horizon must be set after future_value_available is set,
         # because it depends on it.
@@ -480,26 +494,4 @@ class SameDayOfYearLagFeaturizer(BasePeriodicLagFeaturizer):
         return day_lag_all
 
 
-## Temporary testing code
-if __name__ == '__main__':
-    pd.set_option('display.max_columns', None)
-
-    tsdf = pd.DataFrame({'store': [1] * 10 + [2] * 10,
-                         'date': list(pd.date_range('2011-01-01', '2011-01-10')) +
-                                 list(pd.date_range('2011-01-01', '2011-01-10')),
-                         'sales': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
-                                   11, 12, 13, 14, 15, 16, 17, 18, 19, 20]})
-
-    df_config = {
-        'time_col_name': 'date',
-        'ts_id_col_names': 'store',
-        'target_col_name': 'sales',
-        'frequency': 'D',
-        'time_format': '%Y-%m-%d'
-    }
-
-    lag_featurizer = LagFeaturizer(df_config, input_col_names='sales',
-                                   lags=[1, 2, 3, 4],
-                                   max_horizon=2)
-    lag_featurizer.transform(tsdf)
 

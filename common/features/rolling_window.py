@@ -5,7 +5,7 @@ import warnings
 from functools import reduce
 from math import ceil
 
-from base_ts_estimators import BaseTSFeaturizer
+from .base_ts_estimators import BaseTSFeaturizer
 from common.utils import convert_to_tsdf
 
 
@@ -194,7 +194,7 @@ class RollingWindowFeaturizer(BaseRollingWindowFeaturizer):
                  window_args={}, agg_func='mean', agg_args={},
                  future_value_available=False, max_horizon=None,
                  rolling_gap=None, train_df=None):
-        super(RollingWindowFeaturizer, self).__init__(df_config)
+        super().__init__(df_config)
 
         self.input_col_names = input_col_names
         self.window_size = window_size
@@ -336,14 +336,17 @@ class SameDayOfWeekRollingWindowFeaturizer(BaseRollingWindowFeaturizer):
         output_col_suffix(str): Suffix of the output columns. The start week of
             each rolling window is added at the end. Default value
             'same_dow_rolling_agg'.
+        round_agg_result(bool): If round the final aggregation result.
+            Default value is False.
     """
 
     def __init__(self, df_config, input_col_names, window_size,
                  max_horizon=None, future_value_available=False,
                  start_week=None, agg_func='mean', agg_count=1,
                  agg_args={}, train_df=None,
-                 output_col_suffix='same_dow_rolling_agg'):
-        super(SameDayOfWeekRollingWindowFeaturizer, self).__init__(df_config)
+                 output_col_suffix='same_dow_rolling_agg',
+                 round_agg_result=False):
+        super().__init__(df_config)
 
         self.input_col_names = input_col_names
         self.window_size = window_size
@@ -353,6 +356,7 @@ class SameDayOfWeekRollingWindowFeaturizer(BaseRollingWindowFeaturizer):
         self.train_df = train_df
         self.agg_args = agg_args
         self.output_col_suffix = output_col_suffix
+        self.round_agg_result = round_agg_result
 
         # max_horizon must be set after future_value_available is set, because
         # it depends on future_value_available
@@ -414,49 +418,27 @@ class SameDayOfWeekRollingWindowFeaturizer(BaseRollingWindowFeaturizer):
                          (max_time_stamp - pd.to_timedelta(lag, 'W'))
                          <= forecast_creation_time]
 
-            df_list = [input_df]
+            tmp_df = pd.DataFrame({'time': input_df.index.get_level_values(0)})
+            lag_df = pd.DataFrame(index=input_df.index)
+            lag_df.reset_index(inplace=True)
             if len(week_lags) > 0:
                 for lag in week_lags:
-                    df_shifted = input_df[self.input_col_names] \
-                        .shift(lag, freq='W')
-                    df_shifted.columns = [x + '_lag' + str(lag) for x in
-                                          df_shifted.columns]
-                    df_list.append(df_shifted)
-                lag_df = reduce(
-                    lambda left, right:
-                    pd.merge(left, right, how='left',
-                             left_index=True, right_index=True), df_list)
-                lag_df.drop(self.input_col_names + self.ts_id_col_names,
-                            inplace=True, axis=1)
+                    tmp_df['lag_time'] = input_df.index.get_level_values(0) - \
+                                         pd.to_timedelta(lag, 'W')
+                    lag_df_cur = pd.merge(tmp_df, input_df, how='left',
+                                          left_on='lag_time', right_index=True)
+                    for col in self.input_col_names:
+                        lag_df[col + '_lag_' + str(lag)] = lag_df_cur[col]
 
                 for col in self.input_col_names:
-                    lag_cols = [c for c in lag_df.columns if c.startwith(col)]
+                    lag_cols = [c for c in lag_df.columns if c.startswith(col)]
                     output_col_name = col + '_' + self.output_col_suffix + \
                                       '_' + str(week_lag_start)
 
-                    ## TODO: remove round after result verification
-                    output_df[output_col_name] = round(lag_df[lag_cols].apply(
-                        self.agg_func, axis=1, **self.agg_args))
-
+                    output_df[output_col_name] = lag_df[lag_cols].apply(
+                        self.agg_func, axis=1, **self.agg_args)
+                    if self.round_agg_result:
+                        output_df[output_col_name] = \
+                            round(output_df[output_col_name])
+        output_df.set_index(self.time_col_name, inplace=True)
         return output_df
-
-## Temporary testing code
-if __name__ == '__main__':
-    tsdf = pd.DataFrame({'store': [1] * 10 + [2] * 10,
-                         'date': list(pd.date_range('2011-01-01', '2011-01-10')) +
-                                 list(pd.date_range('2011-01-01', '2011-01-10')),
-                         'sales': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
-                                   11, 12, 13, 14, 15, 16, 17, 18, 19, 20]})
-
-    df_config = {
-        'time_col_name': 'date',
-        'ts_id_col_names': 'store',
-        'target_col_name': 'sales',
-        'frequency': 'D',
-        'time_format': '%Y-%m-%d'
-    }
-
-    rolling_window_featurizer = RollingWindowFeaturizer(
-        df_config, input_col_names='sales', window_size=3, max_horizon=3,
-        window_args={'min_periods': 1})
-    rolling_window_featurizer.transform(tsdf)

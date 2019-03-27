@@ -21,7 +21,7 @@ test_file_prefix = 'test_round_'
 
 output_file = file.path(paste('energy_load/GEFCom2017_D_Prob_MT_hourly/submissions/GBM/submission_seed_', seed_value, '.csv', sep=""))
 
-normalize_columns = list( 'load_lag', 'dry_bulb_lag')
+normalize_columns = list( 'DEMAND_same_woy_lag', 'DryBulb_same_doy_lag')
 
 quantiles = seq(0.1, 0.9, by = 0.1)
 
@@ -69,7 +69,7 @@ for (iR in 1:N_ROUNDS){
     for (tau in quantiles) {
       result = data.table(Zone=test_df_sub$Zone, Datetime = test_df_sub$Datetime, Round=iR)
       
-      gbmModel = gbm(formula = DEMAND ~ load_lag + dry_bulb_lag +
+      gbmModel = gbm(formula = DEMAND ~ DEMAND_same_woy_lag + DryBulb_same_doy_lag +
                      annual_sin_1 + annual_cos_1 + annual_sin_2 + annual_cos_2 + annual_sin_3 + annual_cos_3 +
                      weekly_sin_1 + weekly_cos_1 + weekly_sin_2 + weekly_cos_2 + weekly_sin_3 + weekly_cos_3,
                      distribution = list(name = "quantile", alpha = tau),

@@ -27,7 +27,7 @@ test_file_prefix = 'test_round_'
 output_file = file.path(paste('energy_load/GEFCom2017_D_Prob_MT_hourly/submissions/fnn/submission_seed_', seed_value, '.csv', sep=""))
 
 # Data and forecast parameters
-normalize_columns = list('load_lag', 'dry_bulb_lag')
+normalize_columns = list('DEMAND_same_woy_lag', 'DryBulb_same_doy_lag')
 quantiles = seq(0.1, 0.9, by = 0.1)
 
 # Train and predict
@@ -65,13 +65,13 @@ for (iR in 1:6){
     train_df_sub = train_df[Zone == z & hour_of_day == h]
     test_df_sub = test_df[Zone == z & hour_of_day == h]
     
-    train_x <- as.matrix(train_df_sub[, c('load_lag', 'dry_bulb_lag',
+    train_x <- as.matrix(train_df_sub[, c('DEMAND_same_woy_lag', 'DryBulb_same_doy_lag',
                            'annual_sin_1', 'annual_cos_1', 'annual_sin_2', 'annual_cos_2', 'annual_sin_3', 'annual_cos_3', 
                            'weekly_sin_1', 'weekly_cos_1', 'weekly_sin_2', 'weekly_cos_2', 'weekly_sin_3', 'weekly_cos_3'), 
                            drop=FALSE])
     train_y <- as.matrix(train_df_sub[, c('DEMAND'), drop=FALSE])
 
-    test_x <- as.matrix(test_df_sub[, c('load_lag', 'dry_bulb_lag',
+    test_x <- as.matrix(test_df_sub[, c('DEMAND_same_woy_lag', 'DryBulb_same_doy_lag',
                            'annual_sin_1', 'annual_cos_1', 'annual_sin_2', 'annual_cos_2', 'annual_sin_3', 'annual_cos_3', 
                            'weekly_sin_1', 'weekly_cos_1', 'weekly_sin_2', 'weekly_cos_2', 'weekly_sin_3', 'weekly_cos_3'), 
                            drop=FALSE])

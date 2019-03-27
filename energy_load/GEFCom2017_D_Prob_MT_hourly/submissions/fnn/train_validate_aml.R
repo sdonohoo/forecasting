@@ -59,7 +59,7 @@ cv_settings = fromJSON(file=cv_file)
 
 
 # Data and forecast parameters
-normalize_columns = list('load_lag', 'dry_bulb_lag')
+normalize_columns = list('DEMAND_same_woy_lag', 'DryBulb_same_doy_lag')
 quantiles = seq(0.1, 0.9, by = 0.1)
 
 
@@ -108,7 +108,7 @@ for (i in 1:length(cv_settings)){
     result_all_zones = foreach(z = zones, .combine = rbind) %dopar% {
       print(paste('Zone', z))
       
-      features = c('load_lag', 'dry_bulb_lag',
+      features = c('DEMAND_same_woy_lag', 'DryBulb_same_doy_lag',
                    'annual_sin_1', 'annual_cos_1', 'annual_sin_2', 
                    'annual_cos_2', 'annual_sin_3', 'annual_cos_3', 
                    'weekly_sin_1', 'weekly_cos_1', 'weekly_sin_2', 

@@ -58,13 +58,13 @@ iter.max = as.integer(param_grid[parameter_set, 'iter.max'])
 penalty = as.integer(param_grid[parameter_set, 'penalty'])
 
 # Data and forecast parameters
-features = c('LoadLag', 'DryBulbLag',
+features = c('DEMAND_same_woy_lag', 'DryBulb_same_doy_lag',
              'annual_sin_1', 'annual_cos_1', 'annual_sin_2', 
              'annual_cos_2', 'annual_sin_3', 'annual_cos_3', 
              'weekly_sin_1', 'weekly_cos_1', 'weekly_sin_2', 
              'weekly_cos_2', 'weekly_sin_3', 'weekly_cos_3')
 
-normalize_columns = list('LoadLag', 'DryBulbLag')
+normalize_columns = list('DEMAND_same_woy_lag', 'DryBulb_same_doy_lag')
 quantiles = seq(0.1, 0.9, by = 0.1)
 subset_columns_train = c(features, 'DEMAND')
 subset_columns_validation = c(features, 'DEMAND', 'Zone', 'Datetime', 'LoadRatio')
@@ -97,7 +97,7 @@ for (i in 1:length(cv_settings)){
     validation_data = cvdata_df[Datetime >= validation_range[1] & Datetime <= validation_range[2]]
     
     zones = unique(validation_data$Zone)
-    hours = unique(validation_data$Hour)
+    hours = unique(validation_data$hour_of_day)
     
     for (c in normalize_columns){
       min_c = min(train_data[, ..c])
@@ -106,9 +106,9 @@ for (i in 1:length(cv_settings)){
       validation_data[, c] = (validation_data[, ..c] - min_c)/(max_c - min_c)
     }
     
-    validation_data$AverageLoadRatio = rowMeans(validation_data[,c('LoadRatio_10', 'LoadRatio_11', 'LoadRatio_12', 
-                                                                   'LoadRatio_13', 'LoadRatio_14', 'LoadRatio_15', 'LoadRatio_16')], na.rm=TRUE)
-    validation_data[, LoadRatio:=mean(AverageLoadRatio), by=list(Hour, MonthOfYear)]
+    validation_data$AverageLoadRatio = rowMeans(validation_data[,c('recent_load_ratio_10', 'recent_load_ratio_11', 'recent_load_ratio_12',
+                                                                    'recent_load_ratio_13', 'recent_load_ratio_14', 'recent_load_ratio_15', 'recent_load_ratio_16')], na.rm=TRUE)
+    validation_data[, LoadRatio:=mean(AverageLoadRatio), by=list(hour_of_day, month_of_year)]
     
     result_all_zones = foreach(z = zones, .combine = rbind) %dopar% {
       print(paste('Zone', z))
@@ -117,8 +117,8 @@ for (i in 1:length(cv_settings)){
       hour_counter = 1
       
       for (h in hours){
-        train_df_sub = train_data[Zone == z & Hour == h, ..subset_columns_train]
-        validation_df_sub = validation_data[Zone == z & Hour == h, ..subset_columns_validation]
+        train_df_sub = train_data[Zone == z & hour_of_day == h, ..subset_columns_train]
+        validation_df_sub = validation_data[Zone == z & hour_of_day == h, ..subset_columns_validation]
         
         result = data.table(Zone=validation_df_sub$Zone, Datetime=validation_df_sub$Datetime, Round=iR, CVRound=i)
         

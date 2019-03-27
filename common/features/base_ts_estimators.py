@@ -30,16 +30,24 @@ class BaseTSEstimator(BaseEstimator, ABC):
     def __init__(self, df_config):
         self.time_col_name = df_config['time_col_name']
         self.target_col_name = df_config['target_col_name']
-        # If ts_id_col_names is not a list, convert it to a list to simplify
-        # downstream code that use it.
-        if df_config['ts_id_col_names'] is None:
-            self.ts_id_col_names = []
-        elif isinstance(df_config['ts_id_col_names'], list):
-            self.ts_id_col_names = df_config['ts_id_col_names']
-        else:
-            self.ts_id_col_names = [df_config['ts_id_col_names']]
+        self.ts_id_col_names = df_config['ts_id_col_names']
         self.frequency = df_config['frequency']
         self.time_format = df_config['time_format']
+
+    @property
+    def ts_id_col_names(self):
+        return self._ts_id_col_names
+
+    @ts_id_col_names.setter
+    def ts_id_col_names(self, val):
+        # If ts_id_col_names is not a list, convert it to a list to simplify
+        # downstream code that use it.
+        if val is None:
+            self._ts_id_col_names = []
+        elif isinstance(val, list):
+            self._ts_id_col_names = val
+        else:
+            self._ts_id_col_names = [val]
 
     def _check_config_cols_exist(self, df):
         """
@@ -73,6 +81,7 @@ class BaseTSFeaturizer(BaseTSEstimator, TransformerMixin):
         in the fit method.
         """
         return self
+
     @abstractmethod
     def transform(self, X):
         """

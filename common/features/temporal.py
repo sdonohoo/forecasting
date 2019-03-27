@@ -6,7 +6,7 @@ import warnings
 from math import ceil
 
 from abc import ABC, abstractmethod
-from base_ts_estimators import BaseTSFeaturizer
+from .base_ts_estimators import BaseTSFeaturizer
 
 
 class TemporalFeaturizer(BaseTSFeaturizer):
@@ -38,7 +38,7 @@ class TemporalFeaturizer(BaseTSFeaturizer):
     """
 
     def __init__(self, df_config, feature_list=None):
-        super(TemporalFeaturizer, self).__init__(df_config)
+        super().__init__(df_config)
 
         if feature_list:
             self.feature_list = feature_list
@@ -197,7 +197,7 @@ class DayTypeFeaturizer(BaseTSFeaturizer):
                  semi_holiday_offset=timedelta(days=1),
                  weekday_type_map={1: 2, 3: 2},
                  holiday_code=7, semi_holiday_code=8):
-        super(DayTypeFeaturizer, self).__init__(df_config)
+        super().__init__(df_config)
         self.weekday_type_map = weekday_type_map
 
         self.holiday_col_name = holiday_col_name
@@ -275,8 +275,8 @@ class BaseFourierFeaturizer(BaseTSFeaturizer, ABC):
         """
         pass
 
-    @classmethod
-    def fourier_approximation(cls, t, n, period):
+    @staticmethod
+    def fourier_approximation(t, n, period):
         """
         Computes Fourier Series at different harmonies (n) and periods.
 
@@ -317,7 +317,7 @@ class BaseFourierFeaturizer(BaseTSFeaturizer, ABC):
         """
         self._check_config_cols_exist(X)
         X = X.copy()
-        datetime_col = self._get_time_values(X)
+        datetime_col = self._get_time_col(X)
 
         time_values = self._get_time_values(datetime_col)
         output_dict = {}
@@ -344,13 +344,13 @@ class AnnualFourierFeaturizer(BaseFourierFeaturizer):
     """
 
     def __init__(self, df_config, n_harmonics):
-        super(AnnualFourierFeaturizer, self).__init__(df_config)
+        super().__init__(df_config)
         self.n_harmonics = n_harmonics
         self.output_prefix = 'annual'
         self.period = 365.24
 
-    @classmethod
-    def _get_time_values(cls, datetime_col):
+    @staticmethod
+    def _get_time_values(datetime_col):
         return datetime_col.dt.dayofyear
 
 
@@ -365,13 +365,13 @@ class WeeklyFourierFeaturizer(BaseFourierFeaturizer):
 
     """
     def __init__(self, df_config, n_harmonics):
-        super(WeeklyFourierFeaturizer, self).__init__(df_config)
+        super().__init__(df_config)
         self.n_harmonics = n_harmonics
         self.output_prefix = 'weekly'
         self.period = 7
 
-    @classmethod
-    def _get_time_values(cls, datetime_col):
+    @staticmethod
+    def _get_time_values(datetime_col):
         return datetime_col.dt.dayofweek + 1
 
 
@@ -385,13 +385,13 @@ class DailyFourierFeaturizer(BaseFourierFeaturizer):
         n_harmonics: Number of harmonies to compute, n=1, 2, 3,...
     """
     def __init__(self, df_config, n_harmonics):
-        super(DailyFourierFeaturizer, self).__init__(df_config)
+        super().__init__(df_config)
         self.n_harmonics = n_harmonics
         self.output_prefix = 'daily'
         self.period = 24
 
-    @classmethod
-    def _get_time_values(cls, datetime_col):
+    @staticmethod
+    def _get_time_values(datetime_col):
         return datetime_col.dt.hour + 1
 
 

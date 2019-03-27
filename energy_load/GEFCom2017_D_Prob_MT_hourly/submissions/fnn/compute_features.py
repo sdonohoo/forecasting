@@ -19,9 +19,9 @@ TEST_DATA_DIR = os.path.join(DATA_DIR, 'test')
 
 DF_CONFIG = {
     'time_col_name': 'Datetime',
-    'grain_col_name': 'Zone',
-    'value_col_name': 'DEMAND',
-    'frequency': 'hourly',
+    'ts_id_col_names': 'Zone',
+    'target_col_name': 'DEMAND',
+    'frequency': 'H',
     'time_format': '%Y-%m-%d %H:%M:%S'
 }
 
@@ -38,10 +38,10 @@ feature_config_list = \
      ('annual_fourier', {'n_harmonics': 3}),
      ('weekly_fourier', {'n_harmonics': 3}),
      ('previous_year_load_lag',
-      {'input_col_name': 'DEMAND', 'output_col_name': 'load_lag'}),
-     ('previous_year_dry_bulb_lag',
-      {'input_col_name': 'DryBulb', 'output_col_name': 'dry_bulb_lag'}),
-     ('load_ratio', {})]
+      {'input_col_names': 'DEMAND', 'round_agg_result': True}),
+     ('previous_year_temp_lag',
+      {'input_col_names': 'DryBulb', 'round_agg_result': True})
+     ]
 
 
 if __name__ == '__main__':
@@ -59,4 +59,4 @@ if __name__ == '__main__':
 
     compute_features(TRAIN_DATA_DIR, TEST_DATA_DIR, OUTPUT_DIR, DF_CONFIG,
                      feature_config_list,
-                     filter_by_month=True)
+                     filter_by_month=True, compute_load_ratio=True)

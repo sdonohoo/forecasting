@@ -19,9 +19,9 @@ TEST_DATA_DIR = os.path.join(DATA_DIR, 'test')
 
 DF_CONFIG = {
     'time_col_name': 'Datetime',
-    'grain_col_name': 'Zone',
-    'value_col_name': 'DEMAND',
-    'frequency': 'hourly',
+    'ts_id_col_names': 'Zone',
+    'target_col_name': 'DEMAND',
+    'frequency': 'H',
     'time_format': '%Y-%m-%d %H:%M:%S'
 }
 
@@ -38,7 +38,8 @@ HOLIDAY_COLNAME = 'Holiday'
 feature_config_list = \
     [('temporal', {'feature_list':
                        ['hour_of_day', 'day_of_week', 'day_of_month',
-                        'hour_of_year', 'week_of_year', 'month_of_year']}),
+                        'normalized_hour_of_year', 'week_of_year',
+                        'month_of_year']}),
      ('annual_fourier', {'n_harmonics': 3}),
      ('weekly_fourier', {'n_harmonics': 3}),
      ('daily_fourier',  {'n_harmonics': 2}),
@@ -47,29 +48,24 @@ feature_config_list = \
      ('normalized_year', {}),
      ('day_type', {'holiday_col_name': HOLIDAY_COLNAME}),
      ('previous_year_load_lag',
-      {'input_col_name': 'DEMAND', 'output_col_name': 'load_lag'}),
-     ('previous_year_dew_pnt_lag',
-      {'input_col_name': 'DewPnt', 'output_col_name': 'dew_pnt_lag'}),
-     ('previous_year_dry_bulb_lag',
-      {'input_col_name': 'DryBulb', 'output_col_name': 'dry_bulb_lag'}),
+      {'input_col_names': 'DEMAND',
+       'round_agg_result': True}),
+     ('previous_year_temp_lag',
+      {'input_col_names': ['DryBulb', 'DewPnt'],
+       'round_agg_result': True}),
      ('recent_load_lag',
-      {'input_col_name': 'DEMAND',
+      {'input_col_names': 'DEMAND',
        'start_week': 10,
        'window_size': 4,
        'agg_count': 8,
-       'output_col_prefix': 'recent_load_'}),
-     ('recent_dry_bulb_lag',
-      {'input_col_name': 'DryBulb',
+       'round_agg_result': True}),
+     ('recent_temp_lag',
+      {'input_col_names': ['DryBulb', 'DewPnt'],
        'start_week': 10,
        'window_size': 4,
        'agg_count': 8,
-       'output_col_prefix': 'recent_dry_bulb_'}),
-     ('recent_dew_pnt_lag',
-      {'input_col_name': 'DewPnt',
-       'start_week': 10,
-       'window_size': 4,
-       'agg_count': 8,
-       'output_col_prefix': 'recent_dew_pnt_'})]
+       'round_agg_result': True})
+]
 
 
 if __name__ == '__main__':

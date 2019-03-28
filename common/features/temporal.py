@@ -27,6 +27,7 @@ class TemporalFeaturizer(BaseTSFeaturizer):
                 day_of_year
                 normalized_hour_of_year
                 week_of_year
+                year
 
             If feature_list is not specified, a default set of features are
             returned depending on df_config['frequency']
@@ -64,7 +65,8 @@ class TemporalFeaturizer(BaseTSFeaturizer):
                                       'day_of_year': self.day_of_year,
                                       'normalized_hour_of_year':
                                           self.normalized_hour_of_year,
-                                      'week_of_month': self.week_of_month}
+                                      'week_of_month': self.week_of_month,
+                                      'year': self.year}
 
     def hour_of_day(self, time_col):
         """Returns the hour from a datetime column."""
@@ -92,11 +94,15 @@ class TemporalFeaturizer(BaseTSFeaturizer):
 
     def week_of_month(self, time_col):
         """Returns the week of month from a datetime column."""
-        first_day = time_col.dt.replace(day=1)
+        first_day = time_col.apply(lambda x: x.replace(day=1))
         dom = time_col.dt.day
-        adjusted_dom = dom + first_day.weekday()
-        wom = int(ceil(adjusted_dom / 7.0))
+        adjusted_dom = dom + first_day.dt.dayofweek
+        wom = adjusted_dom.apply(lambda x: int(ceil(x / 7.0)))
         return wom
+
+    def year(self, time_col):
+        """Returns year from a datetime column."""
+        return time_col.dt.year
 
     def normalized_hour_of_year(self, time_col):
         """

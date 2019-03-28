@@ -118,7 +118,7 @@ def add_datetime(input_datetime, unit, add_count):
     return new_datetime
 
 
-def convert_to_tsdf(input_df, time_col_name, time_format, frequency):
+def convert_to_tsdf(input_df, time_col_name, time_format):
     output_df = input_df.copy()
     if not is_datetime_like(output_df[time_col_name]):
         output_df[time_col_name] = \
@@ -126,7 +126,6 @@ def convert_to_tsdf(input_df, time_col_name, time_format, frequency):
                            format=time_format)
 
     output_df.set_index(time_col_name, inplace=True)
-    output_df = output_df.asfreq(frequency)
 
     if not output_df.index.is_monotonic:
         output_df.sort_index(inplace=True)

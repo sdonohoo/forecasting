@@ -1,6 +1,7 @@
 from abc import abstractmethod
 import pandas as pd
 import numpy as np
+from collections import Iterable
 
 from .base_ts_estimators import BaseTSFeaturizer
 from common.utils import convert_to_tsdf
@@ -73,7 +74,7 @@ class BaseLagFeaturizer(BaseTSFeaturizer):
                                    input_df.index.get_level_values(0)})
         for lag in lags:
             tmp_df['lag_time'] = input_df.index.get_level_values(0) - \
-                           pd.to_timedelta(lag, frequency)
+                           pd.to_timedelta(int(lag), frequency)
             lag_df_cur = pd.merge(tmp_df, input_df, how='left',
                                   left_on='lag_time', right_index=True)
             for col in input_col_names:
@@ -131,6 +132,9 @@ class BaseLagFeaturizer(BaseTSFeaturizer):
 
             X_lag_tmp.reset_index(inplace=True)
 
+            # ##TODO: Add a boolean argument and refine this
+            # X_lag_tmp.fillna(method='ffill', inplace=True)
+
         if self.train_df is not None:
             X_lag_tmp = X_lag_tmp.loc[X_lag_tmp[self.time_col_name] >
                                       forecast_creation_time].copy()
@@ -177,8 +181,7 @@ class BasePeriodicLagFeaturizer(BaseLagFeaturizer):
         input_df = input_df.copy()
         input_df = convert_to_tsdf(input_df,
                                    time_col_name=self.time_col_name,
-                                   time_format=self.time_format,
-                                   frequency=self.frequency)
+                                   time_format=self.time_format)
 
         output_df = pd.DataFrame({
             self.time_col_name: input_df.index.get_level_values(0)})
@@ -315,7 +318,7 @@ class LagFeaturizer(BaseLagFeaturizer):
 
     @lags.setter
     def lags(self, val):
-        if not isinstance(val, list):
+        if not isinstance(val, Iterable):
             val = [val]
         if not self.future_value_available:
             for lag in val:
@@ -338,9 +341,7 @@ class LagFeaturizer(BaseLagFeaturizer):
         """
         input_df = convert_to_tsdf(input_df,
                                    time_col_name=self.time_col_name,
-                                   time_format=self.time_format,
-                                   frequency=self.frequency
-                                   )
+                                   time_format=self.time_format)
 
         if not self.future_value_available:
             input_df.loc[input_df.index.get_level_values(0) >

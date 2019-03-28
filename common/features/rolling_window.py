@@ -292,8 +292,7 @@ class RollingWindowFeaturizer(BaseRollingWindowFeaturizer):
         """
         input_df = convert_to_tsdf(input_df,
                                    time_col_name=self.time_col_name,
-                                   time_format=self.time_format,
-                                   frequency=self.frequency)
+                                   time_format=self.time_format)
 
         if not self.future_value_available:
             input_df.loc[input_df.index.get_level_values(0) >
@@ -477,8 +476,7 @@ class SameDayOfWeekRollingWindowFeaturizer(BaseRollingWindowFeaturizer):
         """
         input_df = convert_to_tsdf(input_df,
                                    time_col_name=self.time_col_name,
-                                   time_format=self.time_format,
-                                   frequency=self.frequency)
+                                   time_format=self.time_format)
 
         output_df = pd.DataFrame({
             self.time_col_name: input_df.index.get_level_values(0)})

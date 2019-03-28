@@ -2,7 +2,6 @@ import pandas as pd
 from abc import abstractmethod
 import numpy as np
 import warnings
-from functools import reduce
 from math import ceil
 
 from .base_ts_estimators import BaseTSFeaturizer
@@ -189,6 +188,51 @@ class RollingWindowFeaturizer(BaseRollingWindowFeaturizer):
             pipeline.set_params('featurizer_step_name__train_df) = train_df
             featurizer_step_name is the name of the featurizer step when
             creating the pipeline.
+
+    Examples:
+        This featurizer is scikit-learn compatible and can be used in
+        scikit-learn pipelines.
+        >>> tsdf = pd.DataFrame({
+        ...    'store': [1] * 10 + [2] * 10,
+        ...    'date': list(pd.date_range('2011-01-01', '2011-01-10')) +
+        ...            list(pd.date_range('2011-01-01', '2011-01-10')),
+        ...    'sales': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
+        ...              11, 12, 13, 14, 15, 16, 17, 18, 19, 20]})
+
+        >>> df_config = {
+        ...    'time_col_name': 'date',
+        ...    'ts_id_col_names': 'store',
+        ...    'target_col_name': 'sales',
+        ...    'frequency': 'D',
+        ...    'time_format': '%Y-%m-%d'
+        ...}
+
+        >>> rolling_window_featurizer = RollingWindowFeaturizer(
+        ...    df_config, input_col_names='sales',
+        ...    window_size=3, max_horizon=3,
+        ...    window_args={'min_periods': 1})
+        >>> rolling_window_featurizer.transform(tsdf)
+            store       date  sales  sales_mean
+        0       1 2011-01-01      1         NaN
+        1       1 2011-01-02      2         NaN
+        2       1 2011-01-03      3         NaN
+        3       1 2011-01-04      4         1.0
+        4       1 2011-01-05      5         1.5
+        5       1 2011-01-06      6         2.0
+        6       1 2011-01-07      7         3.0
+        7       1 2011-01-08      8         4.0
+        8       1 2011-01-09      9         5.0
+        9       1 2011-01-10     10         6.0
+        10      2 2011-01-01     11         NaN
+        11      2 2011-01-02     12         NaN
+        12      2 2011-01-03     13         NaN
+        13      2 2011-01-04     14        11.0
+        14      2 2011-01-05     15        11.5
+        15      2 2011-01-06     16        12.0
+        16      2 2011-01-07     17        13.0
+        17      2 2011-01-08     18        14.0
+        18      2 2011-01-09     19        15.0
+        19      2 2011-01-10     20        16.0
     """
     def __init__(self, df_config, input_col_names, window_size,
                  window_args={}, agg_func='mean', agg_args={},
@@ -338,6 +382,47 @@ class SameDayOfWeekRollingWindowFeaturizer(BaseRollingWindowFeaturizer):
             'same_dow_rolling_agg'.
         round_agg_result(bool): If round the final aggregation result.
             Default value is False.
+    Examples:
+        This featurizer is scikit-learn compatible and can be used in
+        scikit-learn pipelines.
+        >>> tsdf = pd.DataFrame({
+        ...    'store': [1] * 7 + [2] * 7,
+        ...    'date': pd.to_datetime([
+        ...        '2017-09-07', '2019-02-14', '2019-02-21',
+        ...        '2019-02-28', '2019-03-07', '2019-03-14',
+        ...        '2019-03-28'] * 2),
+        ...    'sales': [1, 2, 3, 4, 5, 6, 7,
+        ...             11, 12, 13, 14, 15, 16, 17]})
+
+        >>> df_config = {
+        ...    'time_col_name': 'date',
+        ...    'ts_id_col_names': 'store',
+        ...    'target_col_name': 'sales',
+        ...    'frequency': 'D',
+        ...    'time_format': '%Y-%m-%d'
+        ...}
+
+        >>> same_dow_rolling_window_featurizer =
+        ...    SameDayOfWeekRollingWindowFeaturizer(
+        ...    df_config, input_col_names='sales', start_week=2,
+        ...    window_size=4, agg_count=2, max_horizon=1,
+        ...    output_col_suffix='rolling')
+        >>> same_dow_rolling_window_featurizer.transform(tsdf)
+                store       date  sales  sales_rolling_2  sales_rolling_3
+        0       1 2017-09-07      1              NaN              NaN
+        1       1 2019-02-14      2              NaN              NaN
+        2       1 2019-02-21      3              NaN              NaN
+        3       1 2019-02-28      4              2.0              NaN
+        4       1 2019-03-07      5              2.5              2.0
+        5       1 2019-03-14      6              3.0              2.5
+        6       1 2019-03-28      7              4.5              3.5
+        7       2 2017-09-07     11              NaN              NaN
+        8       2 2019-02-14     12              NaN              NaN
+        9       2 2019-02-21     13              NaN              NaN
+        10      2 2019-02-28     14             12.0              NaN
+        11      2 2019-03-07     15             12.5             12.0
+        12      2 2019-03-14     16             13.0             12.5
+        13      2 2019-03-28     17             14.5             13.5
     """
 
     def __init__(self, df_config, input_col_names, window_size,

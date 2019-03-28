@@ -250,6 +250,49 @@ class LagFeaturizer(BaseLagFeaturizer):
             pipeline.set_params('featurizer_step_name__train_df) = train_df
             featurizer_step_name is the name of the featurizer step when
             creating the pipeline.
+    Examples:
+        This featurizer is scikit-learn compatible and can be used in
+        scikit-learn pipelines.
+        >>> tsdf = pd.DataFrame({
+        ...    'store': [1] * 10 + [2] * 10,
+        ...    'date': list(pd.date_range('2011-01-01', '2011-01-10')) +
+        ...            list(pd.date_range('2011-01-01', '2011-01-10')),
+        ...    'sales': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
+        ...              11, 12, 13, 14, 15, 16, 17, 18, 19, 20]})
+
+        >>> df_config = {
+        ...    'time_col_name': 'date',
+        ...    'ts_id_col_names': 'store',
+        ...    'target_col_name': 'sales',
+        ...    'frequency': 'D',
+        ...    'time_format': '%Y-%m-%d'
+        ...}
+
+        >>> lag_featurizer = LagFeaturizer(df_config, input_col_names='sales',
+        ...                               lags=[1, 2, 3],
+        ...                               max_horizon=2)
+        >>> lag_featurizer.transform(tsdf)
+            store       date  sales  sales_lag_1  sales_lag_2  sales_lag_3
+        0       1 2011-01-01      1          NaN          NaN          NaN
+        1       1 2011-01-02      2          1.0          NaN          NaN
+        2       1 2011-01-03      3          2.0          1.0          NaN
+        3       1 2011-01-04      4          3.0          2.0          1.0
+        4       1 2011-01-05      5          4.0          3.0          2.0
+        5       1 2011-01-06      6          5.0          4.0          3.0
+        6       1 2011-01-07      7          6.0          5.0          4.0
+        7       1 2011-01-08      8          7.0          6.0          5.0
+        8       1 2011-01-09      9          8.0          7.0          6.0
+        9       1 2011-01-10     10          NaN          8.0          7.0
+        10      2 2011-01-01     11          NaN          NaN          NaN
+        11      2 2011-01-02     12         11.0          NaN          NaN
+        12      2 2011-01-03     13         12.0         11.0          NaN
+        13      2 2011-01-04     14         13.0         12.0         11.0
+        14      2 2011-01-05     15         14.0         13.0         12.0
+        15      2 2011-01-06     16         15.0         14.0         13.0
+        16      2 2011-01-07     17         16.0         15.0         14.0
+        17      2 2011-01-08     18         17.0         16.0         15.0
+        18      2 2011-01-09     19         18.0         17.0         16.0
+        19      2 2011-01-10     20          NaN         18.0         17.0
     """
     def __init__(self, df_config, input_col_names, lags,
                  future_value_available=False, max_horizon=None,
@@ -306,6 +349,8 @@ class LagFeaturizer(BaseLagFeaturizer):
         lag_df = self._create_lag_df(input_df[self.input_col_names],
                                      lags=self.lags,
                                      frequency=self.frequency)
+
+        lag_df.set_index(self.time_col_name, inplace=True)
 
         return lag_df
 
@@ -366,6 +411,49 @@ class SameWeekOfYearLagFeaturizer(BasePeriodicLagFeaturizer):
             Default value is 'same_woy_lag'.
         round_agg_result(bool): If round the final aggregation result.
             Default value is False.
+
+    Examples:
+        This featurizer is scikit-learn compatible and can be used in
+        scikit-learn pipelines.
+        Note that in the example below, the lag feature of '2019-03-28' is
+        the average of the first 6 values, which correspond to two 3-week
+        windows around the same time of previous two years.
+        >>> tsdf = pd.DataFrame({
+        ...    'store': [1] * 7 + [2] * 7,
+        ...    'date': pd.to_datetime([
+        ...        '2017-03-23', '2017-03-30', '2017-04-06',
+        ...        '2018-03-22', '2018-03-29', '2018-04-05',
+        ...        '2019-03-28'] * 2),
+        ...    'sales': [1, 2, 3, 4, 5, 6, 7,
+        ...              11, 12, 13, 14, 15, 16, 17]})
+
+        >>> df_config = {
+        ...    'time_col_name': 'date',
+        ...    'ts_id_col_names': 'store',
+        ...    'target_col_name': 'sales',
+        ...    'frequency': 'D',
+        ...    'time_format': '%Y-%m-%d'
+        ...}
+
+        >>> same_woy_lag_featurizer = SameWeekOfYearLagFeaturizer(
+        ...    df_config,  input_col_names='sales', n_years=2, week_window=1,
+        ...    max_horizon=1)
+        >>> same_woy_lag_featurizer.transform(tsdf)
+            store       date  sales  sales_same_woy_lag
+        0       1 2017-03-23      1                 NaN
+        1       1 2017-03-30      2                 NaN
+        2       1 2017-04-06      3                 NaN
+        3       1 2018-03-22      4                 1.5
+        4       1 2018-03-29      5                 2.0
+        5       1 2018-04-05      6                 2.5
+        6       1 2019-03-28      7                 3.5
+        7       2 2017-03-23     11                 NaN
+        8       2 2017-03-30     12                 NaN
+        9       2 2017-04-06     13                 NaN
+        10      2 2018-03-22     14                11.5
+        11      2 2018-03-29     15                12.0
+        12      2 2018-04-05     16                12.5
+        13      2 2019-03-28     17                13.5
     """
 
     def __init__(self, df_config, input_col_names, train_df=None, n_years=3,
@@ -458,6 +546,49 @@ class SameDayOfYearLagFeaturizer(BasePeriodicLagFeaturizer):
             Default value is 'same_doy_lag'.
         round_agg_result(bool): If round the final aggregation result.
             Default value is False.
+    Examples:
+        This featurizer is scikit-learn compatible and can be used in
+        scikit-learn pipelines.
+        Note that in the example below, the lag feature of '2019-03-28' is
+        the average of the first 6 values, which correspond to two 3-day
+        windows around the same time of previous two years.
+        >>> tsdf = pd.DataFrame({
+        ...    'store': [1] * 7 + [2] * 7,
+        ...    'date': pd.to_datetime([
+        ...        '2017-03-27', '2017-03-28', '2017-03-29',
+        ...        '2018-03-27', '2018-03-28', '2018-03-29',
+        ...        '2019-03-28'] * 2),
+        ...    'sales': [1, 2, 3, 4, 5, 6, 7,
+        ...              11, 12, 13, 14, 15, 16, 17]})
+
+        >>> df_config = {
+        ...    'time_col_name': 'date',
+        ...    'ts_id_col_names': 'store',
+        ...    'target_col_name': 'sales',
+        ...    'frequency': 'D',
+        ...    'time_format': '%Y-%m-%d'
+        ...}
+
+        >>> same_doy_lag_featurizer = SameDayOfYearLagFeaturizer(
+        ...    df_config,  input_col_names='sales', n_years=2, day_window=1,
+        ...    max_horizon=1)
+
+        >>> same_doy_lag_featurizer.transform(tsdf)
+                store       date  sales  sales_same_doy_lag
+        0       1 2017-03-27      1                 NaN
+        1       1 2017-03-28      2                 NaN
+        2       1 2017-03-29      3                 NaN
+        3       1 2018-03-27      4                 1.5
+        4       1 2018-03-28      5                 2.0
+        5       1 2018-03-29      6                 2.5
+        6       1 2019-03-28      7                 3.5
+        7       2 2017-03-27     11                 NaN
+        8       2 2017-03-28     12                 NaN
+        9       2 2017-03-29     13                 NaN
+        10      2 2018-03-27     14                11.5
+        11      2 2018-03-28     15                12.0
+        12      2 2018-03-29     16                12.5
+        13      2 2019-03-28     17                13.5
     """
 
     def __init__(self, df_config, input_col_names, train_df=None,
@@ -492,6 +623,12 @@ class SameDayOfYearLagFeaturizer(BasePeriodicLagFeaturizer):
             day_lag_all += [j + i * 365 for j in day_lag_last_year]
 
         return day_lag_all
+
+
+
+
+
+
 
 
 

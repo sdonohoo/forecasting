@@ -119,6 +119,18 @@ def add_datetime(input_datetime, unit, add_count):
 
 
 def convert_to_tsdf(input_df, time_col_name, time_format):
+    """
+    Convert a time column in a data frame to monotonically increasing time
+    index.
+    Args:
+        input_df(pandas.DataFrame): Input data frame to convert.
+        time_col_name(str): Name of the time column to use as index.
+        time_format(str): Format of the time column.
+
+    Returns:
+        pandas.DataFrame: A new data frame with the time column of the input
+            data frame set as monotonically increasing index.
+    """
     output_df = input_df.copy()
     if not is_datetime_like(output_df[time_col_name]):
         output_df[time_col_name] = \

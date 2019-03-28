@@ -215,21 +215,21 @@ Please follow the instructions below to deploy the Linux DSVM.
 
 **Time:**
 
-* Run time 1: 1065 seconds
+* Run time 1: 1092 seconds
 
-* Run time 2: 1072 seconds
+* Run time 2: 1085 seconds
 
-* Run time 3: 1057 seconds
+* Run time 3: 1062 seconds
 
-* Run time 4: 1054 seconds
+* Run time 4: 1083 seconds
 
-* Run time 5: 1055 seconds
+* Run time 5: 1110 seconds
 
-* Median run time: 1057 seconds
+* Median run time: 1085 seconds
 
 **Cost:**  
 The hourly cost of the Standard D8s Ubuntu Linux VM in East US Azure region is 0.3840 USD, based on the price at the submission date.   
-Thus, the total cost is 1057/3600 * 0.3840 = $0.1127.
+Thus, the total cost is 1085/3600 * 0.3840 = $0.1157.
 
 **Average relative improvement (in %) over GEFCom2017 benchmark model**  (measured over the first run)  
 Round 1: 6.13  

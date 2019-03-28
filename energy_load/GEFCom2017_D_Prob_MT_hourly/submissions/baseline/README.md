@@ -159,21 +159,21 @@ Note there is no randomness in this baseline model, so the model quality is the 
 
 **Time:**
 
-* Run time 1: 138 seconds
+* Run time 1: 188 seconds
 
-* Run time 2: 137 seconds
+* Run time 2: 185 seconds
 
-* Run time 3: 136 seconds
+* Run time 3: 185 seconds
 
-* Run time 4: 137 seconds
+* Run time 4: 189 seconds
 
-* Run time 5: 134 seconds
+* Run time 5: 189 seconds
 
-* Median run time:  **137 seconds**
+* Median run time:  **188 seconds**
 
 **Cost:**  
 The hourly cost of the Standard D8s Ubuntu Linux VM in East US Azure region is 0.3840 USD, based on the price at the submission date.   
-Thus, the total cost is 137/3600 * 0.3840 = $0.0146.
+Thus, the total cost is 188/3600 * 0.3840 = $0.0201.
 
 **Average relative improvement (in %) over GEFCom2017 benchmark model**  (measured over the first run)  
 Round 1: -6.67  

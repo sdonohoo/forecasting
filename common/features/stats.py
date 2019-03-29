@@ -23,6 +23,8 @@ class PopularityFeaturizer(BaseTSFeaturizer):
             the popularity.
             If 'wide', wide_col_names must be provided and are used to
             compute the popularity.
+            It's a read-only property and can not be changed once a
+            featurizer is instantiated.
         wide_col_names(list of str): If data_format is 'wide', each unique
             value in the id_col_name column has a corresponding wide column
             that contains the feature value for that unique id. The column

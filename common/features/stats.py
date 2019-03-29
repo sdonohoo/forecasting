@@ -1,6 +1,7 @@
 from .base_ts_estimators import BaseTSFeaturizer
 from common.utils import is_iterable_but_not_string
 
+
 class PopularityFeaturizer(BaseTSFeaturizer):
     """
     Computes a feature indicating the popularity of each group of data.

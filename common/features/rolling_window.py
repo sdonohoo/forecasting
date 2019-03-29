@@ -26,6 +26,12 @@ class BaseRollingWindowFeaturizer(BaseTSFeaturizer):
         else:
             self._input_col_names = [val]
 
+    #future_value_available is a read-only property because there are a few
+    # other properties depend on it.
+    @property
+    def future_value_available(self):
+        return self._future_value_available
+
     @property
     def max_horizon(self):
         return self._max_horizon
@@ -159,6 +165,8 @@ class RollingWindowFeaturizer(BaseRollingWindowFeaturizer):
         agg_args(dict): Additional arguments passed to the aggregation function.
         future_value_available(bool): Whether future values of the input
             columns are available at forecast time. Default value is False.
+            It's a read-only property and can not be changed once a featurizer
+            is instantiated.
         max_horizon(int): Maximum number of steps ahead to forecast. The step
             unit is the frequency of the data.
             This value is needed to prevent creating features on the
@@ -244,7 +252,7 @@ class RollingWindowFeaturizer(BaseRollingWindowFeaturizer):
         self.window_size = window_size
         self.agg_func = agg_func
         self.agg_args = agg_args
-        self.future_value_available = future_value_available
+        self._future_value_available = future_value_available
         self.train_df = train_df
 
         # max_horizon and window_args must be set after future_value_available
@@ -345,6 +353,8 @@ class SameDayOfWeekRollingWindowFeaturizer(BaseRollingWindowFeaturizer):
             specified.
         future_value_available(bool): Whether future values of the input
             columns are available at forecast time. Default value is False.
+            It's a read-only property and can not be changed once a
+            featurizer is instantiated.
         start_week(int): Number of weeks between the current week and the first
             week of the first aggregation feature. If not set, it's
             automatically computed based on max_horizon and the data frequency.
@@ -434,7 +444,7 @@ class SameDayOfWeekRollingWindowFeaturizer(BaseRollingWindowFeaturizer):
 
         self.input_col_names = input_col_names
         self.window_size = window_size
-        self.future_value_available = future_value_available
+        self._future_value_available = future_value_available
         self.agg_func = agg_func
         self.agg_count = agg_count
         self.train_df = train_df

@@ -24,6 +24,12 @@ class BaseLagFeaturizer(BaseTSFeaturizer):
         else:
             self._input_col_names = [val]
 
+    #future_value_available is a read-only property because there are a few
+    # other properties depend on it.
+    @property
+    def future_value_available(self):
+        return self._future_value_available
+
     @property
     def max_horizon(self):
         return self._max_horizon
@@ -227,7 +233,8 @@ class LagFeaturizer(BaseLagFeaturizer):
             future_value_available is False, lags must be positive.
         future_value_available(bool): Whether future values of the input
             columns are available at the forecast creation time. Default
-            value is False.
+            value is False. It's a read-only property and can not be changed
+            once a featurizer is instantiated.
         max_horizon(int): Maximum number of steps ahead to forecast. The step
             unit is the frequency of the data.
             This value is needed to prevent creating features on the
@@ -303,7 +310,7 @@ class LagFeaturizer(BaseLagFeaturizer):
         super().__init__(df_config)
 
         self.input_col_names = input_col_names
-        self.future_value_available = future_value_available
+        self._future_value_available = future_value_available
 
         # max_horizon and lags must be set after future_value_available is set,
         # because they depends on it.
@@ -395,7 +402,8 @@ class SameWeekOfYearLagFeaturizer(BasePeriodicLagFeaturizer):
         agg_args(dict): Additional arguments passed to the aggregation function.
         future_value_available(bool): Whether future values of the input
             columns are available at the forecast creation time. Default
-            value is False.
+            value is False. It's a read-only property and can not be changed
+            once a featurizer is instantiated.
         max_horizon(int): Maximum number of steps ahead to forecast. The step
             unit is the frequency of the data.
             This value is needed to prevent creating features on the
@@ -469,7 +477,7 @@ class SameWeekOfYearLagFeaturizer(BasePeriodicLagFeaturizer):
         self.week_window = week_window
         self.agg_func = agg_func
         self.agg_args = agg_args
-        self.future_value_available = future_value_available
+        self._future_value_available = future_value_available
         self.output_col_suffix = output_col_suffix
         self.train_df = train_df
         self.round_agg_result = round_agg_result
@@ -530,7 +538,8 @@ class SameDayOfYearLagFeaturizer(BasePeriodicLagFeaturizer):
         agg_args(dict): Additional arguments passed to the aggregation function.
         future_value_available(bool): Whether future values of the input
             columns are available at the forecast creation time. Default
-            value is False.
+            value is False. It's a read-only property and can not be changed
+            once a featurizer is instantiated.
         max_horizon(int): Maximum number of steps ahead to forecast. The step
             unit is the frequency of the data.
             This value is needed to prevent creating features on the
@@ -603,7 +612,7 @@ class SameDayOfYearLagFeaturizer(BasePeriodicLagFeaturizer):
         self.day_window = day_window
         self.agg_func = agg_func
         self.agg_args = agg_args
-        self.future_value_available = future_value_available
+        self._future_value_available = future_value_available
         self.output_col_suffix = output_col_suffix
         self.train_df = train_df
         self.round_agg_result = round_agg_result

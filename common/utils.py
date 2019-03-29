@@ -1,6 +1,7 @@
 import datetime
 import pandas as pd
 from dateutil.relativedelta import relativedelta
+from collections import Iterable
 
 ALLOWED_TIME_COLUMN_TYPES = [pd.Timestamp, pd.DatetimeIndex,
                              datetime.datetime, datetime.date]
@@ -143,3 +144,13 @@ def convert_to_tsdf(input_df, time_col_name, time_format):
         output_df.sort_index(inplace=True)
 
     return output_df
+
+
+def is_iterable_but_not_string(obj):
+    """
+    Determine if an object has iterable, list-like properties.
+    Importantly, this functions *does not* consider a string
+    to be list-like, even though Python strings are iterable.
+
+    """
+    return isinstance(obj, Iterable) and not isinstance(obj, str)

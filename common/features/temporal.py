@@ -68,31 +68,38 @@ class TemporalFeaturizer(BaseTSFeaturizer):
                                       'week_of_month': self.week_of_month,
                                       'year': self.year}
 
-    def hour_of_day(self, time_col):
+    @staticmethod
+    def hour_of_day(time_col):
         """Returns the hour from a datetime column."""
         return time_col.dt.hour
 
-    def week_of_year(self, time_col):
+    @staticmethod
+    def week_of_year(time_col):
         """Returns the week from a datetime column."""
         return time_col.dt.week
 
-    def month_of_year(self, time_col):
+    @staticmethod
+    def month_of_year(time_col):
         """Returns the month from a datetime column."""
         return time_col.dt.month
 
-    def day_of_week(self, time_col):
+    @staticmethod
+    def day_of_week(time_col):
         """Returns the day of week from a datetime column."""
         return time_col.dt.dayofweek
 
-    def day_of_month(self, time_col):
+    @staticmethod
+    def day_of_month(time_col):
         """Returns the day of month from a datetime column."""
         return time_col.dt.day
 
-    def day_of_year(self, time_col):
+    @staticmethod
+    def day_of_year(time_col):
         """Returns the day of year from a datetime column."""
         return time_col.dt.dayofyear
 
-    def week_of_month(self, time_col):
+    @staticmethod
+    def week_of_month(time_col):
         """Returns the week of month from a datetime column."""
         first_day = time_col.apply(lambda x: x.replace(day=1))
         dom = time_col.dt.day
@@ -100,11 +107,13 @@ class TemporalFeaturizer(BaseTSFeaturizer):
         wom = adjusted_dom.apply(lambda x: int(ceil(x / 7.0)))
         return wom
 
-    def year(self, time_col):
+    @staticmethod
+    def year(time_col):
         """Returns year from a datetime column."""
         return time_col.dt.year
 
-    def normalized_hour_of_year(self, time_col):
+    @staticmethod
+    def normalized_hour_of_year(time_col):
         """
         Normalized hour of year is a cyclic variable that indicates the annual
         position of a particular hour on a particular day and repeats each
@@ -292,7 +301,8 @@ class BaseFourierFeaturizer(BaseTSFeaturizer, ABC):
                 annual Fourier, this is the day of year.
             n(int): Harmony to compute, n = 1, 2, 3,...
             period(int): Period of the time series data. For hourly data with
-                daily seasonality, this is 24. For weekly seasonality, this is 7.
+                daily seasonality, this is 24. For weekly seasonality, this is
+                7.
                 For yearly seasonality, this is the number of days in a year.
 
         Returns:

@@ -4,7 +4,7 @@ import numpy as np
 from collections import Iterable
 
 from .base_ts_estimators import BaseTSFeaturizer
-from common.utils import convert_to_tsdf
+from common.utils import convert_to_tsdf, is_iterable_but_not_string
 
 
 class BaseLagFeaturizer(BaseTSFeaturizer):
@@ -19,8 +19,8 @@ class BaseLagFeaturizer(BaseTSFeaturizer):
 
     @input_col_names.setter
     def input_col_names(self, val):
-        if isinstance(val, list):
-            self._input_col_names = val
+        if is_iterable_but_not_string(val):
+            self._input_col_names = list(val)
         else:
             self._input_col_names = [val]
 

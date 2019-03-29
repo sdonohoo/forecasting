@@ -4,7 +4,7 @@ Base classes for time series forecasting tasks.
 from abc import ABC, abstractmethod
 from sklearn.base import BaseEstimator, TransformerMixin
 import pandas as pd
-from common.utils import is_datetime_like
+from common.utils import is_datetime_like, is_iterable_but_not_string
 
 
 class BaseTSEstimator(BaseEstimator, ABC):
@@ -44,8 +44,8 @@ class BaseTSEstimator(BaseEstimator, ABC):
         # downstream code that use it.
         if val is None:
             self._ts_id_col_names = []
-        elif isinstance(val, list):
-            self._ts_id_col_names = val
+        elif is_iterable_but_not_string(val):
+            self._ts_id_col_names = list(val)
         else:
             self._ts_id_col_names = [val]
 

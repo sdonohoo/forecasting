@@ -126,7 +126,9 @@ class PopularityFeaturizer(BaseTSFeaturizer):
             raise ValueError('For wide data format, wide_col_names can not be '
                              'None.')
         if self.data_format == 'wide':
-            if not is_iterable_but_not_string(val):
+            if is_iterable_but_not_string(val):
+                val = list(val)
+            else:
                 raise ValueError(
                     'wide_col_names must be a non-string Iterable, '
                     'e.g. a list.')

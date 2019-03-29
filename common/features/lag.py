@@ -263,14 +263,14 @@ class LagFeaturizer(BaseLagFeaturizer):
     Examples:
         This featurizer is scikit-learn compatible and can be used in
         scikit-learn pipelines.
-        >>> tsdf = pd.DataFrame({
+        >>>tsdf = pd.DataFrame({
         ...    'store': [1] * 10 + [2] * 10,
         ...    'date': list(pd.date_range('2011-01-01', '2011-01-10')) +
         ...            list(pd.date_range('2011-01-01', '2011-01-10')),
         ...    'sales': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
         ...              11, 12, 13, 14, 15, 16, 17, 18, 19, 20]})
 
-        >>> df_config = {
+        >>>df_config = {
         ...    'time_col_name': 'date',
         ...    'ts_id_col_names': 'store',
         ...    'target_col_name': 'sales',
@@ -278,10 +278,10 @@ class LagFeaturizer(BaseLagFeaturizer):
         ...    'time_format': '%Y-%m-%d'
         ...}
 
-        >>> lag_featurizer = LagFeaturizer(df_config, input_col_names='sales',
+        >>>lag_featurizer = LagFeaturizer(df_config, input_col_names='sales',
         ...                               lags=[1, 2, 3],
         ...                               max_horizon=2)
-        >>> lag_featurizer.transform(tsdf)
+        >>>lag_featurizer.transform(tsdf)
             store       date  sales  sales_lag_1  sales_lag_2  sales_lag_3
         0       1 2011-01-01      1          NaN          NaN          NaN
         1       1 2011-01-02      2          1.0          NaN          NaN
@@ -427,7 +427,7 @@ class SameWeekOfYearLagFeaturizer(BasePeriodicLagFeaturizer):
         Note that in the example below, the lag feature of '2019-03-28' is
         the average of the first 6 values, which correspond to two 3-week
         windows around the same time of previous two years.
-        >>> tsdf = pd.DataFrame({
+        >>>tsdf = pd.DataFrame({
         ...    'store': [1] * 7 + [2] * 7,
         ...    'date': pd.to_datetime([
         ...        '2017-03-23', '2017-03-30', '2017-04-06',
@@ -436,7 +436,7 @@ class SameWeekOfYearLagFeaturizer(BasePeriodicLagFeaturizer):
         ...    'sales': [1, 2, 3, 4, 5, 6, 7,
         ...              11, 12, 13, 14, 15, 16, 17]})
 
-        >>> df_config = {
+        >>>df_config = {
         ...    'time_col_name': 'date',
         ...    'ts_id_col_names': 'store',
         ...    'target_col_name': 'sales',
@@ -444,10 +444,10 @@ class SameWeekOfYearLagFeaturizer(BasePeriodicLagFeaturizer):
         ...    'time_format': '%Y-%m-%d'
         ...}
 
-        >>> same_woy_lag_featurizer = SameWeekOfYearLagFeaturizer(
+        >>>same_woy_lag_featurizer = SameWeekOfYearLagFeaturizer(
         ...    df_config,  input_col_names='sales', n_years=2, week_window=1,
         ...    max_horizon=1)
-        >>> same_woy_lag_featurizer.transform(tsdf)
+        >>>same_woy_lag_featurizer.transform(tsdf)
             store       date  sales  sales_same_woy_lag
         0       1 2017-03-23      1                 NaN
         1       1 2017-03-30      2                 NaN
@@ -562,7 +562,7 @@ class SameDayOfYearLagFeaturizer(BasePeriodicLagFeaturizer):
         Note that in the example below, the lag feature of '2019-03-28' is
         the average of the first 6 values, which correspond to two 3-day
         windows around the same time of previous two years.
-        >>> tsdf = pd.DataFrame({
+        >>>tsdf = pd.DataFrame({
         ...    'store': [1] * 7 + [2] * 7,
         ...    'date': pd.to_datetime([
         ...        '2017-03-27', '2017-03-28', '2017-03-29',
@@ -571,7 +571,7 @@ class SameDayOfYearLagFeaturizer(BasePeriodicLagFeaturizer):
         ...    'sales': [1, 2, 3, 4, 5, 6, 7,
         ...              11, 12, 13, 14, 15, 16, 17]})
 
-        >>> df_config = {
+        >>>df_config = {
         ...    'time_col_name': 'date',
         ...    'ts_id_col_names': 'store',
         ...    'target_col_name': 'sales',
@@ -579,11 +579,11 @@ class SameDayOfYearLagFeaturizer(BasePeriodicLagFeaturizer):
         ...    'time_format': '%Y-%m-%d'
         ...}
 
-        >>> same_doy_lag_featurizer = SameDayOfYearLagFeaturizer(
+        >>>same_doy_lag_featurizer = SameDayOfYearLagFeaturizer(
         ...    df_config,  input_col_names='sales', n_years=2, day_window=1,
         ...    max_horizon=1)
 
-        >>> same_doy_lag_featurizer.transform(tsdf)
+        >>>same_doy_lag_featurizer.transform(tsdf)
                 store       date  sales  sales_same_doy_lag
         0       1 2017-03-27      1                 NaN
         1       1 2017-03-28      2                 NaN

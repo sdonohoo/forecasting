@@ -200,14 +200,14 @@ class RollingWindowFeaturizer(BaseRollingWindowFeaturizer):
     Examples:
         This featurizer is scikit-learn compatible and can be used in
         scikit-learn pipelines.
-        >>> tsdf = pd.DataFrame({
+        >>>tsdf = pd.DataFrame({
         ...    'store': [1] * 10 + [2] * 10,
         ...    'date': list(pd.date_range('2011-01-01', '2011-01-10')) +
         ...            list(pd.date_range('2011-01-01', '2011-01-10')),
         ...    'sales': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
         ...              11, 12, 13, 14, 15, 16, 17, 18, 19, 20]})
 
-        >>> df_config = {
+        >>>df_config = {
         ...    'time_col_name': 'date',
         ...    'ts_id_col_names': 'store',
         ...    'target_col_name': 'sales',
@@ -215,11 +215,11 @@ class RollingWindowFeaturizer(BaseRollingWindowFeaturizer):
         ...    'time_format': '%Y-%m-%d'
         ...}
 
-        >>> rolling_window_featurizer = RollingWindowFeaturizer(
+        >>>rolling_window_featurizer = RollingWindowFeaturizer(
         ...    df_config, input_col_names='sales',
         ...    window_size=3, max_horizon=3,
         ...    window_args={'min_periods': 1})
-        >>> rolling_window_featurizer.transform(tsdf)
+        >>>rolling_window_featurizer.transform(tsdf)
             store       date  sales  sales_mean
         0       1 2011-01-01      1         NaN
         1       1 2011-01-02      2         NaN
@@ -394,7 +394,7 @@ class SameDayOfWeekRollingWindowFeaturizer(BaseRollingWindowFeaturizer):
     Examples:
         This featurizer is scikit-learn compatible and can be used in
         scikit-learn pipelines.
-        >>> tsdf = pd.DataFrame({
+        >>>tsdf = pd.DataFrame({
         ...    'store': [1] * 7 + [2] * 7,
         ...    'date': pd.to_datetime([
         ...        '2017-09-07', '2019-02-14', '2019-02-21',
@@ -403,7 +403,7 @@ class SameDayOfWeekRollingWindowFeaturizer(BaseRollingWindowFeaturizer):
         ...    'sales': [1, 2, 3, 4, 5, 6, 7,
         ...             11, 12, 13, 14, 15, 16, 17]})
 
-        >>> df_config = {
+        >>>df_config = {
         ...    'time_col_name': 'date',
         ...    'ts_id_col_names': 'store',
         ...    'target_col_name': 'sales',
@@ -411,12 +411,12 @@ class SameDayOfWeekRollingWindowFeaturizer(BaseRollingWindowFeaturizer):
         ...    'time_format': '%Y-%m-%d'
         ...}
 
-        >>> same_dow_rolling_window_featurizer =
+        >>>same_dow_rolling_window_featurizer =
         ...    SameDayOfWeekRollingWindowFeaturizer(
         ...    df_config, input_col_names='sales', start_week=2,
         ...    window_size=4, agg_count=2, max_horizon=1,
         ...    output_col_suffix='rolling')
-        >>> same_dow_rolling_window_featurizer.transform(tsdf)
+        >>>same_dow_rolling_window_featurizer.transform(tsdf)
                 store       date  sales  sales_rolling_2  sales_rolling_3
         0       1 2017-09-07      1              NaN              NaN
         1       1 2019-02-14      2              NaN              NaN

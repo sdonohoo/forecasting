@@ -22,17 +22,19 @@ class BaseTSEstimator(BaseEstimator, ABC):
                 stores and multiple brands, each store and brand
                 combination defines a unique time series.
             frequency(str): Frequency of the data frame.
-                See https://pandas.pydata.org/pandas-docs/stable/user_guide/timeseries.html#dateoffset-objects
+                See https://pandas.pydata.org/pandas-docs/stable/user_guide/
+                timeseries.html#dateoffset-objects
             time_format: Format of the timestamps in the time column.
                 See http://strftime.org/.
 
     """
+
     def __init__(self, df_config):
-        self.time_col_name = df_config['time_col_name']
-        self.target_col_name = df_config['target_col_name']
-        self.ts_id_col_names = df_config['ts_id_col_names']
-        self.frequency = df_config['frequency']
-        self.time_format = df_config['time_format']
+        self.time_col_name = df_config["time_col_name"]
+        self.target_col_name = df_config["target_col_name"]
+        self.ts_id_col_names = df_config["ts_id_col_names"]
+        self.frequency = df_config["frequency"]
+        self.time_format = df_config["time_format"]
 
     @property
     def ts_id_col_names(self):
@@ -54,12 +56,16 @@ class BaseTSEstimator(BaseEstimator, ABC):
         Checks if the columns specified in data frame configuration exist.
         """
         if self.time_col_name not in df.columns:
-            raise Exception('time_col_name {} does not exist in the input '
-                            'data frame'.format(self.time_col_name))
+            raise Exception(
+                "time_col_name {} does not exist in the input "
+                "data frame".format(self.time_col_name)
+            )
         for id_col_name in self.ts_id_col_names:
             if id_col_name not in df.columns:
-                raise Exception('ts_id_col_names {} does not exist in the '
-                                'input data frame'.format(id_col_name))
+                raise Exception(
+                    "ts_id_col_names {} does not exist in the "
+                    "input data frame".format(id_col_name)
+                )
 
     def _get_time_col(self, df):
         """
@@ -75,6 +81,7 @@ class BaseTSFeaturizer(BaseTSEstimator, TransformerMixin):
     """
     Base abstract featurizer class for all time series featurizers.
     """
+
     def fit(self, X, y=None):
         """
         Default implementation of fit method. By default, nothing is done

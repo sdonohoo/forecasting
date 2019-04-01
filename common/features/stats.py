@@ -97,10 +97,16 @@ class PopularityFeaturizer(BaseTSFeaturizer):
         5      3 2011-01-02      11      12       8      6    0.774194      8
     """
 
-    def __init__(self, df_config, id_col_name, feature_col_name,
-                 data_format='long', wide_col_names=None,
-                 output_col_name='popularity',
-                 return_feature_col=False):
+    def __init__(
+        self,
+        df_config,
+        id_col_name,
+        feature_col_name,
+        data_format="long",
+        wide_col_names=None,
+        output_col_name="popularity",
+        return_feature_col=False,
+    ):
 
         super().__init__(df_config)
         self.id_col_name = id_col_name
@@ -110,10 +116,11 @@ class PopularityFeaturizer(BaseTSFeaturizer):
         self.output_col_name = output_col_name
         self.return_feature_col = return_feature_col
 
-        if data_format not in ['long', 'wide']:
+        if data_format not in ["long", "wide"]:
             raise ValueError(
-                'Invalid value for argument data_format, '
-                'accepted values are {0} and {1}'.format('long', 'wide'))
+                "Invalid value for argument data_format, "
+                "accepted values are {0} and {1}".format("long", "wide")
+            )
 
     @property
     def data_format(self):
@@ -125,20 +132,24 @@ class PopularityFeaturizer(BaseTSFeaturizer):
 
     @wide_col_names.setter
     def wide_col_names(self, val):
-        if self.data_format == 'wide' and val is None:
-            raise ValueError('For wide data format, wide_col_names can not be '
-                             'None.')
-        if self.data_format == 'wide':
+        if self.data_format == "wide" and val is None:
+            raise ValueError(
+                "For wide data format, wide_col_names can not be " "None."
+            )
+        if self.data_format == "wide":
             if is_iterable_but_not_string(val):
                 val = list(val)
             else:
                 raise ValueError(
-                    'wide_col_names must be a non-string Iterable, '
-                    'e.g. a list.')
+                    "wide_col_names must be a non-string Iterable, "
+                    "e.g. a list."
+                )
             for c in val:
                 if not c.startswith(self.feature_col_name):
-                    raise ValueError('Elements of wide_col_names must start '
-                                     'with feature_col_name')
+                    raise ValueError(
+                        "Elements of wide_col_names must start "
+                        "with feature_col_name"
+                    )
 
         self._wide_col_names = val
 
@@ -153,24 +164,30 @@ class PopularityFeaturizer(BaseTSFeaturizer):
         id_all = df[self.id_col_name].unique()
         for id in id_all:
             wide_col_name = input_col + str(id)
-            df[wide_col_name] = df.loc[df[self.id_col_name] == id,
-                                       input_col].values[0]
+            df[wide_col_name] = df.loc[
+                df[self.id_col_name] == id, input_col
+            ].values[0]
         return df
 
     def transform(self, X):
         self._check_config_cols_exist(X)
-        if self.data_format == 'long':
+        if self.data_format == "long":
             if len(self.ts_id_col_names) > 0:
                 grain_col_name_tmp = self.ts_id_col_names.copy()
                 if self.id_col_name in self.ts_id_col_names:
                     grain_col_name_tmp.remove(self.id_col_name)
-                cols = grain_col_name_tmp + \
-                       [self.time_col_name, self.feature_col_name,
-                        self.id_col_name]
+                cols = grain_col_name_tmp + [
+                    self.time_col_name,
+                    self.feature_col_name,
+                    self.id_col_name,
+                ]
                 group_cols = grain_col_name_tmp + [self.time_col_name]
             else:
-                cols = [self.time_col_name, self.feature_col_name,
-                        self.id_col_name]
+                cols = [
+                    self.time_col_name,
+                    self.feature_col_name,
+                    self.id_col_name,
+                ]
                 group_cols = self.time_col_name
             X_tmp = X[cols].copy()
             id_all = X_tmp[self.id_col_name].unique()
@@ -180,22 +197,28 @@ class PopularityFeaturizer(BaseTSFeaturizer):
                 # X_tmp[wide_col_name] = np.nan
                 self.wide_col_names.append(wide_col_name)
 
-            X_tmp = X_tmp.groupby(group_cols).\
-                apply(lambda g: self._add_wide_cols(g, self.feature_col_name))
+            X_tmp = X_tmp.groupby(group_cols).apply(
+                lambda g: self._add_wide_cols(g, self.feature_col_name)
+            )
             X_tmp.reset_index(inplace=True)
 
         else:
             X_tmp = X[self.wide_col_names + [self.id_col_name]].copy()
             X_tmp[self.feature_col_name] = X_tmp.apply(
-                lambda x: x.loc[self.feature_col_name +
-                                str(int(x.loc[self.id_col_name]))], axis=1)
+                lambda x: x.loc[
+                    self.feature_col_name + str(int(x.loc[self.id_col_name]))
+                ],
+                axis=1,
+            )
 
-        X_tmp['avg'] = X_tmp[self.wide_col_names].sum(axis=1).\
-            apply(lambda x: x / len(self.wide_col_names))
-        X[self.output_col_name] = X_tmp[self.feature_col_name] / X_tmp['avg']
+        X_tmp["avg"] = (
+            X_tmp[self.wide_col_names]
+            .sum(axis=1)
+            .apply(lambda x: x / len(self.wide_col_names))
+        )
+        X[self.output_col_name] = X_tmp[self.feature_col_name] / X_tmp["avg"]
 
         if self.return_feature_col:
             X[self.feature_col_name] = X_tmp[self.feature_col_name]
 
         return X
-

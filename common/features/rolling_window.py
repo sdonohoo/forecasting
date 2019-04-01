@@ -15,6 +15,7 @@ class BaseRollingWindowFeaturizer(BaseTSFeaturizer):
     which creates rolling window features on a data frame containing a single
     time series.
     """
+
     @property
     def input_col_names(self):
         return self._input_col_names
@@ -26,7 +27,7 @@ class BaseRollingWindowFeaturizer(BaseTSFeaturizer):
         else:
             self._input_col_names = [val]
 
-    #future_value_available is a read-only property because there are a few
+    # future_value_available is a read-only property because there are a few
     # other properties depend on it.
     @property
     def future_value_available(self):
@@ -39,8 +40,10 @@ class BaseRollingWindowFeaturizer(BaseTSFeaturizer):
     @max_horizon.setter
     def max_horizon(self, val):
         if not val and not self.future_value_available:
-            raise Exception('max_horizon must be set when '
-                            'future_value_available is False')
+            raise Exception(
+                "max_horizon must be set when "
+                "future_value_available is False"
+            )
         self._max_horizon = val
 
     @property
@@ -51,11 +54,16 @@ class BaseRollingWindowFeaturizer(BaseTSFeaturizer):
     def window_args(self, val):
         # If future value is not available, force to set the labels at the
         # right end of the window to avoid data leakage.
-        if not self.future_value_available and \
-                'center' in val and val['center'] is True:
-            val['center'] = False
-            warnings("window_args['center'] is set to False, because "
-                     "future_value_available is False")
+        if (
+            not self.future_value_available
+            and "center" in val
+            and val["center"] is True
+        ):
+            val["center"] = False
+            warnings(
+                "window_args['center'] is set to False, because "
+                "future_value_available is False"
+            )
         self._window_args = val
 
     @abstractmethod
@@ -94,8 +102,9 @@ class BaseRollingWindowFeaturizer(BaseTSFeaturizer):
         """
         self._check_config_cols_exist(X)
 
-        col_names = [self.time_col_name] + self.input_col_names + \
-                     self.ts_id_col_names
+        col_names = (
+            [self.time_col_name] + self.input_col_names + self.ts_id_col_names
+        )
         merge_col_names = [self.time_col_name] + self.ts_id_col_names
 
         if self.train_df is not None:
@@ -110,33 +119,37 @@ class BaseRollingWindowFeaturizer(BaseTSFeaturizer):
                 # Compute an imaginary forecast creation time for the training
                 # data based on the maximum timestamp to forecast on
                 max_train_timestamp = time_col.max()
-                forecast_creation_time = \
-                    max_train_timestamp - pd.to_timedelta(self.max_horizon,
-                                                          self.frequency)
+                forecast_creation_time = max_train_timestamp - pd.to_timedelta(
+                    self.max_horizon, self.frequency
+                )
             else:
                 forecast_creation_time = time_col.max()
             X_tmp = X[col_names].copy()
 
         if len(self.ts_id_col_names) == 0:
-            output_tmp = \
-                self._rolling_window_agg_single_ts(X_tmp,
-                                                   forecast_creation_time)
+            output_tmp = self._rolling_window_agg_single_ts(
+                X_tmp, forecast_creation_time
+            )
         else:
-            output_tmp = \
-                X_tmp.groupby(self.ts_id_col_names).apply(
-                    lambda g: self._rolling_window_agg_single_ts(
-                        g, forecast_creation_time))
+            output_tmp = X_tmp.groupby(self.ts_id_col_names).apply(
+                lambda g: self._rolling_window_agg_single_ts(
+                    g, forecast_creation_time
+                )
+            )
             output_tmp.reset_index(inplace=True)
 
         if self.train_df is not None:
-            output_tmp = output_tmp.loc[output_tmp[self.time_col_name] >
-                                        forecast_creation_time].copy()
+            output_tmp = output_tmp.loc[
+                output_tmp[self.time_col_name] > forecast_creation_time
+            ].copy()
 
         X = pd.merge(X, output_tmp, on=merge_col_names)
         if X.shape[0] == 0:
-            raise Exception('The featurizer output is empty. Set the '
-                            'train_df property of the featurizer to '
-                            'None if transforming training data.')
+            raise Exception(
+                "The featurizer output is empty. Set the "
+                "train_df property of the featurizer to "
+                "None if transforming training data."
+            )
         return X
 
 
@@ -157,12 +170,14 @@ class RollingWindowFeaturizer(BaseRollingWindowFeaturizer):
             included in the time-period. This is only valid for datetimelike
             indexes.
         window_args(dict): Additional arguments passed to pandas.rolling.
-            See https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.rolling.html
+            See https://pandas.pydata.org/pandas-docs/stable/reference/api/
+            pandas.DataFrame.rolling.html
         agg_func(function or str): Function used to aggregate data in the
             rolling window.  If a function, must either work when passed a
             DataFrame or when passed to DataFrame.apply. Default value is
             'mean'. Other commonly used values are 'std', 'quantile'.
-        agg_args(dict): Additional arguments passed to the aggregation function.
+        agg_args(dict): Additional arguments passed to the aggregation
+            function.
         future_value_available(bool): Whether future values of the input
             columns are available at forecast time. Default value is False.
             It's a read-only property and can not be changed once a featurizer
@@ -242,10 +257,20 @@ class RollingWindowFeaturizer(BaseRollingWindowFeaturizer):
         18      2 2011-01-09     19        15.0
         19      2 2011-01-10     20        16.0
     """
-    def __init__(self, df_config, input_col_names, window_size,
-                 window_args={}, agg_func='mean', agg_args={},
-                 future_value_available=False, max_horizon=None,
-                 rolling_gap=None, train_df=None):
+
+    def __init__(
+        self,
+        df_config,
+        input_col_names,
+        window_size,
+        window_args={},
+        agg_func="mean",
+        agg_args={},
+        future_value_available=False,
+        max_horizon=None,
+        rolling_gap=None,
+        train_df=None,
+    ):
         super().__init__(df_config)
 
         self.input_col_names = input_col_names
@@ -269,7 +294,7 @@ class RollingWindowFeaturizer(BaseRollingWindowFeaturizer):
         elif isinstance(self.agg_func, str):
             self._agg_func_name = self.agg_func
         else:
-            raise Exception('agg_func must be a function or a string.')
+            raise Exception("agg_func must be a function or a string.")
 
     @property
     def rolling_gap(self):
@@ -298,21 +323,28 @@ class RollingWindowFeaturizer(BaseRollingWindowFeaturizer):
             pandas.DataFrame: Data frame with the time column of input_df
                 and rolling window features.
         """
-        input_df = convert_to_tsdf(input_df,
-                                   time_col_name=self.time_col_name,
-                                   time_format=self.time_format)
+        input_df = convert_to_tsdf(
+            input_df,
+            time_col_name=self.time_col_name,
+            time_format=self.time_format,
+        )
 
         if not self.future_value_available:
-            input_df.loc[input_df.index.get_level_values(0) >
-                         forecast_creation_time, self.input_col_names] = np.nan
+            input_df.loc[
+                input_df.index.get_level_values(0) > forecast_creation_time,
+                self.input_col_names,
+            ] = np.nan
 
-        rolling_agg_df = input_df[self.input_col_names]\
-            .shift(self.rolling_gap)\
-            .rolling(window=self.window_size, **self.window_args)\
+        rolling_agg_df = (
+            input_df[self.input_col_names]
+            .shift(self.rolling_gap)
+            .rolling(window=self.window_size, **self.window_args)
             .agg(self.agg_func, **self.agg_args)
+        )
 
-        rolling_agg_df.columns = [col + '_' + self._agg_func_name for col in
-                                  rolling_agg_df.columns]
+        rolling_agg_df.columns = [
+            col + "_" + self._agg_func_name for col in rolling_agg_df.columns
+        ]
 
         return rolling_agg_df
 
@@ -372,7 +404,8 @@ class SameDayOfWeekRollingWindowFeaturizer(BaseRollingWindowFeaturizer):
             10th, 11th, 12th, and 13th weeks before the current week.
             3) moving_agg_lag_11: aggregate the same day and hour values of the
             11th, 12th, 13th, and 14th weeks before the current week.
-        agg_args(dict): Additional arguments passed to the aggregation function.
+        agg_args(dict): Additional arguments passed to the aggregation
+            function.
         train_df(pd.DataFrame): Training data needed to compute rolling
             window features on testing data.
             Note: this property must be None when transforming the
@@ -434,12 +467,21 @@ class SameDayOfWeekRollingWindowFeaturizer(BaseRollingWindowFeaturizer):
         13      2 2019-03-28     17             14.5             13.5
     """
 
-    def __init__(self, df_config, input_col_names, window_size,
-                 max_horizon=None, future_value_available=False,
-                 start_week=None, agg_func='mean', agg_count=1,
-                 agg_args={}, train_df=None,
-                 output_col_suffix='same_dow_rolling_agg',
-                 round_agg_result=False):
+    def __init__(
+        self,
+        df_config,
+        input_col_names,
+        window_size,
+        max_horizon=None,
+        future_value_available=False,
+        start_week=None,
+        agg_func="mean",
+        agg_count=1,
+        agg_args={},
+        train_df=None,
+        output_col_suffix="same_dow_rolling_agg",
+        round_agg_result=False,
+    ):
         super().__init__(df_config)
 
         self.input_col_names = input_col_names
@@ -484,54 +526,74 @@ class SameDayOfWeekRollingWindowFeaturizer(BaseRollingWindowFeaturizer):
             pandas.DataFrame: Data frame with the time column of input_df
                 and rolling window features.
         """
-        input_df = convert_to_tsdf(input_df,
-                                   time_col_name=self.time_col_name,
-                                   time_format=self.time_format)
+        input_df = convert_to_tsdf(
+            input_df,
+            time_col_name=self.time_col_name,
+            time_format=self.time_format,
+        )
 
-        output_df = pd.DataFrame({
-            self.time_col_name: input_df.index.get_level_values(0)})
+        output_df = pd.DataFrame(
+            {self.time_col_name: input_df.index.get_level_values(0)}
+        )
         min_time_stamp = output_df[self.time_col_name].min()
         max_time_stamp = output_df[self.time_col_name].max()
 
         if not self.future_value_available:
-            input_df.loc[input_df.index.get_level_values(0) >
-                         forecast_creation_time, self.input_col_names] = np.nan
+            input_df.loc[
+                input_df.index.get_level_values(0) > forecast_creation_time,
+                self.input_col_names,
+            ] = np.nan
 
         for i in range(self.agg_count):
             week_lag_start = self.start_week + i
-            week_lags = \
-                [week_lag_start + w for w in range(self.window_size)]
+            week_lags = [week_lag_start + w for w in range(self.window_size)]
 
             # Make sure the lag is not too small and not available for the
             # maximum forecasting time point, or too large and not available
             # for any time point
-            week_lags = [lag for lag in week_lags
-                         if (max_time_stamp - pd.to_timedelta(lag, 'W')) >=
-                         min_time_stamp and
-                         (max_time_stamp - pd.to_timedelta(lag, 'W'))
-                         <= forecast_creation_time]
+            week_lags = [
+                lag
+                for lag in week_lags
+                if (max_time_stamp - pd.to_timedelta(lag, "W"))
+                >= min_time_stamp
+                and (max_time_stamp - pd.to_timedelta(lag, "W"))
+                <= forecast_creation_time
+            ]
 
-            tmp_df = pd.DataFrame({'time': input_df.index.get_level_values(0)})
+            tmp_df = pd.DataFrame({"time": input_df.index.get_level_values(0)})
             lag_df = pd.DataFrame(index=input_df.index)
             lag_df.reset_index(inplace=True)
             if len(week_lags) > 0:
                 for lag in week_lags:
-                    tmp_df['lag_time'] = input_df.index.get_level_values(0) - \
-                                         pd.to_timedelta(lag, 'W')
-                    lag_df_cur = pd.merge(tmp_df, input_df, how='left',
-                                          left_on='lag_time', right_index=True)
+                    tmp_df["lag_time"] = input_df.index.get_level_values(
+                        0
+                    ) - pd.to_timedelta(lag, "W")
+                    lag_df_cur = pd.merge(
+                        tmp_df,
+                        input_df,
+                        how="left",
+                        left_on="lag_time",
+                        right_index=True,
+                    )
                     for col in self.input_col_names:
-                        lag_df[col + '_lag_' + str(lag)] = lag_df_cur[col]
+                        lag_df[col + "_lag_" + str(lag)] = lag_df_cur[col]
 
                 for col in self.input_col_names:
                     lag_cols = [c for c in lag_df.columns if c.startswith(col)]
-                    output_col_name = col + '_' + self.output_col_suffix + \
-                                      '_' + str(week_lag_start)
+                    output_col_name = (
+                        col
+                        + "_"
+                        + self.output_col_suffix
+                        + "_"
+                        + str(week_lag_start)
+                    )
 
                     output_df[output_col_name] = lag_df[lag_cols].apply(
-                        self.agg_func, axis=1, **self.agg_args)
+                        self.agg_func, axis=1, **self.agg_args
+                    )
                     if self.round_agg_result:
-                        output_df[output_col_name] = \
-                            round(output_df[output_col_name])
+                        output_df[output_col_name] = round(
+                            output_df[output_col_name]
+                        )
         output_df.set_index(self.time_col_name, inplace=True)
         return output_df

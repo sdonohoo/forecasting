@@ -13,6 +13,7 @@ class BaseLagFeaturizer(BaseTSFeaturizer):
     Child classes need to implement _lag_single_ts, which creates a data
     frame with lag features on a single time series.
     """
+
     @property
     def input_col_names(self):
         return self._input_col_names
@@ -24,7 +25,7 @@ class BaseLagFeaturizer(BaseTSFeaturizer):
         else:
             self._input_col_names = [val]
 
-    #future_value_available is a read-only property because there are a few
+    # future_value_available is a read-only property because there are a few
     # other properties depend on it.
     @property
     def future_value_available(self):
@@ -37,8 +38,10 @@ class BaseLagFeaturizer(BaseTSFeaturizer):
     @max_horizon.setter
     def max_horizon(self, val):
         if val is None and not self.future_value_available:
-            raise Exception('max_horizon must be set when '
-                            'future_value_available is False')
+            raise Exception(
+                "max_horizon must be set when "
+                "future_value_available is False"
+            )
         self._max_horizon = val
 
     @abstractmethod
@@ -64,27 +67,38 @@ class BaseLagFeaturizer(BaseTSFeaturizer):
                 and columns to create lag features on.
             lags(int or list of int): Lags to compute.
             frequency(str): Frequency of the shift operation.
-                See https://pandas.pydata.org/pandas-docs/stable/user_guide/timeseries.html#dateoffset-objects
+                See https://pandas.pydata.org/pandas-docs/stable/user_guide/
+                timeseries.html#dateoffset-objects
 
         Returns:
             pandas.DataFrame: Data frame with time column and lag features.
         """
         if not isinstance(input_df.index, pd.DatetimeIndex):
-            raise Exception('The index of input_df must be '
-                            'pandas.DatetimeIndex. Use utils.convert_to_tsdf '
-                            'to convert it first.')
+            raise Exception(
+                "The index of input_df must be "
+                "pandas.DatetimeIndex. Use utils.convert_to_tsdf "
+                "to convert it first."
+            )
         input_col_names = input_df.columns
-        tmp_df = pd.DataFrame({input_df.index.name:
-                                   input_df.index.get_level_values(0)})
-        lag_df = pd.DataFrame({input_df.index.name:
-                                   input_df.index.get_level_values(0)})
+        tmp_df = pd.DataFrame(
+            {input_df.index.name: input_df.index.get_level_values(0)}
+        )
+        lag_df = pd.DataFrame(
+            {input_df.index.name: input_df.index.get_level_values(0)}
+        )
         for lag in lags:
-            tmp_df['lag_time'] = input_df.index.get_level_values(0) - \
-                           pd.to_timedelta(int(lag), frequency)
-            lag_df_cur = pd.merge(tmp_df, input_df, how='left',
-                                  left_on='lag_time', right_index=True)
+            tmp_df["lag_time"] = input_df.index.get_level_values(
+                0
+            ) - pd.to_timedelta(int(lag), frequency)
+            lag_df_cur = pd.merge(
+                tmp_df,
+                input_df,
+                how="left",
+                left_on="lag_time",
+                right_index=True,
+            )
             for col in input_col_names:
-                lag_df[col + '_lag_' + str(lag)] = lag_df_cur[col]
+                lag_df[col + "_lag_" + str(lag)] = lag_df_cur[col]
 
         return lag_df
 
@@ -107,8 +121,9 @@ class BaseLagFeaturizer(BaseTSFeaturizer):
         """
         self._check_config_cols_exist(X)
 
-        col_names = [self.time_col_name] + self.input_col_names + \
-                    self.ts_id_col_names
+        col_names = (
+            [self.time_col_name] + self.input_col_names + self.ts_id_col_names
+        )
         merge_col_names = [self.time_col_name] + self.ts_id_col_names
 
         if self.train_df is not None:
@@ -123,9 +138,9 @@ class BaseLagFeaturizer(BaseTSFeaturizer):
                 # Compute an imaginary forecast creation time for the training
                 # data based on the maximum horizon to forecast on
                 max_train_timestamp = time_col.max()
-                forecast_creation_time = \
-                    max_train_timestamp - pd.to_timedelta(self.max_horizon,
-                                                          self.frequency)
+                forecast_creation_time = max_train_timestamp - pd.to_timedelta(
+                    self.max_horizon, self.frequency
+                )
             else:
                 forecast_creation_time = time_col.max()
             X_tmp = X[col_names].copy()
@@ -133,8 +148,9 @@ class BaseLagFeaturizer(BaseTSFeaturizer):
         if len(self.ts_id_col_names) == 0:
             X_lag_tmp = self._lag_single_ts(X_tmp, forecast_creation_time)
         else:
-            X_lag_tmp = X_tmp.groupby(self.ts_id_col_names).\
-                apply(lambda g: self._lag_single_ts(g, forecast_creation_time))
+            X_lag_tmp = X_tmp.groupby(self.ts_id_col_names).apply(
+                lambda g: self._lag_single_ts(g, forecast_creation_time)
+            )
 
             X_lag_tmp.reset_index(inplace=True)
 
@@ -142,14 +158,17 @@ class BaseLagFeaturizer(BaseTSFeaturizer):
             # X_lag_tmp.fillna(method='ffill', inplace=True)
 
         if self.train_df is not None:
-            X_lag_tmp = X_lag_tmp.loc[X_lag_tmp[self.time_col_name] >
-                                      forecast_creation_time].copy()
+            X_lag_tmp = X_lag_tmp.loc[
+                X_lag_tmp[self.time_col_name] > forecast_creation_time
+            ].copy()
         X = pd.merge(X, X_lag_tmp, on=merge_col_names)
 
         if X.shape[0] == 0:
-            raise Exception('The featurizer output is empty. Set the '
-                            'train_df property of the featurizer to '
-                            'None if transforming training data.')
+            raise Exception(
+                "The featurizer output is empty. Set the "
+                "train_df property of the featurizer to "
+                "None if transforming training data."
+            )
         return X
 
 
@@ -163,6 +182,7 @@ class BasePeriodicLagFeaturizer(BaseLagFeaturizer):
     each of the 5 years are aggregate.
     Child classes need to implement _calculate_lags.
     """
+
     @abstractmethod
     def _calculate_lags(self):
         """
@@ -185,38 +205,47 @@ class BasePeriodicLagFeaturizer(BaseLagFeaturizer):
             pandas.DataFrame: Data frame with time column and lag features.
         """
         input_df = input_df.copy()
-        input_df = convert_to_tsdf(input_df,
-                                   time_col_name=self.time_col_name,
-                                   time_format=self.time_format)
+        input_df = convert_to_tsdf(
+            input_df,
+            time_col_name=self.time_col_name,
+            time_format=self.time_format,
+        )
 
-        output_df = pd.DataFrame({
-            self.time_col_name: input_df.index.get_level_values(0)})
+        output_df = pd.DataFrame(
+            {self.time_col_name: input_df.index.get_level_values(0)}
+        )
         min_time_stamp = output_df[self.time_col_name].min()
         max_time_stamp = output_df[self.time_col_name].max()
 
         if not self.future_value_available:
-            input_df.loc[input_df.index.get_level_values(0) >
-                         forecast_creation_time, self.input_col_names] = np.nan
+            input_df.loc[
+                input_df.index.get_level_values(0) > forecast_creation_time,
+                self.input_col_names,
+            ] = np.nan
 
         lag_all = self._calculate_lags()
 
-        lag_all = [lag for lag in lag_all
-                   if (max_time_stamp -
-                       pd.to_timedelta(lag, self._lag_frequency)) >=
-                   min_time_stamp]
+        lag_all = [
+            lag
+            for lag in lag_all
+            if (max_time_stamp - pd.to_timedelta(lag, self._lag_frequency))
+            >= min_time_stamp
+        ]
 
-        lag_df = self._create_lag_df(input_df[self.input_col_names],
-                                     lags=lag_all,
-                                     frequency=self._lag_frequency)
+        lag_df = self._create_lag_df(
+            input_df[self.input_col_names],
+            lags=lag_all,
+            frequency=self._lag_frequency,
+        )
         for col in self.input_col_names:
             lag_cols = [c for c in lag_df.columns if c.startswith(col)]
-            output_col_name = col + '_' + self.output_col_suffix
+            output_col_name = col + "_" + self.output_col_suffix
 
             output_df[output_col_name] = lag_df[lag_cols].apply(
-                self.agg_func, axis=1, **self.agg_args)
+                self.agg_func, axis=1, **self.agg_args
+            )
             if self.round_agg_result:
-                output_df[output_col_name] = \
-                    round(output_df[output_col_name])
+                output_df[output_col_name] = round(output_df[output_col_name])
         output_df.set_index(self.time_col_name, inplace=True)
         return output_df
 
@@ -304,9 +333,16 @@ class LagFeaturizer(BaseLagFeaturizer):
         18      2 2011-01-09     19         18.0         17.0         16.0
         19      2 2011-01-10     20          NaN         18.0         17.0
     """
-    def __init__(self, df_config, input_col_names, lags,
-                 future_value_available=False, max_horizon=None,
-                 train_df=None):
+
+    def __init__(
+        self,
+        df_config,
+        input_col_names,
+        lags,
+        future_value_available=False,
+        max_horizon=None,
+        train_df=None,
+    ):
         super().__init__(df_config)
 
         self.input_col_names = input_col_names
@@ -330,8 +366,10 @@ class LagFeaturizer(BaseLagFeaturizer):
         if not self.future_value_available:
             for lag in val:
                 if lag < 0:
-                    raise Exception('lag can not be negative when '
-                                    'future_value_available is False')
+                    raise Exception(
+                        "lag can not be negative when "
+                        "future_value_available is False"
+                    )
         self._lags = val
 
     def _lag_single_ts(self, input_df, forecast_creation_time):
@@ -346,17 +384,23 @@ class LagFeaturizer(BaseLagFeaturizer):
         Returns:
             pandas.DataFrame: Data frame with time column and lag features.
         """
-        input_df = convert_to_tsdf(input_df,
-                                   time_col_name=self.time_col_name,
-                                   time_format=self.time_format)
+        input_df = convert_to_tsdf(
+            input_df,
+            time_col_name=self.time_col_name,
+            time_format=self.time_format,
+        )
 
         if not self.future_value_available:
-            input_df.loc[input_df.index.get_level_values(0) >
-                         forecast_creation_time, self.input_col_names] = np.nan
+            input_df.loc[
+                input_df.index.get_level_values(0) > forecast_creation_time,
+                self.input_col_names,
+            ] = np.nan
 
-        lag_df = self._create_lag_df(input_df[self.input_col_names],
-                                     lags=self.lags,
-                                     frequency=self.frequency)
+        lag_df = self._create_lag_df(
+            input_df[self.input_col_names],
+            lags=self.lags,
+            frequency=self.frequency,
+        )
 
         lag_df.set_index(self.time_col_name, inplace=True)
 
@@ -399,7 +443,8 @@ class SameWeekOfYearLagFeaturizer(BasePeriodicLagFeaturizer):
         agg_func(function or str): Aggregation function to apply on multiple
             previous values. Default value is 'mean'. Other commonly used
             values are 'std', 'quantile'.
-        agg_args(dict): Additional arguments passed to the aggregation function.
+        agg_args(dict): Additional arguments passed to the aggregation
+            function.
         future_value_available(bool): Whether future values of the input
             columns are available at the forecast creation time. Default
             value is False. It's a read-only property and can not be changed
@@ -465,11 +510,20 @@ class SameWeekOfYearLagFeaturizer(BasePeriodicLagFeaturizer):
         13      2 2019-03-28     17                13.5
     """
 
-    def __init__(self, df_config, input_col_names, train_df=None, n_years=3,
-                 week_window=1, agg_func='mean', agg_args={},
-                 future_value_available=False, max_horizon=None,
-                 output_col_suffix='same_woy_lag',
-                 round_agg_result=False):
+    def __init__(
+        self,
+        df_config,
+        input_col_names,
+        train_df=None,
+        n_years=3,
+        week_window=1,
+        agg_func="mean",
+        agg_args={},
+        future_value_available=False,
+        max_horizon=None,
+        output_col_suffix="same_woy_lag",
+        round_agg_result=False,
+    ):
         super().__init__(df_config)
 
         self.input_col_names = input_col_names
@@ -486,13 +540,17 @@ class SameWeekOfYearLagFeaturizer(BasePeriodicLagFeaturizer):
         # because it depends on it.
         self.max_horizon = max_horizon
 
-        self._lag_frequency = 'W'
+        self._lag_frequency = "W"
 
     def _calculate_lags(self):
         """Calculate of list of numbers of weeks to lag."""
         week_lag_base = 52
-        week_lag_last_year = list(range(week_lag_base - self.week_window,
-                                        week_lag_base + self.week_window + 1))
+        week_lag_last_year = list(
+            range(
+                week_lag_base - self.week_window,
+                week_lag_base + self.week_window + 1,
+            )
+        )
         week_lag_all = []
         for i in range(self.n_years):
             week_lag_all += [j + i * 52 for j in week_lag_last_year]
@@ -535,7 +593,8 @@ class SameDayOfYearLagFeaturizer(BasePeriodicLagFeaturizer):
         agg_func(function or str): Aggregation function to apply on multiple
             previous values. Default value is 'mean'. Other commonly used
             values are 'std', 'quantile'.
-        agg_args(dict): Additional arguments passed to the aggregation function.
+        agg_args(dict): Additional arguments passed to the aggregation
+            function.
         future_value_available(bool): Whether future values of the input
             columns are available at the forecast creation time. Default
             value is False. It's a read-only property and can not be changed
@@ -601,11 +660,20 @@ class SameDayOfYearLagFeaturizer(BasePeriodicLagFeaturizer):
         13      2 2019-03-28     17                13.5
     """
 
-    def __init__(self, df_config, input_col_names, train_df=None,
-                 n_years=3, day_window=1, agg_func='mean', agg_args={},
-                 future_value_available=False, max_horizon=None,
-                 output_col_suffix='same_doy_lag',
-                 round_agg_result=False):
+    def __init__(
+        self,
+        df_config,
+        input_col_names,
+        train_df=None,
+        n_years=3,
+        day_window=1,
+        agg_func="mean",
+        agg_args={},
+        future_value_available=False,
+        max_horizon=None,
+        output_col_suffix="same_doy_lag",
+        round_agg_result=False,
+    ):
         super().__init__(df_config)
         self.input_col_names = input_col_names
         self.n_years = n_years
@@ -621,24 +689,19 @@ class SameDayOfYearLagFeaturizer(BasePeriodicLagFeaturizer):
         # because it depends on it.
         self.max_horizon = max_horizon
 
-        self._lag_frequency = 'D'
+        self._lag_frequency = "D"
 
     def _calculate_lags(self):
         """Calculates a list of numbers of days to lag."""
         day_lag_base = 365
-        day_lag_last_year = list(range(day_lag_base - self.day_window,
-                                       day_lag_base + self.day_window + 1))
+        day_lag_last_year = list(
+            range(
+                day_lag_base - self.day_window,
+                day_lag_base + self.day_window + 1,
+            )
+        )
         day_lag_all = []
         for i in range(self.n_years):
             day_lag_all += [j + i * 365 for j in day_lag_last_year]
 
         return day_lag_all
-
-
-
-
-
-
-
-
-

@@ -16,6 +16,7 @@ class BaseTemporalNormalizer(BaseTSFeaturizer):
     create normalized features at a specific granularity, e.g. normalized
     year, normalized day.
     """
+
     @abstractmethod
     def _get_min_max_time(self, time_col):
         """
@@ -58,13 +59,16 @@ class BaseTemporalNormalizer(BaseTSFeaturizer):
             added to the input data frame.
         """
         if not self._is_fit:
-            raise Exception('The featurizer needs to be fitted first to be '
-                            'used to transform data.')
+            raise Exception(
+                "The featurizer needs to be fitted first to be "
+                "used to transform data."
+            )
         self._check_config_cols_exist(X)
         if self._output_col_name in X.columns:
-            warnings.warn('Column {} is already in the data frame, '
-                          'it will be overwritten.'.
-                          format(self._output_col_name))
+            warnings.warn(
+                "Column {} is already in the data frame, "
+                "it will be overwritten.".format(self._output_col_name)
+            )
 
         time_col = X[self.time_col_name]
         if not is_datetime_like(time_col):
@@ -79,17 +83,18 @@ class YearNormalizer(BaseTemporalNormalizer):
     """
     Creates a temporal feature indicating the position of the year of a record
     in the entire time period under consideration, normalized to be between
-    0 and 1.
+    0 and 1 on training data and greater than 1 on testing data.
 
     Args:
         df_config(dict): Configuration of the time series data frame to compute
             features on.
 
     """
+
     def __init__(self, df_config):
         super(YearNormalizer, self).__init__(df_config)
         self._is_fit = False
-        self._output_col_name = 'normalized_year'
+        self._output_col_name = "normalized_year"
 
     @classmethod
     def _get_min_max_time(cls, time_col):
@@ -101,8 +106,9 @@ class YearNormalizer(BaseTemporalNormalizer):
     def _normalize_time(self, time_col):
         year = time_col.dt.year
         if self.max_time != self.min_time:
-            normalized_time = \
-                (year - self.min_time) / (self.max_time - self.min_time)
+            normalized_time = (year - self.min_time) / (
+                self.max_time - self.min_time
+            )
         else:
             normalized_time = 0
 
@@ -113,7 +119,7 @@ class DateNormalizer(BaseTemporalNormalizer):
     """
     Creates a temporal feature indicating the position of the date of a record
     in the entire time period under consideration, normalized to be between
-    0 and 1.
+    0 and 1 on training data and greater than 1 on testing data.
 
     Args:
         df_config(dict): Configuration of the time series data frame to compute
@@ -123,7 +129,7 @@ class DateNormalizer(BaseTemporalNormalizer):
     def __init__(self, df_config):
         super(DateNormalizer, self).__init__(df_config)
         self._is_fit = False
-        self._output_col_name = 'normalized_date'
+        self._output_col_name = "normalized_date"
 
     @classmethod
     def _get_min_max_time(cls, time_col):
@@ -137,8 +143,9 @@ class DateNormalizer(BaseTemporalNormalizer):
         current_date = (date - self.min_time).apply(lambda x: x.days)
 
         if self.max_time != self.min_time:
-            normalized_time = \
+            normalized_time = (
                 current_date / (self.max_time - self.min_time).days
+            )
         else:
             normalized_time = 0
 
@@ -149,16 +156,17 @@ class DateHourNormalizer(BaseTemporalNormalizer):
     """
     Creates a temporal feature indicating the position of the hour of a record
     in the entire time period under consideration, normalized to be between
-    0 and 1.
+    0 and 1 on training data and greater than 1 on testing data.
 
     Args:
         df_config(dict): Configuration of the time series data frame to compute
             features on.
     """
+
     def __init__(self, df_config):
         super(DateHourNormalizer, self).__init__(df_config)
         self._is_fit = False
-        self._output_col_name = 'normalized_datehour'
+        self._output_col_name = "normalized_datehour"
 
     @classmethod
     def _get_min_max_time(cls, time_col):
@@ -168,15 +176,16 @@ class DateHourNormalizer(BaseTemporalNormalizer):
         return min_datehour, max_datehour
 
     def _normalize_time(self, time_col):
-        current_datehour = (time_col - self.min_time)\
-            .apply(lambda x: x.days * 24 + x.seconds / 3600)
+        current_datehour = (time_col - self.min_time).apply(
+            lambda x: x.days * 24 + x.seconds / 3600
+        )
 
         max_min_diff = self.max_time - self.min_time
 
         if max_min_diff != 0:
-            normalized_time = \
-                current_datehour/(
-                        max_min_diff.days * 24 + max_min_diff.seconds / 3600)
+            normalized_time = current_datehour / (
+                max_min_diff.days * 24 + max_min_diff.seconds / 3600
+            )
         else:
             normalized_time = 0
 

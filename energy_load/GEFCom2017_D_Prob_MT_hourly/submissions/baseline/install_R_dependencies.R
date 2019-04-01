@@ -1,6 +1,7 @@
 pkgs <- c(
   'data.table',
-  'quantreg'
+  'quantreg',
+  'doParallel'
 )
 
 install.packages(pkgs)

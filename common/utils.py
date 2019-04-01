@@ -1,15 +1,21 @@
 import datetime
 import pandas as pd
 from dateutil.relativedelta import relativedelta
+from collections import Iterable
 
-ALLOWED_TIME_COLUMN_TYPES = [pd.Timestamp, pd.DatetimeIndex,
-                             datetime.datetime, datetime.date]
+ALLOWED_TIME_COLUMN_TYPES = [
+    pd.Timestamp,
+    pd.DatetimeIndex,
+    datetime.datetime,
+    datetime.date,
+]
 
 
 def is_datetime_like(x):
     """Function that checks if a data frame column x is of a datetime type."""
-    return any(isinstance(x, col_type)
-               for col_type in ALLOWED_TIME_COLUMN_TYPES)
+    return any(
+        isinstance(x, col_type) for col_type in ALLOWED_TIME_COLUMN_TYPES
+    )
 
 
 def get_datetime_col(df, datetime_colname):
@@ -20,7 +26,7 @@ def get_datetime_col(df, datetime_colname):
     Args:
         df: pandas DataFrame containing the column to convert
         datetime_colname: name of the column to be converted
-    
+
     Returns:
         pandas.Series: converted column
 
@@ -33,15 +39,13 @@ def get_datetime_col(df, datetime_colname):
     elif datetime_colname in df.columns:
         datetime_col = df[datetime_colname]
     else:
-        raise Exception('Column or index {0} does not exist in the data '
-                        'frame'.format(datetime_colname))
+        raise Exception(
+            "Column or index {0} does not exist in the data "
+            "frame".format(datetime_colname)
+        )
 
     if not is_datetime_like(datetime_col):
-        try:
-            datetime_col = pd.to_datetime(df[datetime_colname])
-        except:
-            raise Exception('Column or index {0} can not be converted to '
-                            'datetime type.'.format(datetime_colname))
+        datetime_col = pd.to_datetime(df[datetime_colname])
     return datetime_col
 
 
@@ -60,23 +64,25 @@ def get_month_day_range(date):
 
 def split_train_validation(df, fct_horizon, datetime_colname):
     """
-    Splits the input dataframe into train and validate folds based on the forecast
-    creation time (fct) and forecast horizon specified by fct_horizon.
-    
+    Splits the input dataframe into train and validate folds based on the
+    forecast creation time (fct) and forecast horizon specified by fct_horizon.
+
     Args:
         df: The input data frame to split.
-        fct_horizon: list of tuples in the format of 
+        fct_horizon: list of tuples in the format of
             (fct, (forecast_horizon_start, forecast_horizon_end))
         datetime_colname: name of the datetime column
-    
+
     Note: df[datetime_colname] needs to be a datetime type.
     """
     i_round = 0
     for fct, horizon in fct_horizon:
         i_round += 1
-        train = df.loc[df[datetime_colname] < fct, ].copy()
-        validation = df.loc[(df[datetime_colname] >= horizon[0]) &
-                            (df[datetime_colname] <= horizon[1]), ].copy()
+        train = df.loc[df[datetime_colname] < fct].copy()
+        validation = df.loc[
+            (df[datetime_colname] >= horizon[0])
+            & (df[datetime_colname] <= horizon[1]),
+        ].copy()
 
         yield i_round, train, validation
 
@@ -91,28 +97,67 @@ def add_datetime(input_datetime, unit, add_count):
         unit: unit of time, valid values: 'year', 'month', 'week',
             'day', 'hour', 'minute'.
         add_count: number of units to add
-    
+
     Returns:
         New datetime after adding the time difference to input datetime.
-    
+
     Raises:
         Exception: if invalid unit is provided. Valid units are:
             'year', 'month', 'week', 'day', 'hour', 'minute'.
     """
-    if unit == 'year':
+    if unit == "year":
         new_datetime = input_datetime + relativedelta(years=add_count)
-    elif unit == 'month':
+    elif unit == "month":
         new_datetime = input_datetime + relativedelta(months=add_count)
-    elif unit == 'week':
+    elif unit == "week":
         new_datetime = input_datetime + relativedelta(weeks=add_count)
-    elif unit == 'day':
+    elif unit == "day":
         new_datetime = input_datetime + relativedelta(days=add_count)
-    elif unit == 'hour':
+    elif unit == "hour":
         new_datetime = input_datetime + relativedelta(hours=add_count)
-    elif unit == 'minute':
+    elif unit == "minute":
         new_datetime = input_datetime + relativedelta(minutes=add_count)
     else:
-        raise Exception('Invalid backtest step unit, {}, provided. Valid '
-                        'step units are year, month, week, day, hour, and minute'
-                        .format(unit))
+        raise Exception(
+            "Invalid backtest step unit, {}, provided. Valid "
+            "step units are year, month, week, day, hour, "
+            "and minute".format(unit)
+        )
     return new_datetime
+
+
+def convert_to_tsdf(input_df, time_col_name, time_format):
+    """
+    Convert a time column in a data frame to monotonically increasing time
+    index.
+    Args:
+        input_df(pandas.DataFrame): Input data frame to convert.
+        time_col_name(str): Name of the time column to use as index.
+        time_format(str): Format of the time column.
+
+    Returns:
+        pandas.DataFrame: A new data frame with the time column of the input
+            data frame set as monotonically increasing index.
+    """
+    output_df = input_df.copy()
+    if not is_datetime_like(output_df[time_col_name]):
+        output_df[time_col_name] = pd.to_datetime(
+            output_df[time_col_name], format=time_format
+        )
+
+    output_df.set_index(time_col_name, inplace=True)
+
+    if not output_df.index.is_monotonic:
+        output_df.sort_index(inplace=True)
+
+    return output_df
+
+
+def is_iterable_but_not_string(obj):
+    """
+    Determine if an object has iterable, list-like properties.
+    Importantly, this functions *does not* consider a string
+    to be list-like, even though Python strings are iterable.
+
+    """
+    return isinstance(obj, Iterable) and not isinstance(obj, str)

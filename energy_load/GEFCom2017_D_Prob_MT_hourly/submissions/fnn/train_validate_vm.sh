@@ -5,7 +5,7 @@ do
     echo "Parameter Set $i"
     start=`date +%s`
     echo 'Creating features...'
-    python $path/submissions/fnn/feature_engineering.py --submission fnn
+    python $path/submissions/fnn/compute_features.py --submission fnn
 
     echo 'Training and validation...'
     Rscript $path/submissions/fnn/train_validate.R $i

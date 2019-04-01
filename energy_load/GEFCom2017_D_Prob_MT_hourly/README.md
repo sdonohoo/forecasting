@@ -68,6 +68,45 @@ using the available training data:
 | 5 | 2011-01-01 01:00:00 | 2017-01-31 00:00:00 | 2017-03-01 01:00:00 | 2017-03-31 00:00:00 |
 | 6 | 2011-01-01 01:00:00 | 2017-01-31 00:00:00 | 2017-04-01 01:00:00 | 2017-04-30 00:00:00 |
 
+
+### Feature engineering
+A common feature engineering script, common/feature_engineering.py, is provided to be used by individual submissions.  
+Below is an example of using this script. 
+The feature configuration list is used to specify the features to be computed by the compute_features function. 
+Each feature configuration is a tuple in the format of (feature_name, featurizer_args).
+* feature_name is used to determine the featurizer to use, see FEATURE_MAP in
+common/feature_engineering.py.
+* featurizer_args is a dictionary of arguments passed to the featurizer.
+
+```python
+from energy_load.GEFCom2017_D_Prob_MT_hourly.common.feature_engineering\
+    import compute_features
+    
+DF_CONFIG = {
+    'time_col_name': 'Datetime',
+    'grain_col_name': 'Zone',
+    'value_col_name': 'DEMAND',
+    'frequency': 'hourly',
+    'time_format': '%Y-%m-%d %H:%M:%S'
+}
+    
+feature_config_list = \
+    [('temporal', {'feature_list': ['hour_of_day', 'month_of_year']}),
+     ('annual_fourier', {'n_harmonics': 3}),
+     ('weekly_fourier', {'n_harmonics': 3}),
+     ('previous_year_load_lag',
+      {'input_col_name': 'DEMAND', 'output_col_name': 'load_lag'}),
+     ('previous_year_dry_bulb_lag',
+      {'input_col_name': 'DryBulb', 'output_col_name': 'dry_bulb_lag'})]
+      
+TRAIN_DATA_DIR = './data/train'
+TEST_DATA_DIR = './data/test'
+OUTPUT_DIR = './data/features'
+     
+compute_features(TRAIN_DATA_DIR, TEST_DATA_DIR, OUTPUT_DIR, DF_CONFIG,
+                 feature_config_list,
+                 filter_by_month=True)
+```
 # Model Evaluation
 
 **Evaluation metric**: Pinball loss  

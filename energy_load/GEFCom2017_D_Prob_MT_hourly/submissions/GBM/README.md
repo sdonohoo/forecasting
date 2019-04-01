@@ -41,34 +41,33 @@ The data of January - April of 2016 were used as validation dataset for some min
 
 ### Steps to reproduce results
 
-0. Follow the instructions [here](#resource-deployment-instructions) to provision a Linux virtual machine and log into the provisioned
+1. Follow the instructions [here](#resource-deployment-instructions) to provision a Linux virtual machine and log into the provisioned
 VM.
 
-1. Clone the Forecasting repository to the home directory of your machine
+2. Clone the Forecasting repository to the home directory of your machine
 
     ```bash
     cd ~
     git clone https://github.com/Microsoft/Forecasting.git
     ```
-  Use one of the following options to securely connect to the Git repo:
-  * [Personal Access Tokens](https://help.github.com/articles/creating-a-personal-access-token-for-the-command-line/)  
-  For this method, the clone command becomes
+    Use one of the following options to securely connect to the Git repo:
+    * [Personal Access Tokens](https://help.github.com/articles/creating-a-personal-access-token-for-the-command-line/)  
+    For this method, the clone command becomes
     ```bash
     git clone https://<username>:<personal access token>@github.com/Microsoft/Forecasting.git
     ```
-  * [Git Credential Managers](https://github.com/Microsoft/Git-Credential-Manager-for-Windows)
-  * [Authenticate with SSH](https://help.github.com/articles/connecting-to-github-with-ssh/)
-
-
-2. Create a conda environment for running the scripts of data downloading, data preparation, and result evaluation.   
+    * [Git Credential Managers](https://github.com/Microsoft/Git-Credential-Manager-for-Windows)
+    * [Authenticate with SSH](https://help.github.com/articles/connecting-to-github-with-ssh/)  
+ 
+3. Create a conda environment for running the scripts of data downloading, data preparation, and result evaluation.   
 To do this, you need to check if conda has been installed by runnning command `conda -V`. If it is installed, you will see the conda version in the terminal. Otherwise, please follow the instructions [here](https://conda.io/docs/user-guide/install/linux.html) to install conda.  
-From the `~/Forecasting` directory on the VM create a conda environment named `tsperf` by running:
+From the `~/Forecasting` directory on the VM create a conda environment named `tsperf` by running:  
 
-   ```bash
-   conda env create --file ./common/conda_dependencies.yml
-   ```
+       ```bash
+       conda env create --file ./common/conda_dependencies.yml
+       ```
 
-3. Download and extract data **on the VM**.
+4. Download and extract data **on the VM**.
 
     ```bash
     source activate tsperf
@@ -76,7 +75,7 @@ From the `~/Forecasting` directory on the VM create a conda environment named `t
     python energy_load/GEFCom2017_D_Prob_MT_hourly/common/extract_data.py
     ```
 
-4. Prepare Docker container for model training and predicting.  
+5. Prepare Docker container for model training and predicting.  
 
    > NOTE: To execute docker commands without sudo as a non-root user, you need to create a Unix group and add users to it by following the instructions [here](https://docs.docker.com/install/linux/linux-postinstall/#manage-docker-as-a-non-root-user). Otherwise, simply prefix all docker commands with sudo.
 
@@ -92,20 +91,20 @@ From the `~/Forecasting` directory on the VM create a conda environment named `t
    4.2 Build a local Docker image
 
    ```bash
-   sudo docker build -t gbm_image:v1 ./energy_load/GEFCom2017_D_Prob_MT_hourly/submissions/gbm_image:v1
+   sudo docker build -t gbm_image ./energy_load/GEFCom2017_D_Prob_MT_hourly/submissions/gbm
    ```
 
-5. Train and predict **within Docker container**
+6. Train and predict **within Docker container**
 
-    5.1 Start a Docker container from the image  
+    6.1 Start a Docker container from the image  
 
    ```bash
-   sudo docker run -it -v ~/Forecasting:/Forecasting --name gbm_container gbm_image:v1
+   sudo docker run -it -v ~/Forecasting:/Forecasting --name gbm_container gbm_image
    ```
 
    Note that option `-v ~/Forecasting:/Forecasting` mounts the `~/Forecasting` folder (the one you cloned) to the container so that you can access the code and data on your VM within the container.
 
-   5.2 Train and predict  
+   6.2 Train and predict  
 
    ```
    source activate tsperf
@@ -114,7 +113,7 @@ From the `~/Forecasting` directory on the VM create a conda environment named `t
    ```
    After generating the forecast results, you can exit the Docker container with command `exit`.
 
-6. Model evaluation **on the VM**
+7. Model evaluation **on the VM**
 
     ```bash
     source activate tsperf
@@ -132,9 +131,9 @@ From the `~/Forecasting` directory on the VM create a conda environment named `t
 
 **Key packages/dependencies:**
   * Python
-    - python==3.6    
+    - python==3.7    
   * R
-    - r-base==3.5.1  
+    - r-base==3.5.3  
     - gbm==2.1.3
     - data.table==1.11.4
 
@@ -146,34 +145,34 @@ Please follow the instructions below to deploy the Linux DSVM.
 ## Implementation evaluation
 **Quality:**  
 
-* Pinball loss run 1: 78.71
-* Pinball loss run 2: 78.72
-* Pinball loss run 3: 78.69
-* Pinball loss run 4: 78.71
-* Pinball loss run 5: 78.71
+* Pinball loss run 1: 78.85
+* Pinball loss run 2: 78.84
+* Pinball loss run 3: 78.86
+* Pinball loss run 4: 78.76
+* Pinball loss run 5: 78.82
 
-Median Pinball loss: **78.71**
+Median Pinball loss: **78.84**
 
 **Time:**
 
-* Run time 1: 878 seconds
-* Run time 2: 888 seconds
-* Run time 3: 894 seconds
-* Run time 4: 894 seconds
-* Run time 5: 878 seconds
+* Run time 1: 268 seconds
+* Run time 2: 269 seconds
+* Run time 3: 269 seconds
+* Run time 4: 269 seconds
+* Run time 5: 266 seconds
 
-Median run time: **888 seconds**
+Median run time: **269 seconds**
 
 **Cost:**  
-The hourly cost of the Standard D8s Ubuntu Linux VM in East US Azure region is 0.3840 USD, based on the price at the submission date. Thus, the total cost is `888/3600 * 0.3840 = $0.0947`.
+The hourly cost of the Standard D8s Ubuntu Linux VM in East US Azure region is 0.3840 USD, based on the price at the submission date. Thus, the total cost is `269/3600 * 0.3840 = $0.0287`.
 
 **Average relative improvement (in %) over GEFCom2017 benchmark model**  (measured over the first run)  
-Round 1: 9.57  
-Round 2: 18.17  
-Round 3: 17.83   
-Round 4: 8.58  
-Round 5: 7.54  
-Round 6: 6.96  
+Round 1: 9.55  
+Round 2: 18.24  
+Round 3: 17.90   
+Round 4: 8.27  
+Round 5: 7.22  
+Round 6: 6.80  
 
 **Ranking in the qualifying round of GEFCom2017 competition**  
 4

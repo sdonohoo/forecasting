@@ -1,6 +1,7 @@
 pkgs <- c(
   'data.table',
-  'qrnn'
+  'qrnn',
+  'doParallel'
 )
 
 install.packages(pkgs)

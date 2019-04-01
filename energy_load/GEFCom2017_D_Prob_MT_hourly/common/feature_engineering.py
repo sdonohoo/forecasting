@@ -1,325 +1,444 @@
 """
-This script creates a set of commonly used features using the functions in
-common.feature_utils, which serve as a set of baseline features.
-Feel free to write your own feature engineering code to create new features by
-calling the feature_utils functions with alternative parameters.
+This script computes features on the GEFCom2017_D dataset. It is
+parameterized so that a selected set of features specified by a feature
+configuration list are computed and saved as csv files.
 """
-import os, sys, getopt
+import os
+from math import ceil
+import pandas as pd
 from functools import reduce
+from sklearn.pipeline import Pipeline
 
-from benchmark_paths import DATA_DIR, SUBMISSIONS_DIR
-from common.feature_utils import *
-from common.utils import is_datetime_like
+from common.features.lag import (
+    SameWeekOfYearLagFeaturizer,
+    SameDayOfYearLagFeaturizer,
+)
+from common.features.temporal import (
+    TemporalFeaturizer,
+    DayTypeFeaturizer,
+    AnnualFourierFeaturizer,
+    DailyFourierFeaturizer,
+    WeeklyFourierFeaturizer,
+)
+from common.features.rolling_window import SameDayOfWeekRollingWindowFeaturizer
+from common.features.normalization import (
+    YearNormalizer,
+    DateNormalizer,
+    DateHourNormalizer,
+)
 
-print('Data directory used: {}'.format(DATA_DIR))
+from .benchmark_paths import DATA_DIR
 
-OUTPUT_DIR = os.path.join(DATA_DIR, 'features')
-TRAIN_DATA_DIR = os.path.join(DATA_DIR, 'train')
-TEST_DATA_DIR = os.path.join(DATA_DIR, 'test')
+print("Data directory used: {}".format(DATA_DIR))
 
-TRAIN_BASE_FILE = 'train_base.csv'
-TRAIN_FILE_PREFIX = 'train_round_'
-TEST_FILE_PREFIX = 'test_round_'
+pd.set_option("display.max_columns", None)
+
+OUTPUT_DIR = os.path.join(DATA_DIR, "features")
+TRAIN_DATA_DIR = os.path.join(DATA_DIR, "train")
+TEST_DATA_DIR = os.path.join(DATA_DIR, "test")
+
+TRAIN_BASE_FILE = "train_base.csv"
+TRAIN_FILE_PREFIX = "train_round_"
+TEST_FILE_PREFIX = "test_round_"
 NUM_ROUND = 6
 
-DATETIME_COLNAME = 'Datetime'
-HOLIDAY_COLNAME = 'Holiday'
 
-DATETIME_FORMAT = '%Y-%m-%d %H:%M:%S'
+# A dictionary mapping each feature name to the featurizer for computing the
+# feature
+FEATURE_MAP = {
+    "temporal": TemporalFeaturizer,
+    "annual_fourier": AnnualFourierFeaturizer,
+    "weekly_fourier": WeeklyFourierFeaturizer,
+    "daily_fourier": DailyFourierFeaturizer,
+    "normalized_date": DateNormalizer,
+    "normalized_datehour": DateHourNormalizer,
+    "normalized_year": YearNormalizer,
+    "day_type": DayTypeFeaturizer,
+    "recent_load_lag": SameDayOfWeekRollingWindowFeaturizer,
+    "recent_temp_lag": SameDayOfWeekRollingWindowFeaturizer,
+    "previous_year_load_lag": SameWeekOfYearLagFeaturizer,
+    "previous_year_temp_lag": SameDayOfYearLagFeaturizer,
+}
+
+# List of features that requires the training data when computing them on the
+# testing data
+FEATURES_REQUIRE_TRAINING_DATA = [
+    "recent_load_lag",
+    "recent_temp_lag",
+    "previous_year_load_lag",
+    "previous_year_temp_lag",
+]
+
+# List of features that requires the max_horizon argument to be set
+FEATURES_REQUIRE_MAX_HORIZON = [
+    "recent_load_lag",
+    "recent_temp_lag",
+    "previous_year_load_lag",
+    "previous_year_temp_lag",
+]
+
+# Configuration for computing a scaling factor that captures year over year
+# trend. These scaling factors can be used to scale forecasting results if no
+# features for capturing the year over year trend are included in the model.
+# To compute the load ratios, first, SameDayOfWeekRollingWindowFeaturizer is
+# used to compute moving average of the DEMAND of the same hour of day and same
+# day of week of seven four-week windows. There is a 10 week gap between the
+# latest four-week window and the current week, because of the forecasting
+# horizon of this problem.
+# Second SameWeekOfYearLagFeaturizer is used to compute the moving average
+# features of the same week of year of previous 5 years.
+# Finally, the load ratios are computed by dividing the moving average DEMAND
+# of previous years by the moving average DEMAND of the current year. The
+# idea is that there is a correlation between the DEMAND between the
+# current time point and earlier time point, and the ratio between the DEMAND
+# of earlier time point of previous years and the current year can be used to
+# scale the forecasting results of the current year.
+LOAD_RATIO_CONFIG = {
+    "same_day_of_week_rolling_args": {
+        "window_size": 4,
+        "start_week": 10,
+        "agg_count": 7,
+        "output_col_suffix": "recent_moving_average",
+        "round_agg_result": True,
+    },
+    "same_week_of_year_lag_args": {
+        "n_years": 5,
+        "week_window": 0,
+        "output_col_suffix": "lag",
+        "round_agg_result": True,
+    },
+}
 
 
-def create_basic_features(input_df, datetime_colname):
+def parse_feature_config(feature_config, feature_map):
     """
-    This helper function uses the functions in common.feature_utils to
-    create a set of basic features which are independently created for each
-    row, i.e. no lag features or rolling window features.
-    
+    A helper function parsing a feature_config to feature name,
+    featurizer class, and arguments to use to initialize the featurizer.
+    """
+    feature_name = feature_config[0]
+    feature_args = feature_config[1]
+    featurizer = feature_map[feature_name]
+
+    return feature_name, feature_args, featurizer
+
+
+def compute_training_features(
+    train_df, df_config, feature_config_list, feature_map, max_horizon
+):
+    """
+    Creates a pipeline based on the input feature configuration list and the
+    feature_map. Fit the pipeline on the training data and transform
+    the training data.
+
     Args:
-        input_df (pandas.DataFrame): data frame for which to compute basic features.
-        datetime_colname (str): name of Datetime column
+        train_df(pd.DataFrame): Training data to fit on and transform.
+        df_config(dict): Configuration of the time series data frame to compute
+            features on.
+        feature_config_list(list of tuples): The first element of each
+            feature configuration tuple is the name of the feature,
+            which must be a key in feature_map. The second element of each
+            feature configuration tuple is a dictionary of arguments to pass
+            to the featurizer corresponding the feature name in feature_map.
+        feature_map(dict): Maps each feature name (key) to corresponding
+            featurizer(value).
+        max_horizon(int): Maximum number of steps ahead to forecast.
+            The step unit is the frequency of the data.
+            This value is needed to prevent creating features on the
+            training data that are not available for the testing data. For
+            example, the features and models are created on week 7 to
+            forecast week 8 to week 10. It would not make sense to create a
+            feature using data from week 8 and week 9, because they are not
+            available at the forecast creation  time. Thus, it does not make
+            sense to create a feature using data from week 5 and week 6 for
+            week 7.
 
     Returns:
-        pandas.DataFrame: output data frame which contains newly created features
+        (pd.DataFrame, sklearn.pipeline): (training features, feature
+            engineering pipeline fitted on the training data.
     """
+    pipeline_steps = []
+    for feature_config in feature_config_list:
+        feature_name, feature_args, featurizer = parse_feature_config(
+            feature_config, feature_map
+        )
+        if feature_name in FEATURES_REQUIRE_MAX_HORIZON:
+            feature_args["max_horizon"] = max_horizon
+        pipeline_steps.append(
+            (feature_name, featurizer(df_config=df_config, **feature_args))
+        )
 
-    output_df = input_df.copy()
-    if not is_datetime_like(output_df[datetime_colname]):
-        output_df[datetime_colname] = \
-            pd.to_datetime(output_df[datetime_colname], format=DATETIME_FORMAT)
-    datetime_col = output_df[datetime_colname]
+    feature_engineering_pipeline = Pipeline(pipeline_steps)
+    feature_engineering_pipeline_fitted = feature_engineering_pipeline.fit(
+        train_df
+    )
+    train_features = feature_engineering_pipeline_fitted.transform(train_df)
 
-    # Basic temporal features
-    output_df['Hour'] = hour_of_day(datetime_col)
-    output_df['TimeOfYear'] = time_of_year(datetime_col)
-    output_df['WeekOfYear'] = week_of_year(datetime_col)
-    output_df['MonthOfYear'] = month_of_year(datetime_col)
-
-    # Fourier approximation features
-    annual_fourier_approx = annual_fourier(datetime_col, n_harmonics=3)
-    weekly_fourier_approx = weekly_fourier(datetime_col, n_harmonics=3)
-    daily_fourier_approx = daily_fourier(datetime_col, n_harmonics=2)
-
-    for k, v in annual_fourier_approx.items():
-        output_df[k] = v
-
-    for k, v in weekly_fourier_approx.items():
-        output_df[k] = v
-
-    for k, v in daily_fourier_approx.items():
-        output_df[k] = v
-
-    return output_df
+    return train_features, feature_engineering_pipeline_fitted
 
 
-def create_advanced_features(train_df, test_df, datetime_colname,
-                             holiday_colname=None):
+def compute_testing_features(
+    test_df,
+    feature_engineering_pipeline,
+    feature_config_list=None,
+    train_df=None,
+):
+
     """
-    This helper function uses the functions in common.feature_utils to
-    create a set of advanced features. These features could depend on other
-    rows in two ways:
-    1) Lag or rolling window features depend on values of previous time points.
-    2) Normalized features depend on the value range of the entire feature
-    column.
-    Therefore, the train_df and test_df are concatenated to create these
-    features.
-    
-    NOTE: test_df can not contain any values that are unknown at
-    forecasting creation time to avoid data leakage from the future. For
-    example, it can contain the timestamps, zone, holiday, forecasted
-    temperature, but it MUST NOT contain things like actual temperature,
-    actual load, etc.
+    Computes features on the testing data using a fitted feature engineering
+    pipeline.
 
     Args:
-        train_df (pandas.DataFrame): data frame containing training data
-        test_df (pandas.DataFrame): data frame containing testing data
-        datetime_colname (str): name of Datetime column
-        holiday_colname (str): name of Holiday column (if present), default value is None
-
+        test_df(pd.DataFrame): Testing data to fit on and transform.
+        feature_engineering_pipeline(sklearn.pipeline): A feature engineering
+            pipeline fitted on the training data.
+        feature_config_list(list of tuples, optional): The first element of
+            each feature configuration tuple is the name of the feature,
+            which must be a key in feature_map. The second element of each
+            feature configuration tuple is a dictionary of arguments to pass
+            to the featurizer corresponding the feature name in feature_map.
+            A value is required if train_df is not None.
+        train_df(pd.DataFrame, optional): Training data needed to compute
+            some lag features on testing data.
     Returns:
-        pandas.DataFrame: output containing newly constructed features on training data
-        pandas.DataFrame: output containing newly constructed features on testing data
+        pd.DataFrame: Testing features.
+    """
+    if train_df is not None and feature_config_list is not None:
+        train_df_arguments = {}
+        for feature_config in feature_config_list:
+            feature_step_name = feature_config[0]
+            if feature_step_name in FEATURES_REQUIRE_TRAINING_DATA:
+                train_df_arguments[feature_step_name + "__train_df"] = train_df
+        if len(train_df_arguments) > 0:
+            feature_engineering_pipeline.set_params(**train_df_arguments)
+
+    test_features = feature_engineering_pipeline.transform(test_df)
+
+    return test_features
+
+
+def compute_features_one_round(
+    train_base_df,
+    train_delta_df,
+    test_df,
+    df_config,
+    feature_config_list,
+    feature_map,
+    filter_by_month,
+    compute_load_ratio=False,
+):
 
     """
-    output_df = pd.concat([train_df, test_df], sort=True)
-    if not is_datetime_like(output_df[datetime_colname]):
-        output_df[datetime_colname] = \
-            pd.to_datetime(output_df[datetime_colname], format=DATETIME_FORMAT)
-    datetime_col = output_df[datetime_colname]
-    forecast_creation_time = max(train_df[datetime_colname])
-
-    # Temporal features indicating the position of a record in the entire
-    # time period under consideration.
-    # For example, if the first date in training data is 2011-01-01 and the
-    # last date in testing data is 2017-02-28. The 'CurrentDate' feature
-    # for 2011-01-01 is 0, and for 2017-02-28 is 1.
-    min_date = min(datetime_col.dt.date)
-    max_date = max(datetime_col.dt.date)
-    output_df['CurrentDate'] = \
-        normalized_current_date(datetime_col, min_date, max_date)
-
-    # 'CurrentDateHour' is similar to 'CurrentDate', and at hour level.
-    min_datehour = min(datetime_col)
-    max_datehour = max(datetime_col)
-    output_df['CurrentDateHour'] = \
-        normalized_current_datehour(datetime_col, min_datehour, max_datehour)
-
-    # 'CurrentYear' is similar to 'CurrentDate', and at year level.
-    min_year = min(datetime_col.dt.year)
-    max_year = max(datetime_col.dt.year)
-    output_df['CurrentYear'] = normalized_current_year(
-        datetime_col, min_year, max_year)
-
-    output_df['DayType'] = day_type(datetime_col, output_df[holiday_colname])
-
-    # Load lag feature based on previous years' load
-    same_week_day_hour_load_lag = \
-        output_df[[datetime_colname, 'DEMAND', 'Zone']].groupby('Zone').apply(
-            lambda g: same_week_day_hour_lag(g[datetime_colname],
-                                             g['DEMAND'],
-                                             output_colname='LoadLag'))
-    same_week_day_hour_load_lag.reset_index(inplace=True)
-
-    # Temperature lag features based on previous years' temperature
-    same_day_hour_drewpnt_lag = \
-        output_df[[datetime_colname, 'DewPnt', 'Zone']].groupby('Zone').apply(
-            lambda g: same_day_hour_lag(g[datetime_colname], g['DewPnt'],
-                                        output_colname='DewPntLag'))
-    same_day_hour_drewpnt_lag.reset_index(inplace=True)
-
-    same_day_hour_drybulb_lag = \
-        output_df[[datetime_colname, 'DryBulb', 'Zone']].groupby('Zone').apply(
-            lambda g: same_day_hour_lag(g[datetime_colname], g['DryBulb'],
-                                        output_colname='DryBulbLag'))
-    same_day_hour_drybulb_lag.reset_index(inplace=True)
-
-    # Moving average features of load of recent weeks
-    load_moving_average = \
-        output_df[[datetime_colname, 'DEMAND', 'Zone']].groupby('Zone').apply(
-            lambda g: same_day_hour_moving_average(g[datetime_colname],
-                                                   g['DEMAND'],
-                                                   start_week=10,
-                                                   window_size=4,
-                                                   average_count=7,
-                                                   forecast_creation_time=forecast_creation_time,
-                                                   output_col_prefix='RecentLoad_'))
-    load_moving_average.reset_index(inplace=True)
-
-    # Moving average features of dew point of recent weeks
-    dewpnt_moving_average = \
-        output_df[[datetime_colname, 'DewPnt', 'Zone']].groupby('Zone').apply(
-            lambda g: same_day_hour_moving_average(g[datetime_colname],
-                                                   g['DewPnt'],
-                                                   start_week=9,
-                                                   window_size=4,
-                                                   average_count=8,
-                                                   forecast_creation_time=forecast_creation_time,
-                                                   output_col_prefix='RecentDewPnt_'))
-    dewpnt_moving_average.reset_index(inplace=True)
-
-    # Moving average features of dry bulb of recent weeks
-    drybulb_moving_average = \
-        output_df[[datetime_colname, 'DryBulb', 'Zone']].groupby('Zone').apply(
-            lambda g: same_day_hour_moving_average(g[datetime_colname],
-                                                   g['DryBulb'],
-                                                   start_week=9,
-                                                   window_size=4,
-                                                   average_count=8,
-                                                   forecast_creation_time=forecast_creation_time,
-                                                   output_col_prefix='RecentDryBulb_'))
-    drybulb_moving_average.reset_index(inplace=True)
-    # Put everything together
-    output_df = reduce(
-        lambda left, right: pd.merge(left, right, on=[datetime_colname, 'Zone']),
-        [output_df, same_week_day_hour_load_lag,
-         same_day_hour_drewpnt_lag, same_day_hour_drybulb_lag,
-         load_moving_average, drybulb_moving_average, dewpnt_moving_average])
-
-    # Split train and test data and return separately
-    train_end = max(train_df[datetime_colname])
-    output_df_train = output_df.loc[output_df[datetime_colname] <= train_end, ]
-    output_df_test = output_df.loc[output_df[datetime_colname] > train_end, ]
-
-    return output_df_train, output_df_test
-
-
-def main(train_dir, test_dir, output_dir, datetime_colname, holiday_colname):
-    """
-    This helper function uses the create_basic_features and create_advanced
-    features functions to create features for each train and test round.
-    
+    Computes features on one round of training and testing data.
     Args:
-        train_dir (str): directory containing training data
-        test_dir (str): directory containing testing data
-        output_dir (str): directory to which to save the output files
-        datetime_colname (str): name of Datetime column
-        holiday_colname (str): name of Holiday column
+        train_base_df(pd.DataFrame): Training data common to all rounds.
+        train_delta_df(pd.DataFrame): Additional training data for the
+            current round.
+        test_df(pd.DataFrame): Testing data of the current round.
+        df_config: Configuration of the input dataframes.
+        feature_config_list(list of tuples, optional): The first element of
+            each feature configuration tuple is the name of the feature,
+            which must be a key in feature_map. The second element of each
+            feature configuration tuple is a dictionary of arguments to pass
+            to the featurizer corresponding the feature name in feature_map.
+        feature_map(dict): Maps each feature name (key) to corresponding
+            featurizer(value).
+        filter_by_month(bool): If filter the training data by the month of
+            the testing data.
+        compute_load_ratio(bool): If computes a scaling factor that capture
+            the year over year trend and can be used to scale the forecasting
+            result. If True, load ratios are computed on the testing data
+            according to the LOAD_RATIO_CONFIG.
+    Returns:
+        (pd.DataFrame, pd.DataFrame): (training features, testing features)
     """
 
-    output_train_dir = os.path.join(output_dir, 'train')
-    output_test_dir = os.path.join(output_dir, 'test')
+    train_round_df = pd.concat([train_base_df, train_delta_df])
+    max_train_timestamp = train_round_df[df_config["time_col_name"]].max()
+    max_test_timestamp = test_df[df_config["time_col_name"]].max()
+    train_test_diff = max_test_timestamp - max_train_timestamp
+    max_horizon = ceil(
+        train_test_diff.days * 24 + train_test_diff.seconds / 3600
+    )
+    train_features, feature_pipeline = compute_training_features(
+        train_round_df,
+        df_config,
+        feature_config_list,
+        feature_map,
+        max_horizon,
+    )
+
+    test_features = compute_testing_features(
+        test_df, feature_pipeline, feature_config_list, train_round_df
+    )
+
+    if compute_load_ratio:
+        rolling_window_args = LOAD_RATIO_CONFIG[
+            "same_day_of_week_rolling_args"
+        ]
+        previous_years_lag_args = LOAD_RATIO_CONFIG[
+            "same_week_of_year_lag_args"
+        ]
+        same_week_day_hour_rolling_featurizer = SameDayOfWeekRollingWindowFeaturizer(
+            df_config,
+            input_col_names=df_config["target_col_name"],
+            max_horizon=max_horizon,
+            **rolling_window_args
+        )
+        train_df_with_recent_load = same_week_day_hour_rolling_featurizer.transform(
+            train_round_df
+        )
+        same_week_day_hour_rolling_featurizer.train_df = train_round_df
+        test_df_with_recent_load = same_week_day_hour_rolling_featurizer.transform(
+            test_df
+        )
+
+        time_col_name = df_config["time_col_name"]
+        ts_id_col_names = df_config["ts_id_col_names"]
+        keep_col_names = [time_col_name]
+        if ts_id_col_names is not None:
+            if isinstance(ts_id_col_names, list):
+                keep_col_names = keep_col_names + ts_id_col_names
+            else:
+                keep_col_names.append(ts_id_col_names)
+        lag_df_list = []
+        start_week = rolling_window_args["start_week"]
+        end_week = start_week + rolling_window_args["agg_count"]
+        for i in range(start_week, end_week):
+            col_old = (
+                df_config["target_col_name"]
+                + "_"
+                + rolling_window_args["output_col_suffix"]
+                + "_"
+                + str(i)
+            )
+            col_new = (
+                col_old + "_" + previous_years_lag_args["output_col_suffix"]
+            )
+            col_ratio = "recent_load_ratio_" + str(i)
+
+            same_week_day_hour_lag_featurizer = SameWeekOfYearLagFeaturizer(
+                df_config,
+                input_col_names=col_old,
+                train_df=train_df_with_recent_load,
+                max_horizon=max_horizon,
+                **previous_years_lag_args
+            )
+
+            lag_df = same_week_day_hour_lag_featurizer.transform(
+                test_df_with_recent_load
+            )
+            lag_df[col_ratio] = lag_df[col_old] / lag_df[col_new]
+            lag_df_list.append(lag_df[keep_col_names + [col_ratio]].copy())
+
+        test_features = reduce(
+            lambda left, right: pd.merge(left, right, on=keep_col_names),
+            [test_features] + lag_df_list,
+        )
+
+    if filter_by_month:
+        test_month = test_features["month_of_year"].values[0]
+        train_features = train_features.loc[
+            train_features["month_of_year"] == test_month,
+        ].copy()
+
+    train_features.dropna(inplace=True)
+
+    return train_features, test_features
+
+
+def compute_features(
+    train_dir,
+    test_dir,
+    output_dir,
+    df_config,
+    feature_config_list,
+    filter_by_month=True,
+    compute_load_ratio=False,
+):
+    """
+    Computes training and testing features of all rounds on the
+    GEFCom2017_D dataset and save as csv files.
+    Args:
+        train_dir(str): Directory of the training datasets.
+        test_dir(str): Directory of the testing datasets.
+        output_dir(str): Directory to save the output feature files.
+        df_config(dict): Configuration of the dataframes.
+        feature_config_list(list of tuples, optional): The first element of
+            each feature configuration tuple is the name of the feature,
+            which must be a key in feature_map. The second element of each
+            feature configuration tuple is a dictionary of arguments to pass
+            to the featurizer corresponding the feature name in feature_map.
+        filter_by_month(bool): If filter the training data by the month of
+            the testing data. Default value is True.
+        compute_load_ratio(bool): If computes a scaling factor that capture
+            the year over year trend and can be used to scale the forecasting
+            result. If True, load ratios are computed on the testing data
+            according to the LOAD_RATIO_CONFIG.
+    """
+    time_col_name = df_config["time_col_name"]
+
+    output_train_dir = os.path.join(output_dir, "train")
+    output_test_dir = os.path.join(output_dir, "test")
     if not os.path.isdir(output_train_dir):
         os.mkdir(output_train_dir)
     if not os.path.isdir(output_test_dir):
         os.mkdir(output_test_dir)
 
-    train_base_df = pd.read_csv(os.path.join(train_dir, TRAIN_BASE_FILE),
-                                parse_dates=[datetime_colname])
+    train_base_df = pd.read_csv(
+        os.path.join(train_dir, TRAIN_BASE_FILE), parse_dates=[time_col_name]
+    )
 
-    # These features only need to be created once for all rounds
-    train_base_basic_features = \
-        create_basic_features(train_base_df,
-                              datetime_colname=datetime_colname)
+    for i in range(1, NUM_ROUND + 1):
+        train_file = os.path.join(
+            train_dir, TRAIN_FILE_PREFIX + str(i) + ".csv"
+        )
+        test_file = os.path.join(test_dir, TEST_FILE_PREFIX + str(i) + ".csv")
 
-    for i in range(1, NUM_ROUND+1):
-        train_file = os.path.join(train_dir, TRAIN_FILE_PREFIX + str(i) + '.csv')
-        test_file = os.path.join(test_dir, TEST_FILE_PREFIX + str(i) + '.csv')
+        train_delta_df = pd.read_csv(train_file, parse_dates=[time_col_name])
+        test_round_df = pd.read_csv(test_file, parse_dates=[time_col_name])
 
-        train_delta_df = pd.read_csv(train_file, parse_dates=[datetime_colname])
-        test_round_df = pd.read_csv(test_file, parse_dates=[datetime_colname])
+        train_all_features, test_all_features = compute_features_one_round(
+            train_base_df,
+            train_delta_df,
+            test_round_df,
+            df_config,
+            feature_config_list,
+            FEATURE_MAP,
+            filter_by_month,
+            compute_load_ratio,
+        )
 
-        train_delta_basic_features = \
-            create_basic_features(train_delta_df,
-                                  datetime_colname=datetime_colname)
-        test_basic_features = \
-            create_basic_features(test_round_df,
-                                  datetime_colname=datetime_colname)
-
-        train_round_df = pd.concat([train_base_df, train_delta_df])
-        train_advanced_features, test_advanced_features = \
-            create_advanced_features(train_round_df, test_round_df,
-                                     datetime_colname=datetime_colname,
-                                     holiday_colname=holiday_colname)
-
-        train_basic_features = pd.concat([train_base_basic_features,
-                                         train_delta_basic_features])
-
-        # Drop some overlapping columns before merge basic and advanced
-        # features.
-        train_basic_columns = set(train_basic_features.columns)
-        train_advanced_columns = set(train_advanced_features.columns)
-        train_overlap_columns = list(train_basic_columns.
-                                     intersection(train_advanced_columns))
-        train_overlap_columns.remove('Zone')
-        train_overlap_columns.remove('Datetime')
-        train_advanced_features.drop(train_overlap_columns,
-                                     inplace=True, axis=1)
-
-        test_basic_columns = set(test_basic_features.columns)
-        test_advanced_columns = set(test_advanced_features.columns)
-        test_overlap_columns = list(test_basic_columns.
-                                    intersection(test_advanced_columns))
-        test_overlap_columns.remove('Zone')
-        test_overlap_columns.remove('Datetime')
-        test_advanced_features.drop(test_overlap_columns, inplace=True, axis=1)
-
-        train_all_features = pd.merge(train_basic_features,
-                                      train_advanced_features,
-                                      on=['Zone', 'Datetime'])
-        test_all_features = pd.merge(test_basic_features,
-                                     test_advanced_features,
-                                     on=['Zone', 'Datetime'])
-
-        train_all_features.dropna(inplace=True)
-        test_all_features.drop(['DewPnt', 'DryBulb', 'DEMAND'],
-                               inplace=True, axis=1)
-
-        train_output_file = os.path.join(output_dir, 'train',
-                                         TRAIN_FILE_PREFIX + str(i) + '.csv')
-        test_output_file = os.path.join(output_dir, 'test',
-                                        TEST_FILE_PREFIX + str(i) + '.csv')
+        train_output_file = os.path.join(
+            output_dir, "train", TRAIN_FILE_PREFIX + str(i) + ".csv"
+        )
+        test_output_file = os.path.join(
+            output_dir, "test", TEST_FILE_PREFIX + str(i) + ".csv"
+        )
 
         train_all_features.to_csv(train_output_file, index=False)
         test_all_features.to_csv(test_output_file, index=False)
 
-        print('Round {}'.format(i))
-        print('Training data size: {}'.format(train_all_features.shape))
-        print('Testing data size: {}'.format(test_all_features.shape))
-        print('Minimum training timestamp: {}'.
-              format(min(train_all_features[datetime_colname])))
-        print('Maximum training timestamp: {}'.
-              format(max(train_all_features[datetime_colname])))
-        print('Minimum testing timestamp: {}'.
-              format(min(test_all_features[datetime_colname])))
-        print('Maximum testing timestamp: {}'.
-              format(max(test_all_features[datetime_colname])))
-        print('')
-
-
-if __name__ == '__main__':
-    opts, args = getopt.getopt(sys.argv[1:], '', ['submission='])
-    for opt, arg in opts:
-        if opt == '--submission':
-            submission_folder = arg
-            output_data_dir = os.path.join(SUBMISSIONS_DIR, submission_folder,
-                                           'data')
-            if not os.path.isdir(output_data_dir):
-                os.mkdir(output_data_dir)
-            OUTPUT_DIR = os.path.join(output_data_dir, 'features')
-    if not os.path.isdir(OUTPUT_DIR):
-        os.mkdir(OUTPUT_DIR)
-
-    main(train_dir=TRAIN_DATA_DIR,
-         test_dir=TEST_DATA_DIR,
-         output_dir=OUTPUT_DIR,
-         datetime_colname=DATETIME_COLNAME,
-         holiday_colname=HOLIDAY_COLNAME)
+        print("Round {}".format(i))
+        print("Training data size: {}".format(train_all_features.shape))
+        print("Testing data size: {}".format(test_all_features.shape))
+        print(
+            "Minimum training timestamp: {}".format(
+                min(train_all_features[time_col_name])
+            )
+        )
+        print(
+            "Maximum training timestamp: {}".format(
+                max(train_all_features[time_col_name])
+            )
+        )
+        print(
+            "Minimum testing timestamp: {}".format(
+                min(test_all_features[time_col_name])
+            )
+        )
+        print(
+            "Maximum testing timestamp: {}".format(
+                max(test_all_features[time_col_name])
+            )
+        )
+        print("")

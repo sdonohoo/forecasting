@@ -10,7 +10,7 @@
 
 pool:
   name: ForecastingBP
-  vmImage: 'forecastingtestmachine'
+  vmImage: "forecastingtestmachine"
 
 steps:
 
@@ -23,9 +23,9 @@ steps:
     conda activate forecasting_base && \
     pytest tests/unit -m "not notebooks and not spark and not gpu" --junitxml=reports/test-unit.xml && \
     conda deactivate
-  displayName: 'Run unit tests'
+  displayName: "Run unit tests"
 
 - task: PublishTestResults@2
   inputs:
-    testResultsFiles: '**/test-unitttest.xml'
-    testRunTitle: 'Test results for PyTest'
+    testResultsFiles: "reports/test-unit.xml"
+    testRunTitle: "Test results of unit tests"

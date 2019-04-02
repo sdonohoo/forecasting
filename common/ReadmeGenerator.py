@@ -99,7 +99,10 @@ print('\n\n\n',file=open(readmefile, "a"))
 
 #insertting build status badge
 print('## Build Status\n\n', file=open(readmefile, "a"))
-print('[![Build Status](https://dev.azure.com/best-practices/forecasting/_apis/build/status/Forecasting/unit_tests_prototype?branchName=chenhui/python_test_pipeline)](https://dev.azure.com/best-practices/forecasting/_build/latest?definitionId=4&branchName=chenhui/python_test_pipeline)' ,file=open(readmefile, "a"))
+print('| Build Type | Branch | Status |  | Branch | Status |' ,file=open(readmefile, "a"))
+print('| --- | --- | --- | --- | --- | --- |' ,file=open(readmefile, "a"))
+print('| **Python Linux CPU** |  master | [![Build Status](https://dev.azure.com/best-practices/forecasting/_apis/build/status/python_unit_tests_base?branchName=master)](https://dev.azure.com/best-practices/forecasting/_build/latest?definitionId=12&branchName=master)  | | staging | [![Build Status](https://dev.azure.com/best-practices/forecasting/_apis/build/status/python_unit_tests_base?branchName=chenhui/python_test_pipeline)](https://dev.azure.com/best-practices/forecasting/_build/latest?definitionId=12&branchName=chenhui/python_test_pipeline) |' ,file=open(readmefile, "a"))
+print('| **R Linux CPU** |  master | [![Build Status](https://dev.azure.com/best-practices/forecasting/_apis/build/status/Forecasting/r_unit_tests_prototype?branchName=master)](https://dev.azure.com/best-practices/forecasting/_build/latest?definitionId=9&branchName=master)  | | staging | [![Build Status](https://dev.azure.com/best-practices/forecasting/_apis/build/status/Forecasting/r_unit_tests_prototype?branchName=zhouf/r_test_pipeline)](https://dev.azure.com/best-practices/forecasting/_build/latest?definitionId=9&branchName=zhouf/r_test_pipeline) |' ,file=open(readmefile, "a"))
 print('\n\n\n',file=open(readmefile, "a"))
 
 

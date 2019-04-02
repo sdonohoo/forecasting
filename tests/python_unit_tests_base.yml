@@ -21,11 +21,11 @@ steps:
 - bash: |
     . /anaconda/etc/profile.d/conda.sh && \
     conda activate forecasting_base && \
-    pytest tests/unit -m "not notebooks and not spark and not gpu" --junitxml=reports/test-unit.xml && \
+    pytest tests/python/unit -m "not notebooks and not spark and not gpu" --junitxml=reports/python-unit-tests-base.xml && \
     conda deactivate
   displayName: "Run unit tests"
 
 - task: PublishTestResults@2
   inputs:
-    testResultsFiles: "reports/test-unit.xml"
+    testResultsFiles: "reports/python-unit-tests-base.xml"
     testRunTitle: "Test results of unit tests"

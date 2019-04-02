@@ -1,7 +1,8 @@
 # TSPerf
 
-TSPerf is a framework that allows discovery and comparison of various time-series forecasting algorithms and architectures on a cloud-based environment. This framework allows data scientists to discover the best approach that fits their use case from cost, time and quality perspective.
- TSPerf framework is designed to facilitate data science community participation and contribution through the development of benchmark implementations against a given set of forecasting problems and datasets. Benchmark implementations are measured in terms of standard metrics of model accuracy, training cost and model training time. Each implementation includes all the necessary instructions and tools that ensure its reproducibility on Azure customer's subscription. We plan to leverage TSPerf to propose a new time-series forecasting track in [MLPerf](https://mlperf.org/).
+TSPerf is a repository of time-series forecasting models with a comprehensive comparison of their performance over provided benchmark data sets, implemented on Azure. Model implementations are compared by forecasting accuracy, training and scoring time and cost on Azure compute. Each implementation includes all the necessary instructions and tools that ensure its reproducibility. We envision TSPerf to become a central repository of time-series forecasting that provides wide coverage of time-series  algorithms, from the very simple to the state of the art in the industry. The roadmap of TSPerf can be found [here](docs/roadmap.md).
+
+
 The following table summarizes benchmarks that are currently included in TSPerf.
 
 Benchmark                                   |  Dataset               |  Benchmark directory
@@ -12,26 +13,23 @@ Retail sales forecasting                    |  Orange Juice dataset  |  `retail_
 
 
 
-A complete documentation of TSPerf, along with the instructions for submitting and reviewing benchmark implementations, can be found [here](./docs/tsperf_rules.md). The tables below show performance of benchmark implementations that are developed so far. These tables are referred to as *performance boards*. Source code of benchmark implementations and instructions for reproducing their performance can be found in submission folders, which are linked in the last column of performance boards.
+A complete documentation of TSPerf, along with the instructions for submitting and reviewing implementations, can be found [here](./docs/tsperf_rules.md). The tables below show performance of implementations that are developed so far. Source code of implementations and instructions for reproducing their performance can be found in submission folders, which are linked in the first column.
 
 ## Probabilistic energy forecasting performance board
 
 
-The following table lists the current submision for the energy foercasting and their respective performances.
+The following table lists the current submision for the energy forecasting and their respective performances.
 
-
-Submission Name  |  Pinball Loss  |  Training and Scoring Time (Sec)  |  Training and Scoring Cost($)  |  Architecture                                 |  Framework                         |  Algorithm                            |  Uni/Multivariate  |  Exteranl Feature Support  |  Submission Folder URL
------------------|----------------|-----------------------------------|--------------------------------|-----------------------------------------------|------------------------------------|---------------------------------------|--------------------|----------------------------|----------------------------------------------------------------------------
-Baseline         |  84.12         |  188                              |  0.0201                        |  Linux DSVM (Standard D8s v3 - Premium SSD)   |  quantreg package of R             |  Linear Quantile Regression           |  Multivariate      |  Yes                       |  [link](energy_load%2FGEFCom2017_D_Prob_MT_hourly%2Fsubmissions%2Fbaseline)
-GBM              |  78.84         |  269                              |  0.0287                        |  Linux DSVM (Standard D8s v3 - Premium SSD)   |  gbm package of R                  |  Gradient Boosting Decision Tree      |  Multivariate      |  Yes                       |  [link](energy_load%2FGEFCom2017_D_Prob_MT_hourly%2Fsubmissions%2FGBM)
-QRF              |  76.29         |  20322                            |  17.19                         |   Linux DSVM (F72s v2 - Premium SSD)          |   scikit-garden package of Python  |   Quantile Regression Forest          |   Multivariate     |   Yes                      |   [link](energy_load%2FGEFCom2017_D_Prob_MT_hourly%2Fsubmissions%2Fqrf)
-FNN              |  80.06         |  1085                             |  0.1157                        |   Linux DSVM (Standard D8s v3 - Premium SSD)  |   qrnn package of R                |   Quantile Regression Neural Network  |   Multivariate     |   Yes                      |   [link](energy_load%2FGEFCom2017_D_Prob_MT_hourly%2Fsubmissions%2Ffnn)
-
+Submission Name                                                                 |  Pinball Loss  |  Training and Scoring Time (sec)  |  Training and Scoring Cost($)  |  Architecture                                 |  Framework                         |  Algorithm                            |  Uni/Multivariate  |  External Feature Support
+--------------------------------------------------------------------------------|----------------|-----------------------------------|--------------------------------|-----------------------------------------------|------------------------------------|---------------------------------------|--------------------|--------------------------
+[Baseline](energy_load%2FGEFCom2017_D_Prob_MT_hourly%2Fsubmissions%2Fbaseline)  |   84.12         |  188                              |  0.0201                       |  Linux DSVM (Standard D8s v3 - Premium SSD)   |  quantreg package of R             |  Linear Quantile Regression           |  Multivariate      |  Yes
+[GBM](energy_load%2FGEFCom2017_D_Prob_MT_hourly%2Fsubmissions%2FGBM)            |   78.84         |  269                              |  0.0287                       |  Linux DSVM (Standard D8s v3 - Premium SSD)   |  gbm package of R                  |  Gradient Boosting Decision Tree      |  Multivariate      |  Yes
+[QRF](energy_load%2FGEFCom2017_D_Prob_MT_hourly%2Fsubmissions%2Fqrf)            |    76.29         |  20322                            |  17.19                       |   Linux DSVM (F72s v2 - Premium SSD)          |   scikit-garden package of Python  |   Quantile Regression Forest          |   Multivariate     |   Yes
+[FNN](energy_load%2FGEFCom2017_D_Prob_MT_hourly%2Fsubmissions%2Ffnn)            |    80.06         |  1085                             |  0.1157                      |   Linux DSVM (Standard D8s v3 - Premium SSD)  |   qrnn package of R                |   Quantile Regression Neural Network  |   Multivariate     |   Yes
 
 The following chart compares the submissions performance on accuracy in Pinball Loss vs. Training and Scoring cost in $:
 
- 
-![EnergyPBLvsTime](./docs/images/Energy-Cost.png)
+ ![EnergyPBLvsTime](./docs/images/Energy-Cost.png)
 
 
 
@@ -39,19 +37,19 @@ The following chart compares the submissions performance on accuracy in Pinball 
 ## Retail sales forecasting performance board
 
 
-The following table lists the current submision for the retail foercasting and their respective performances.
+The following table lists the current submision for the retail forecasting and their respective performances.
 
 
-Submission Name      |  MAPE (%)  |  Training and Scoring Time (sec)  |  Training and Scoring Cost ($)  |  Architecture                                |  Framework                   |  Algorithm                                                          |  Uni/Multivariate  |  Exteranl Feature Support  |  Submission Folder URL
----------------------|------------|-----------------------------------|---------------------------------|----------------------------------------------|------------------------------|---------------------------------------------------------------------|--------------------|----------------------------|-----------------------------------------------------------------------------------
-Baseline             |  109.67    |  114.06                           |  0.003                          |  Linux DSVM(Standard D2s v3 - Premium SSD)   |  forecast package of R       |  Naive Forecast                                                     |  Univariate        |  No                        |  [link](retail_sales%2FOrangeJuice_Pt_3Weeks_Weekly%2Fsubmissions%2Fbaseline)
-AutoARIMA            |  70.80     |  265.94                           |  0.0071                         |  Linux DSVM(Standard D2s v3 - Premium SSD)   |  forecast package of R       |  Auto ARIMA                                                         |  Multivariate      |  Yes                       |  [link](retail_sales%2FOrangeJuice_Pt_3Weeks_Weekly%2Fsubmissions%2FARIMA)
-ETS                  |  70.99     |  277                              |  0.01                           |  Linux DSVM(Standard D2s v3 - Premium SSD)   |  forecast package of R       |  ETS                                                                |  Multivariate      |  No                        |  [link](retail_sales%2FOrangeJuice_Pt_3Weeks_Weekly%2Fsubmissions%2FETS)
-MeanForecast         |  70.74     |  69.88                            |  0.002                          |  Linux DSVM(Standard D2s v3 - Premium SSD)   |  forecast package of R       |  Mean forecast                                                      |   Univariate       |  No                        |  [link](retail_sales%2FOrangeJuice_Pt_3Weeks_Weekly%2Fsubmissions%2FMeanForecast)
-SeasonalNaive        |  165.06    |  160.45                           |  0.004                          |  Linux DSVM(Standard D2s v3 - Premium SSD)   |  forecast package of R       |  Seasonal Naive                                                     |  Univariate        |  No                        |  [link](retail_sales%2FOrangeJuice_Pt_3Weeks_Weekly%2Fsubmissions%2FSeasonalNaive)
-LightGBM             |  36.28     |  625.10                           |  0.0167                         |  Linux DSVM (Standard D2s v3 - Premium SSD)  |  lightGBM package of Python  |  Gradient Boosting Decision Tree                                    |  Multivariate      |  Yes                       |   [link](retail_sales%2FOrangeJuice_Pt_3Weeks_Weekly%2Fsubmissions%2FLightGBM)
-DilatedCNN           |  37.09     |  413                              |  0.1032                         |  Ubuntu VM(NC6 - Standard HDD)               |  Keras and Tensorflow        |  Python + Dilated convolutional neural network                      |   Multivariate     |  Yes                       |  [link](retail_sales%2FOrangeJuice_Pt_3Weeks_Weekly%2Fsubmissions%2FDilatedCNN)
-RNN Encoder-Decoder  |  37.68     |  669                              |  0.2                            |  Ubuntu VM(NC6 - Standard HDD)               |  Tensorflow                  |  Python + Encoder-decoder architecture of recurrent neural network  |   Multivariate     |  Yes                       |  [link](retail_sales%2FOrangeJuice_Pt_3Weeks_Weekly%2Fsubmissions%2FRNN)
+Submission Name                                                                             |  MAPE (%)  |  Training and Scoring Time (sec)  |  Training and Scoring Cost ($)  |  Architecture                                |  Framework                   |  Algorithm                                                          |  Uni/Multivariate  |  External Feature Support
+--------------------------------------------------------------------------------------------|------------|-----------------------------------|---------------------------------|----------------------------------------------|------------------------------|---------------------------------------------------------------------|--------------------|--------------------------
+[Baseline](retail_sales%2FOrangeJuice_Pt_3Weeks_Weekly%2Fsubmissions%2Fbaseline)            |  109.67    |  114.06                           |  0.003                          |  Linux DSVM(Standard D2s v3 - Premium SSD)   |  forecast package of R       |  Naive Forecast                                                     |  Univariate        |  No
+[AutoARIMA](retail_sales%2FOrangeJuice_Pt_3Weeks_Weekly%2Fsubmissions%2FARIMA)              |  70.80     |  265.94                           |  0.0071                         |  Linux DSVM(Standard D2s v3 - Premium SSD)   |  forecast package of R       |  Auto ARIMA                                                         |  Multivariate      |  Yes
+[ETS](retail_sales%2FOrangeJuice_Pt_3Weeks_Weekly%2Fsubmissions%2FETS)                      |  70.99     |  277                              |  0.01                           |  Linux DSVM(Standard D2s v3 - Premium SSD)   |  forecast package of R       |  ETS                                                                |  Multivariate      |  No
+[MeanForecast](retail_sales%2FOrangeJuice_Pt_3Weeks_Weekly%2Fsubmissions%2FMeanForecast)    |  70.74     |  69.88                            |  0.002                          |  Linux DSVM(Standard D2s v3 - Premium SSD)   |  forecast package of R       |  Mean forecast                                                      |   Univariate       |  No
+[SeasonalNaive](retail_sales%2FOrangeJuice_Pt_3Weeks_Weekly%2Fsubmissions%2FSeasonalNaive)  |  165.06    |  160.45                           |  0.004                          |  Linux DSVM(Standard D2s v3 - Premium SSD)   |  forecast package of R       |  Seasonal Naive                                                     |  Univariate        |  No
+[LightGBM](retail_sales%2FOrangeJuice_Pt_3Weeks_Weekly%2Fsubmissions%2FLightGBM)            |  36.28     |  625.10                           |  0.0167                         |  Linux DSVM (Standard D2s v3 - Premium SSD)  |  lightGBM package of Python  |  Gradient Boosting Decision Tree                                    |  Multivariate      |  Yes
+[DilatedCNN](retail_sales%2FOrangeJuice_Pt_3Weeks_Weekly%2Fsubmissions%2FDilatedCNN)        |  37.09     |  413                              |  0.1032                         |  Ubuntu VM(NC6 - Standard HDD)               |  Keras and Tensorflow        |  Python + Dilated convolutional neural network                      |   Multivariate     |  Yes
+[RNN Encoder-Decoder](retail_sales%2FOrangeJuice_Pt_3Weeks_Weekly%2Fsubmissions%2FRNN)      |  37.68     |  669                              |  0.2                            |  Ubuntu VM(NC6 - Standard HDD)               |  Tensorflow                  |  Python + Encoder-decoder architecture of recurrent neural network  |   Multivariate     |  Yes
 
 
 

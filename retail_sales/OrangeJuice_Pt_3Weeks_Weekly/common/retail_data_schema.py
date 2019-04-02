@@ -9,7 +9,7 @@ from benchmark_settings import *
 from common.data_schema import specify_data_schema
 
 DEFAULT_TARGET_COL = "move"
-DEFAULT_STATIC_FEA = ["store", "brand"]
+DEFAULT_STATIC_FEA = None
 DEFAULT_DYNAMIC_FEA = ["deal", "feat"]
 
 def specify_retail_data_schema(

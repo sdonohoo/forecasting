@@ -26,13 +26,13 @@ For examples of doing cross validation and parameter tuning with the output
 of this script, see TSPerf/prototypes/cross_validation.
 
 """
-import benchmark_paths
+import .benchmark_paths
 import json
 import os, sys, getopt
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 
-from common.train_utils import TSCVSplitter
+from ...backtesting.train_utils import TSCVSplitter
 
 
 def main(config_file):

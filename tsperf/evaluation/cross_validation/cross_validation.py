@@ -5,7 +5,7 @@ from datetime import datetime
 from dateutil.relativedelta import relativedelta
 import subprocess
 
-from common.train_utils import TSCVSplitter
+from ..train_utils import TSCVSplitter
 
 
 class ParameterSweeper:

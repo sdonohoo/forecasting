@@ -3,8 +3,8 @@ import math
 import itertools
 import pandas as pd
 import datetime
-from benchmark_paths import DATA_DIR
-import retail_sales.OrangeJuice_Pt_3Weeks_Weekly.common.benchmark_settings as bs
+from .benchmark_paths import DATA_DIR
+import .benchmark_settings as bs
 
 
 # Utility functions

@@ -1,9 +1,9 @@
 import os
 import pandas as pd
 from urllib.request import urlretrieve
-from .benchmark_settings import TRAIN_BASE_END, TRAIN_ROUNDS_ENDS, \
+from benchmark_settings import TRAIN_BASE_END, TRAIN_ROUNDS_ENDS, \
     TEST_STARTS_ENDS
-from .benchmark_paths import DATA_DIR
+from benchmark_paths import DATA_DIR
 from datetime import time
     
 # Columns to be dropped in the test data as they are not available

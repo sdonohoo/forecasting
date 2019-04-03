@@ -73,8 +73,8 @@ Then, you can go to `~/Forecasting` directory in the VM and create a conda envir
 
     ```bash
     source activate tsperf
-    python tsperf/datasets/GEFCom2017/download_data.py
-    python tsperf/dataset/GEFCom2017/extract_data.py
+    python tsperf/benchmarking/GEFCom2017_D_Prob_MT_hourly/download_data.py
+    python tsperf/benchmarking/GEFCom2017_D_Prob_MT_hourly/extract_data.py
     ```
 
 5. Prepare Docker container for model training and predicting.
@@ -112,12 +112,13 @@ Then, you can go to `~/Forecasting` directory in the VM and create a conda envir
    bash benchmarks/GEFCom2017_D_Prob_MT_hourly/baseline/train_score_vm.sh
    ```
    After generating the forecast results, you can exit the Docker container by command `exit`.
+   
 7. Model evaluation **on the VM**
 
    ```bash
    source activate tsperf
    cd ~/Forecasting
-   bash ./common/evaluate baseline benchmarks/GEFCom2017_D_Prob_MT_hourly
+   bash tsperf/benchmarking/evaluate baseline tsperf/benchmarking/GEFCom2017_D_Prob_MT_hourly
    ```
 
 ## Implementation resources

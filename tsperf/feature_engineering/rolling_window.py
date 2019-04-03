@@ -4,8 +4,8 @@ import numpy as np
 import warnings
 from math import ceil
 
-from .base_ts_estimators import BaseTSFeaturizer
-from .utils import convert_to_tsdf, is_iterable_but_not_string
+from base_ts_estimators import BaseTSFeaturizer
+from utils import convert_to_tsdf, is_iterable_but_not_string
 
 
 class BaseRollingWindowFeaturizer(BaseTSFeaturizer):

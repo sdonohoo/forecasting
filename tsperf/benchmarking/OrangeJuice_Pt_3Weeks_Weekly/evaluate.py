@@ -19,8 +19,8 @@ import sys
 import pandas as pd
 import numpy as np
 sys.path.append('.')
-from ...benchmarking.evaluation_utils import MAPE
-from .benchmark_settings import NUM_ROUNDS
+from tsperf.evaluation.evaluation_utils import MAPE
+from benchmark_settings import NUM_ROUNDS
 
 def read_test_files(benchmark_dir):
     """Get the ground truth of the forecasts.

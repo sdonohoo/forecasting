@@ -22,7 +22,7 @@ The table below summarizes the benchmark problem definition:
 | **Forecast granularity**         | hourly |
 | **Forecast type**                   | probabilistic, 9 quantiles: 10th, 20th, ...90th percentiles|
 
-A template of the submission file can be found [here](https://github.com/Microsoft/Forecasting/blob/master/energy_load/GEFCom2017_D_Prob_MT_hourly/reference/submission.csv)
+A template of the submission file can be found [here](https://github.com/Microsoft/Forecasting/blob/master/benchmarks/GEFCom2017_D_Prob_MT_hourly/sample_submission.csv)
 
 # Data  
 ### Dataset attribution

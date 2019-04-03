@@ -15,8 +15,8 @@ import os
 import sys
 import pandas as pd
 sys.path.append('.')
-from .benchmark_paths import BENCHMARK_DIR
-from ...benchmarking.evaluation_utils import pinball_loss
+from benchmark_paths import BENCHMARK_DIR
+from tsperf.evaluation.evaluation_utils import pinball_loss
 
 # baseline losses are taken from Table 2 of
 # F. Ziel. Quantile regression for the qualifying match of GEFCom2017

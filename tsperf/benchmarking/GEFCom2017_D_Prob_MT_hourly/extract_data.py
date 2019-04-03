@@ -67,9 +67,9 @@ from datetime import timedelta
 import pandas as pd
 import numpy as np
 
-from .utils import split_train_test
-from .benchmark_paths import DATA_DIR, HOLIDAY_DATA_PATH
-from .benchmark_settings import TEST_STARTS_ENDS
+from utils import split_train_test
+from benchmark_paths import DATA_DIR, HOLIDAY_DATA_PATH
+from benchmark_settings import TEST_STARTS_ENDS
 
 # This assumes that the script is stored in a directory of the same level
 # as the data directory

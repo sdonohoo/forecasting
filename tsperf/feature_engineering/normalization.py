@@ -5,8 +5,8 @@ features are useful for capturing trend in time series data.
 from abc import abstractmethod
 import warnings
 import pandas as pd
-from .utils import is_datetime_like
-from .base_ts_estimators import BaseTSFeaturizer
+from utils import is_datetime_like
+from base_ts_estimators import BaseTSFeaturizer
 
 
 class BaseTemporalNormalizer(BaseTSFeaturizer):

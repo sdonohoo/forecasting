@@ -9,25 +9,25 @@ import pandas as pd
 from functools import reduce
 from sklearn.pipeline import Pipeline
 
-from ...feature_engineering.lag import (
+from tsperf.feature_engineering.lag import (
     SameWeekOfYearLagFeaturizer,
     SameDayOfYearLagFeaturizer,
 )
-from ...feature_engineering.temporal import (
+from tsperf.feature_engineering.temporal import (
     TemporalFeaturizer,
     DayTypeFeaturizer,
     AnnualFourierFeaturizer,
     DailyFourierFeaturizer,
     WeeklyFourierFeaturizer,
 )
-from ...feature_engineering.rolling_window import SameDayOfWeekRollingWindowFeaturizer
-from ...feature_engineering.normalization import (
+from tsperf.feature_engineering.rolling_window import SameDayOfWeekRollingWindowFeaturizer
+from tsperf.feature_engineering.normalization import (
     YearNormalizer,
     DateNormalizer,
     DateHourNormalizer,
 )
 
-from .benchmark_paths import DATA_DIR
+from benchmark_paths import DATA_DIR
 
 print("Data directory used: {}".format(DATA_DIR))
 

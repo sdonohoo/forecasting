@@ -8,7 +8,7 @@ from https://www.iso-ne.com/isoexpress/web/reports
 import os
 from urllib.request import urlretrieve
 import pandas as pd
-from .benchmark_paths import DATA_DIR
+from benchmark_paths import DATA_DIR
 
 DATA_FILE_LIST_NEW_FORMAT= ['2016_smd_hourly.xls', '2017_smd_hourly.xlsx']
 SHEET_LIST = ['ME', 'NH', 'VT', 'CT', 'RI', 'SEMASS', 'WCMASS', 'NEMASSBOST']

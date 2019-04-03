@@ -4,7 +4,7 @@ import numpy as np
 from collections import Iterable
 
 from .base_ts_estimators import BaseTSFeaturizer
-from common.utils import convert_to_tsdf, is_iterable_but_not_string
+from .utils import convert_to_tsdf, is_iterable_but_not_string
 
 
 class BaseLagFeaturizer(BaseTSFeaturizer):

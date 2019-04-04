@@ -6,7 +6,7 @@ import warnings
 from math import ceil
 
 from abc import ABC, abstractmethod
-from base_ts_estimators import BaseTSFeaturizer
+from tsperf.feature_engineering.base_ts_estimators import BaseTSFeaturizer
 
 
 class TemporalFeaturizer(BaseTSFeaturizer):

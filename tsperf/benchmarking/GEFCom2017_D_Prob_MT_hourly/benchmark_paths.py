@@ -15,5 +15,5 @@ DATA_DIR = os.path.join(BENCHMARK_DIR, 'data')
 TSPERF_DIR = os.path.dirname(os.path.dirname(SCRIPT_DIR))
 HOLIDAY_DATA_PATH = os.path.join(TSPERF_DIR, 'feature_engineering', 'us_holidays.csv')
 
-if TSPERF_DIR not in sys.path:
-    sys.path.insert(0, TSPERF_DIR)
+if REPO_DIR not in sys.path:
+    sys.path.insert(0, REPO_DIR)

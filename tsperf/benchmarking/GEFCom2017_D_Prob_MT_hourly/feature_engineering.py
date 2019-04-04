@@ -27,7 +27,7 @@ from tsperf.feature_engineering.normalization import (
     DateHourNormalizer,
 )
 
-from benchmark_paths import DATA_DIR
+from tsperf.benchmarking.GEFCom2017_D_Prob_MT_hourly.benchmark_paths import DATA_DIR
 
 print("Data directory used: {}".format(DATA_DIR))
 

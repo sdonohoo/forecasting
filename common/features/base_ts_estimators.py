@@ -4,7 +4,11 @@ Base classes for time series forecasting tasks.
 from abc import ABC, abstractmethod
 from sklearn.base import BaseEstimator, TransformerMixin
 import pandas as pd
-from common.utils import is_datetime_like, is_iterable_but_not_string
+from common.utils import (
+    is_datetime_like,
+    is_iterable_but_not_string,
+    get_offset_by_frequency,
+)
 
 
 class BaseTSEstimator(BaseEstimator, ABC):
@@ -35,6 +39,8 @@ class BaseTSEstimator(BaseEstimator, ABC):
         self.ts_id_col_names = df_config["ts_id_col_names"]
         self.frequency = df_config["frequency"]
         self.time_format = df_config["time_format"]
+
+        self._offset = get_offset_by_frequency(self.frequency)
 
     @property
     def ts_id_col_names(self):

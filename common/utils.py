@@ -105,23 +105,23 @@ def add_datetime(input_datetime, unit, add_count):
         Exception: if invalid unit is provided. Valid units are:
             'year', 'month', 'week', 'day', 'hour', 'minute'.
     """
-    if unit == "year":
+    if unit == "Y":
         new_datetime = input_datetime + relativedelta(years=add_count)
-    elif unit == "month":
+    elif unit == "M":
         new_datetime = input_datetime + relativedelta(months=add_count)
-    elif unit == "week":
+    elif unit == "W":
         new_datetime = input_datetime + relativedelta(weeks=add_count)
-    elif unit == "day":
+    elif unit == "D":
         new_datetime = input_datetime + relativedelta(days=add_count)
-    elif unit == "hour":
+    elif unit == "h":
         new_datetime = input_datetime + relativedelta(hours=add_count)
-    elif unit == "minute":
+    elif unit == "m":
         new_datetime = input_datetime + relativedelta(minutes=add_count)
     else:
         raise Exception(
             "Invalid backtest step unit, {}, provided. Valid "
-            "step units are year, month, week, day, hour, "
-            "and minute".format(unit)
+            "step units are Y, M, W, D, h, "
+            "and m".format(unit)
         )
     return new_datetime
 
@@ -161,3 +161,46 @@ def is_iterable_but_not_string(obj):
 
     """
     return isinstance(obj, Iterable) and not isinstance(obj, str)
+
+
+def get_offset_by_frequency(frequency):
+    frequency_to_offset_map = {
+        'B': pd.offsets.BDay(),
+        'C': pd.offsets.CDay(),
+        'W': pd.offsets.Week(),
+        'WOM': pd.offsets.WeekOfMonth(),
+        'LWOM': pd.offsets.LastWeekOfMonth(),
+        'M': pd.offsets.MonthEnd(),
+        'MS': pd.offsets.MonthBegin(),
+        'BM': pd.offsets.BMonthEnd(),
+        'BMS': pd.offsets.BMonthBegin(),
+        'CBM': pd.offsets.CBMonthEnd(),
+        'CBMS': pd.offsets.CBMonthBegin(),
+        'SM': pd.offsets.SemiMonthEnd(),
+        'SMS': pd.offsets.SemiMonthBegin(),
+        'Q': pd.offsets.QuarterEnd(),
+        'QS': pd.offsets.QuarterBegin(),
+        'BQ': pd.offsets.BQuarterEnd(),
+        'BQS': pd.offsets.BQuarterBegin(),
+        'REQ': pd.offsets.FY5253Quarter(),
+        'A': pd.offsets.YearEnd(),
+        'AS': pd.offsets.YearBegin(),
+        'BYS': pd.offsets.YearBegin(),
+        'BA': pd.offsets.BYearEnd(),
+        'BAS': pd.offsets.BYearBegin(),
+        'RE': pd.offsets.FY5253(),
+        'BH': pd.offsets.BusinessHour(),
+        'CBH': pd.offsets.CustomBusinessHour(),
+        'D': pd.offsets.Day(),
+        'H': pd.offsets.Hour(),
+        'T': pd.offsets.Minute(),
+        'min': pd.offsets.Minute(),
+        'S': pd.offsets.Second(),
+        'L': pd.offsets.Milli(),
+        'ms': pd.offsets.Milli(),
+        'U': pd.offsets.Micro(),
+        'us': pd.offsets.Micro(),
+        'N': pd.offsets.Nano()
+    }
+
+    return frequency_to_offset_map[frequency]

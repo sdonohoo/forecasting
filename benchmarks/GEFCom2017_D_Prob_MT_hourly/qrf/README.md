@@ -12,7 +12,7 @@
 
 **Submission name:** Quantile Random Forest
 
-**Submission path:** energy_load/GEFCom2017_D_Prob_MT_hourly/submissions/qrf
+**Submission path:** benchmarks/GEFCom2017_D_Prob_MT_hourly/qrf
 
 
 ## Implementation description
@@ -42,9 +42,9 @@ We used 2 validation time frames, the first one in January-April 2015, the secon
 
 ### Description of implementation scripts
 
-* `feature_engineering.py`: Python script for computing features and generating feature files.
+* `compute_features.py`: Python script for computing features and generating feature files.
 * `train_score.py`: Python script that trains Quantile Random Forest models and predicts on each round of test data.
-* `train_score_vm.sh`: Bash script that runs `feature_engineering.py`and `train_score.py` five times to generate five submission files and measure model running time.
+* `train_score_vm.sh`: Bash script that runs `compute_features.py` and `train_score.py` five times to generate five submission files and measure model running time.
 
 ### Steps to reproduce results
 
@@ -71,15 +71,15 @@ Then, you can go to `~/Forecasting` directory in the VM and create a conda envir
 
    ```bash
    cd ~/Forecasting
-   conda env create --file ./common/conda_dependencies.yml
+   conda env create --file tsperf/benchmarking/conda_dependencies.yml
    ```
 
 4. Download and extract data **on the VM**.
 
     ```bash
     source activate tsperf
-    python energy_load/GEFCom2017_D_Prob_MT_hourly/common/download_data.py
-    python energy_load/GEFCom2017_D_Prob_MT_hourly/common/extract_data.py
+    python tsperf/benchmarking/GEFCom2017_D_Prob_MT_hourly/download_data.py
+    python tsperf/benchmarking/GEFCom2017_D_Prob_MT_hourly/extract_data.py
     ```
 
 5. Prepare Docker container for model training and predicting.
@@ -96,7 +96,7 @@ Then, you can go to `~/Forecasting` directory in the VM and create a conda envir
    5.2 Build a local Docker image
 
    ```bash
-   sudo docker build -t qrf_image ./energy_load/GEFCom2017_D_Prob_MT_hourly/submissions/qrf
+   sudo docker build -t qrf_image benchmarks/GEFCom2017_D_Prob_MT_hourly/qrf
    ```
 
 6. Train and predict **within Docker container**  
@@ -113,7 +113,7 @@ Then, you can go to `~/Forecasting` directory in the VM and create a conda envir
    ```
    source activate tsperf
    cd /Forecasting
-   nohup bash ./energy_load/GEFCom2017_D_Prob_MT_hourly/submissions/qrf/train_score_vm.sh >& out.txt &
+   nohup bash benchmarks/GEFCom2017_D_Prob_MT_hourly/qrf/train_score_vm.sh >& out.txt &
    ```
    The last command will take about 31 hours to complete. You can monitor its progress by checking out.txt file. Also during the run you can disconnect from VM. After reconnecting to VM, use the command  
 
@@ -129,7 +129,7 @@ Then, you can go to `~/Forecasting` directory in the VM and create a conda envir
     ```bash
     source activate tsperf
     cd ~/Forecasting
-    bash ./common/evaluate submissions/qrf energy_load/GEFCom2017_D_Prob_MT_hourly
+    bash tsperf/benchmarking/evaluate qrf tsperf/benchmarking/GEFCom2017_D_Prob_MT_hourly
     ```
 
 ## Implementation resources

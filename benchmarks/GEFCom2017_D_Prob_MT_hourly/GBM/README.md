@@ -12,7 +12,7 @@
 
 **Submission name:** GBM
 
-**Submission path:** energy_load/GEFCom2017_D_Prob_MT_hourly/submissions/GBM
+**Submission path:** benchmarks/GEFCom2017_D_Prob_MT_hourly/GBM
 
 
 ## Implementation description
@@ -35,9 +35,9 @@ The data of January - April of 2016 were used as validation dataset for some min
 
 ### Description of implementation scripts
 
-* `feature_engineering.py`: Python script for computing features and generating feature files.
+* `compute_features.py`: Python script for computing features and generating feature files.
 * `train_predict.R`: R script that trains Gradient Boosting Machine model for quantile regression task and predicts on each round of test data.
-* `train_score_vm.sh`: Bash script that runs `feature_engineering.py`and `train_predict.R` five times to generate five submission files and measure model running time.
+* `train_score_vm.sh`: Bash script that runs `compute_features.py` and `train_predict.R` five times to generate five submission files and measure model running time.
 
 ### Steps to reproduce results
 
@@ -64,15 +64,15 @@ To do this, you need to check if conda has been installed by runnning command `c
 From the `~/Forecasting` directory on the VM create a conda environment named `tsperf` by running:  
 
        ```bash
-       conda env create --file ./common/conda_dependencies.yml
+       conda env create --file tsperf/benchmarking/conda_dependencies.yml
        ```
 
 4. Download and extract data **on the VM**.
 
     ```bash
     source activate tsperf
-    python energy_load/GEFCom2017_D_Prob_MT_hourly/common/download_data.py
-    python energy_load/GEFCom2017_D_Prob_MT_hourly/common/extract_data.py
+    python tsperf/benchmarking/GEFCom2017_D_Prob_MT_hourly/download_data.py
+    python tsperf/benchmarking/GEFCom2017_D_Prob_MT_hourly/extract_data.py
     ```
 
 5. Prepare Docker container for model training and predicting.  
@@ -91,7 +91,7 @@ From the `~/Forecasting` directory on the VM create a conda environment named `t
    4.2 Build a local Docker image
 
    ```bash
-   sudo docker build -t gbm_image ./energy_load/GEFCom2017_D_Prob_MT_hourly/submissions/gbm
+   sudo docker build -t gbm_image benchmarks/GEFCom2017_D_Prob_MT_hourly/gbm
    ```
 
 6. Train and predict **within Docker container**
@@ -109,7 +109,7 @@ From the `~/Forecasting` directory on the VM create a conda environment named `t
    ```
    source activate tsperf
    cd /Forecasting
-   bash ./energy_load/GEFCom2017_D_Prob_MT_hourly/submissions/GBM/train_score_vm.sh > out.txt &
+   bash benchmarks/GEFCom2017_D_Prob_MT_hourly/GBM/train_score_vm.sh > out.txt &
    ```
    After generating the forecast results, you can exit the Docker container with command `exit`.
 
@@ -118,7 +118,7 @@ From the `~/Forecasting` directory on the VM create a conda environment named `t
     ```bash
     source activate tsperf
     cd ~/Forecasting
-    bash ./common/evaluate submissions/GBM energy_load/GEFCom2017_D_Prob_MT_hourly
+    bash tsperf/benchmarking/evaluate GBM tsperf/benchmarking/GEFCom2017_D_Prob_MT_hourly
     ```
 
 ## Implementation resources

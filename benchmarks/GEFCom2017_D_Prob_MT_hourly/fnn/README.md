@@ -12,7 +12,7 @@
 
 **Submission name:** Quantile Regression Neural Network
 
-**Submission path:** energy_load/GEFCom2017_D_Prob_MT_hourly/submissions/fnn
+**Submission path:** benchmarks/GEFCom2017_D_Prob_MT_hourly/fnn
 
 
 ## Implementation description
@@ -36,14 +36,14 @@ The data of January - April of 2016 were used as validation dataset for some min
 ### Description of implementation scripts
 
 Train and Predict:
-* `feature_engineering.py`: Python script for computing features and generating feature files.
+* `compute_features.py`: Python script for computing features and generating feature files.
 * `train_predict.R`: R script that trains Quantile Regression Neural Network models and predicts on each round of test data.
-* `train_score_vm.sh`: Bash script that runs `feature_engineering.py` and `train_predict.R` five times to generate five submission files and measure model running time.
+* `train_score_vm.sh`: Bash script that runs `compute_features.py` and `train_predict.R` five times to generate five submission files and measure model running time.
 
 Tune hyperparameters using R:
 * `cv_settings.json`: JSON script that sets cross validation folds.
 * `train_validate.R`: R script that trains Quantile Regression Neural Network models and evaluate the loss on validation data of each cross validation round and forecast round with a set of hyperparameters and calculate the average loss. This script is used for grid search on vm.
-* `train_validate_vm.sh`: Bash script that runs `feature_engineering.py` and `train_validate.R` multiple times to generate cross validation result files and measure model tuning time.
+* `train_validate_vm.sh`: Bash script that runs `compute_features.py` and `train_validate.R` multiple times to generate cross validation result files and measure model tuning time.
 
 Tune hyperparameters using AzureML HyperDrive:
 * `cv_settings.json`: JSON script that sets cross validation folds.
@@ -78,15 +78,15 @@ Then, you can go to `~/Forecasting` directory in the VM and create a conda envir
 
    ```bash
    cd ~/Forecasting
-   conda env create --file ./common/conda_dependencies.yml
+   conda env create --file tsperf/benchmarking/conda_dependencies.yml
    ```
 
 4. Download and extract data **on the VM**.
 
    ```bash
    source activate tsperf
-   python energy_load/GEFCom2017_D_Prob_MT_hourly/common/download_data.py
-   python energy_load/GEFCom2017_D_Prob_MT_hourly/common/extract_data.py
+   python tsperf/benchmarking/GEFCom2017_D_Prob_MT_hourly/download_data.py
+   python tsperf/benchmarking/GEFCom2017_D_Prob_MT_hourly/extract_data.py
    ```
 
 5. Prepare Docker container for model training and predicting.
@@ -106,7 +106,7 @@ Then, you can go to `~/Forecasting` directory in the VM and create a conda envir
    5.2 Build a local Docker image
 
    ```bash
-   sudo docker build -t fnn_image ./energy_load/GEFCom2017_D_Prob_MT_hourly/submissions/fnn
+   sudo docker build -t fnn_image benchmarks/GEFCom2017_D_Prob_MT_hourly/fnn
    ```
 
 6. Tune Hyperparameters **within Docker container** or **with AzureML hyperdrive**.
@@ -124,7 +124,7 @@ Then, you can go to `~/Forecasting` directory in the VM and create a conda envir
    ```
    source activate tsperf
    cd /Forecasting
-   nohup bash ./energy_load/GEFCom2017_D_Prob_MT_hourly/submissions/fnn/train_validate_vm.sh >& cv_out.txt &
+   nohup bash benchmarks/GEFCom2017_D_Prob_MT_hourly/fnn/train_validate_vm.sh >& cv_out.txt &
    ```
    After generating the cross validation results, you can exit the Docker container by command `exit`.
 
@@ -135,7 +135,7 @@ Then, you can go to `~/Forecasting` directory in the VM and create a conda envir
    ```
    cd ~/Forecasting
    source activate tsperf
-   python energy_load/GEFCom2017_D_Prob_MT_hourly/submissions/fnn/feature_engineering.py
+   python benchmarks/GEFCom2017_D_Prob_MT_hourly/fnn/compute_features.py
    ```
    and then run through the jupyter notebook `hyperparameter_tuning.ipynb` on the VM with the conda env `tsperf` as the jupyter kernel.
 
@@ -156,7 +156,7 @@ Then, you can go to `~/Forecasting` directory in the VM and create a conda envir
    ```
    source activate tsperf
    cd /Forecasting
-   nohup bash ./energy_load/GEFCom2017_D_Prob_MT_hourly/submissions/fnn/train_score_vm.sh >& out.txt &
+   nohup bash benchmarks/GEFCom2017_D_Prob_MT_hourly/fnn/train_score_vm.sh >& out.txt &
    ```
    The last command will take about 7 hours to complete. You can monitor its progress by checking out.txt file. Also during the run you can disconnect from VM. After reconnecting to VM, use the command  
 
@@ -172,7 +172,7 @@ Then, you can go to `~/Forecasting` directory in the VM and create a conda envir
    ```bash
    source activate tsperf
    cd ~/Forecasting
-   bash ./common/evaluate submissions/fnn energy_load/GEFCom2017_D_Prob_MT_hourly
+   bash tsperf/benchmarking/evaluate submissions/fnn tsperf/benchmarking/GEFCom2017_D_Prob_MT_hourly
    ```
 
 ## Implementation resources

@@ -1,14 +1,14 @@
 #!/bin/bash
-path=energy_load/GEFCom2017_D_Prob_MT_hourly
+path=benchmarks/GEFCom2017_D_Prob_MT_hourly
 for i in `seq 1 5`;
 do
     echo "Run $i"
     start=`date +%s`
     echo 'Creating features...'
-    python $path/submissions/fnn/compute_features.py --submission fnn
+    python $path/fnn/compute_features.py --submission fnn
 
     echo 'Training and predicting...'
-    Rscript $path/submissions/fnn/train_predict.R $i
+    Rscript $path/fnn/train_predict.R $i
 
     end=`date +%s`
     echo 'Running time '$((end-start))' seconds'

@@ -20,7 +20,7 @@ parallel::clusterEvalQ(cl, lapply(c("qrnn", "data.table"), library, character.on
 registerDoParallel(cl)
 
 # Specify data directory
-data_dir = 'energy_load/GEFCom2017_D_Prob_MT_hourly/submissions/fnn/data/features'
+data_dir = 'benchmarks/GEFCom2017_D_Prob_MT_hourly/fnn/data/features'
 train_dir = file.path(data_dir, 'train')
 
 train_file_prefix = 'train_round_'
@@ -45,10 +45,10 @@ for (j in 1:length(parameter_names)){
   output_file_name = paste(output_file_name, parameter_names[j], parameter_values[j], sep="_")
 }
 
-output_file = file.path(paste('energy_load/GEFCom2017_D_Prob_MT_hourly/submissions/fnn/', output_file_name, sep=""))
+output_file = file.path(paste('benchmarks/GEFCom2017_D_Prob_MT_hourly/fnn/', output_file_name, sep=""))
 
 # Define cross validation split settings
-cv_file = file.path(paste('energy_load/GEFCom2017_D_Prob_MT_hourly/submissions/fnn/', 'cv_settings.json', sep=""))
+cv_file = file.path(paste('benchmarks/GEFCom2017_D_Prob_MT_hourly/fnn/', 'cv_settings.json', sep=""))
 cv_settings = fromJSON(file=cv_file)
 
 # Parameters of model
@@ -165,7 +165,7 @@ print(paste('Average Pinball Loss:', average_PL))
 output_file_name = paste(output_file_name, 'APL', average_PL, sep="_")
 output_file_name = paste(output_file_name, '.csv', sep="")
 
-output_file = file.path(paste('energy_load/GEFCom2017_D_Prob_MT_hourly/submissions/fnn/', output_file_name, sep=""))
+output_file = file.path(paste('benchmarks/GEFCom2017_D_Prob_MT_hourly/fnn/', output_file_name, sep=""))
 
 fwrite(result_final, output_file)
 

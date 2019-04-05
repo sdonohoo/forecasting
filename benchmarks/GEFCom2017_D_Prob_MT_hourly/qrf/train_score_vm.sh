@@ -1,13 +1,13 @@
-path=energy_load/GEFCom2017_D_Prob_MT_hourly
+path=benchmarks/GEFCom2017_D_Prob_MT_hourly
 for i in `seq 1 5`;
 do
     echo "Run $i"
     start=`date +%s`
     echo 'Creating features...'
-    python $path/submissions/qrf/compute_features.py --submission qrf
+    python $path/qrf/compute_features.py --submission qrf
 
     echo 'Training and predicting...'
-    python $path/submissions/qrf/train_score.py --data-folder $path/submissions/qrf/data --output-folder $path/submissions/qrf --seed $i
+    python $path/qrf/train_score.py --data-folder $path/qrf/data --output-folder $path/qrf --seed $i
 
     end=`date +%s`
     echo 'Running time '$((end-start))' seconds'

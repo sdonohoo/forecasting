@@ -12,7 +12,7 @@
 
 **Submission name:** baseline
 
-**Submission path:** energy_load/GEFCom2017_D_Prob_MT_hourly/submissions/baseline
+**Submission path:** benchmarks/GEFCom2017_D_Prob_MT_hourly/baseline
 
 
 ## Implementation description
@@ -36,9 +36,9 @@ No parameter tuning was done.
 
 ### Description of implementation scripts
 
-* `feature_engineering.py`: Python script for computing features and generating feature files.
+* `compute_features.py`: Python script for computing features and generating feature files.
 * `train_predict.R`: R script that trains Quantile Regression models and predicts on each round of test data.
-* `train_score_vm.sh`: Bash script that runs `feature_engineering.py`and `train_predict.R` five times to generate five submission files and measure model running time.
+* `train_score_vm.sh`: Bash script that runs `compute_features.py` and `train_predict.R` five times to generate five submission files and measure model running time.
 
 ### Steps to reproduce results
 

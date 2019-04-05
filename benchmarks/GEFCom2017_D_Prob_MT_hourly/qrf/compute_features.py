@@ -8,11 +8,11 @@ import sys
 import getopt
 
 import localpath
-from energy_load.GEFCom2017_D_Prob_MT_hourly.common.benchmark_paths import (
+from tsperf.benchmarking.GEFCom2017_D_Prob_MT_hourly.benchmark_paths import (
     DATA_DIR,
     SUBMISSIONS_DIR,
 )
-from energy_load.GEFCom2017_D_Prob_MT_hourly.common.feature_engineering \
+from tsperf.benchmarking.GEFCom2017_D_Prob_MT_hourly.feature_engineering \
     import compute_features
 
 print("Data directory used: {}".format(DATA_DIR))

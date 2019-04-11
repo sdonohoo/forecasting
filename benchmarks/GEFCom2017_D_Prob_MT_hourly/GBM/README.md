@@ -91,7 +91,7 @@ From the `~/Forecasting` directory on the VM create a conda environment named `t
    4.2 Build a local Docker image
 
    ```bash
-   sudo docker build -t gbm_image benchmarks/GEFCom2017_D_Prob_MT_hourly/gbm
+   sudo docker build -t gbm_image benchmarks/GEFCom2017_D_Prob_MT_hourly/GBM
    ```
 
 6. Train and predict **within Docker container**

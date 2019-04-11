@@ -15,7 +15,7 @@ import os
 import sys
 import pandas as pd
 sys.path.append('.')
-from benchmark_paths import BENCHMARK_DIR
+from tsperf.benchmarking.GEFCom2017_D_Prob_MT_hourly.benchmark_paths import BENCHMARK_DIR
 from tsperf.evaluation.evaluation_utils import pinball_loss
 
 # baseline losses are taken from Table 2 of

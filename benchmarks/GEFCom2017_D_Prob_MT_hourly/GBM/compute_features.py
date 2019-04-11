@@ -8,13 +8,12 @@ import sys
 import getopt
 
 import localpath
-from tsperf.benchmarking.GEFCom2017_D_Prob_MT_hourly.benchmark_paths import (
-    DATA_DIR,
-    SUBMISSIONS_DIR,
-)
+
 from tsperf.benchmarking.GEFCom2017_D_Prob_MT_hourly.feature_engineering \
     import compute_features
 
+SUBMISSIONS_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DATA_DIR = os.path.join(SUBMISSIONS_DIR,'data')
 print("Data directory used: {}".format(DATA_DIR))
 
 OUTPUT_DIR = os.path.join(DATA_DIR, "features")

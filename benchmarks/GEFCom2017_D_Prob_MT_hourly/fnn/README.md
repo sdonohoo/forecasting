@@ -172,7 +172,7 @@ Then, you can go to `~/Forecasting` directory in the VM and create a conda envir
    ```bash
    source activate tsperf
    cd ~/Forecasting
-   bash tsperf/benchmarking/evaluate submissions/fnn tsperf/benchmarking/GEFCom2017_D_Prob_MT_hourly
+   bash tsperf/benchmarking/evaluate fnn tsperf/benchmarking/GEFCom2017_D_Prob_MT_hourly
    ```
 
 ## Implementation resources

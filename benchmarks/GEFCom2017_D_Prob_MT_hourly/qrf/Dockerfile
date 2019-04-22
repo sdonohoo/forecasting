@@ -1,5 +1,5 @@
 ## Download base image
-FROM continuumio/anaconda3:4.4.0
+FROM continuumio/anaconda3:5.3.0
 ADD ./conda_dependencies.yml /tmp
 WORKDIR /tmp
 

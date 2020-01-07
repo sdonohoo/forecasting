@@ -59,14 +59,14 @@ class BaseLagFeaturizer(BaseTSFeaturizer):
         """
         pass
 
-    def _create_lag_df(self, input_df, lags, frequency):
+    def _create_lag_df(self, input_df, lags, offset):
         """
         Creates a data frame with lags.
         Args:
             input_df(pandas.DataFrame): Input data frame with a time index
                 and columns to create lag features on.
             lags(int or list of int): Lags to compute.
-            frequency(str): Frequency of the shift operation.
+            offset(pandas.tseries.offsets): Frequency of the shift operation.
                 See https://pandas.pydata.org/pandas-docs/stable/user_guide/
                 timeseries.html#dateoffset-objects
 
@@ -87,9 +87,9 @@ class BaseLagFeaturizer(BaseTSFeaturizer):
             {input_df.index.name: input_df.index.get_level_values(0)}
         )
         for lag in lags:
-            tmp_df["lag_time"] = input_df.index.get_level_values(
-                0
-            ) - pd.to_timedelta(int(lag), frequency)
+            tmp_df["lag_time"] = (
+                input_df.index.get_level_values(0) - int(lag) * offset
+            )
             lag_df_cur = pd.merge(
                 tmp_df,
                 input_df,
@@ -138,8 +138,8 @@ class BaseLagFeaturizer(BaseTSFeaturizer):
                 # Compute an imaginary forecast creation time for the training
                 # data based on the maximum horizon to forecast on
                 max_train_timestamp = time_col.max()
-                forecast_creation_time = max_train_timestamp - pd.to_timedelta(
-                    self.max_horizon, self.frequency
+                forecast_creation_time = (
+                    max_train_timestamp - self.max_horizon * self._offset
                 )
             else:
                 forecast_creation_time = time_col.max()
@@ -228,14 +228,13 @@ class BasePeriodicLagFeaturizer(BaseLagFeaturizer):
         lag_all = [
             lag
             for lag in lag_all
-            if (max_time_stamp - pd.to_timedelta(lag, self._lag_frequency))
-            >= min_time_stamp
+            if (max_time_stamp - int(lag) * self._lag_offset) >= min_time_stamp
         ]
 
         lag_df = self._create_lag_df(
             input_df[self.input_col_names],
             lags=lag_all,
-            frequency=self._lag_frequency,
+            offset=self._lag_offset,
         )
         for col in self.input_col_names:
             lag_cols = [c for c in lag_df.columns if c.startswith(col)]
@@ -397,9 +396,7 @@ class LagFeaturizer(BaseLagFeaturizer):
             ] = np.nan
 
         lag_df = self._create_lag_df(
-            input_df[self.input_col_names],
-            lags=self.lags,
-            frequency=self.frequency,
+            input_df[self.input_col_names], lags=self.lags, offset=self._offset
         )
 
         lag_df.set_index(self.time_col_name, inplace=True)
@@ -540,7 +537,7 @@ class SameWeekOfYearLagFeaturizer(BasePeriodicLagFeaturizer):
         # because it depends on it.
         self.max_horizon = max_horizon
 
-        self._lag_frequency = "W"
+        self._lag_offset = pd.offsets.Week()
 
     def _calculate_lags(self):
         """Calculate of list of numbers of weeks to lag."""
@@ -689,7 +686,7 @@ class SameDayOfYearLagFeaturizer(BasePeriodicLagFeaturizer):
         # because it depends on it.
         self.max_horizon = max_horizon
 
-        self._lag_frequency = "D"
+        self._lag_offset = pd.offsets.Day()
 
     def _calculate_lags(self):
         """Calculates a list of numbers of days to lag."""

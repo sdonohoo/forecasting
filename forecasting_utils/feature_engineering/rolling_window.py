@@ -119,8 +119,8 @@ class BaseRollingWindowFeaturizer(BaseTSFeaturizer):
                 # Compute an imaginary forecast creation time for the training
                 # data based on the maximum timestamp to forecast on
                 max_train_timestamp = time_col.max()
-                forecast_creation_time = max_train_timestamp - pd.to_timedelta(
-                    self.max_horizon, self.frequency
+                forecast_creation_time = (
+                    max_train_timestamp - self.max_horizon * self._offset
                 )
             else:
                 forecast_creation_time = time_col.max()
@@ -474,7 +474,7 @@ class SameDayOfWeekRollingWindowFeaturizer(BaseRollingWindowFeaturizer):
         window_size,
         max_horizon=None,
         future_value_available=False,
-        start_week=None,
+        start_week=1,
         agg_func="mean",
         agg_count=1,
         agg_args={},
@@ -498,20 +498,6 @@ class SameDayOfWeekRollingWindowFeaturizer(BaseRollingWindowFeaturizer):
         # it depends on future_value_available
         self.max_horizon = max_horizon
         self.start_week = start_week
-
-    @property
-    def start_week(self):
-        return self._start_week
-
-    @start_week.setter
-    def start_week(self, val):
-        if val is not None:
-            self._start_week = val
-        elif self.max_horizon is not None:
-            time_interval = pd.to_timedelta(self.max_horizon, self.frequency)
-            self._start_week = ceil(time_interval.days / 7)
-        else:
-            self._start_week = 1
 
     def _rolling_window_agg_single_ts(self, input_df, forecast_creation_time):
         """
@@ -554,9 +540,9 @@ class SameDayOfWeekRollingWindowFeaturizer(BaseRollingWindowFeaturizer):
             week_lags = [
                 lag
                 for lag in week_lags
-                if (max_time_stamp - pd.to_timedelta(lag, "W"))
+                if (max_time_stamp - int(lag) * pd.offsets.Week())
                 >= min_time_stamp
-                and (max_time_stamp - pd.to_timedelta(lag, "W"))
+                and (max_time_stamp - int(lag) * pd.offsets.Week())
                 <= forecast_creation_time
             ]
 
@@ -565,9 +551,10 @@ class SameDayOfWeekRollingWindowFeaturizer(BaseRollingWindowFeaturizer):
             lag_df.reset_index(inplace=True)
             if len(week_lags) > 0:
                 for lag in week_lags:
-                    tmp_df["lag_time"] = input_df.index.get_level_values(
-                        0
-                    ) - pd.to_timedelta(lag, "W")
+                    tmp_df["lag_time"] = (
+                        input_df.index.get_level_values(0)
+                        - int(lag) * pd.offsets.Week()
+                    )
                     lag_df_cur = pd.merge(
                         tmp_df,
                         input_df,

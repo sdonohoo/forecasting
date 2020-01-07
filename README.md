@@ -63,6 +63,11 @@ The following chart compares the submissions performance on accuracy in %MAPE vs
  
 ![EnergyPBLvsTime](./docs/images/Retail-Cost.png)
 
+## Build Status
 
 
+| Build Type | Branch | Status |  | Branch | Status | 
+| --- | --- | --- | --- | --- | --- | 
+| **Python Linux CPU** |  master | [![Build Status](https://dev.azure.com/best-practices/forecasting/_apis/build/status/python_unit_tests_base?branchName=master)](https://dev.azure.com/best-practices/forecasting/_build/latest?definitionId=12&branchName=master)  | | staging | [![Build Status](https://dev.azure.com/best-practices/forecasting/_apis/build/status/python_unit_tests_base?branchName=chenhui/python_test_pipeline)](https://dev.azure.com/best-practices/forecasting/_build/latest?definitionId=12&branchName=chenhui/python_test_pipeline) | 
+| **R Linux CPU** |  master | [![Build Status](https://dev.azure.com/best-practices/forecasting/_apis/build/status/Forecasting/r_unit_tests_prototype?branchName=master)](https://dev.azure.com/best-practices/forecasting/_build/latest?definitionId=9&branchName=master)  | | staging | [![Build Status](https://dev.azure.com/best-practices/forecasting/_apis/build/status/Forecasting/r_unit_tests_prototype?branchName=zhouf/r_test_pipeline)](https://dev.azure.com/best-practices/forecasting/_build/latest?definitionId=9&branchName=zhouf/r_test_pipeline) | 
 

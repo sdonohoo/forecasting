@@ -26,16 +26,20 @@ jobs:
       conda env list
     displayName: Add Conda to PATH
 
-  # Conda creation can take around 10 min
   - bash: |
-      echo "Running setup ..."
+      echo "Initializing setup ..."
       pwd
       ls
       uname -ra
       echo "Running cleanup ... "
       conda env remove -n forecasting_cpu
       echo "Cleanup done."
+    displayName: 'Cleanup existing conda environment'
+
+  - bash: |
+      echo "Running conda env setup ..."
       yes | conda env create -n forecasting_cpu -f tools/environment.yml
+      echo "Conda env installed."
     displayName: 'Creating Conda Environment with dependencies'
 
   - bash: |

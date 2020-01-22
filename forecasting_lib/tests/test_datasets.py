@@ -4,10 +4,11 @@ import pandas as pd
 
 
 def test_download_retail_data():
-    RETAIL_DIR = os.path.join(".", "forecasting_lib", "forecasting_lib", "dataset", "retail")
-    DATA_DIR = os.path.join(".", "contrib", "tsperf", "OrangeJuice_Pt_3Weeks_Weekly", "data")
-    SCRIPT_PATH = os.path.join(RETAIL_DIR, "download_data.r")
+    DATA_DIR = os.path.join("ojdata")
     DATA_FILE_LIST = ["yx.csv", "storedemo.csv"]
+
+    SCRIPTS_DIR = os.path.join(".", "tools", "scripts")
+    SCRIPT_PATH = os.path.join(SCRIPTS_DIR, "download_oj_data.R")
     # Remove data files if they are existed
     for f in DATA_FILE_LIST:
         file_path = os.path.join(DATA_DIR, f)
@@ -16,7 +17,7 @@ def test_download_retail_data():
         assert not os.path.exists(file_path)
     # Call data download script
     try:
-        subprocess.call(["sudo", "Rscript", SCRIPT_PATH])
+        subprocess.call(["Rscript", SCRIPT_PATH, DATA_DIR])
     except subprocess.CalledProcessError as e:
         print(e.output)
     # Check downloaded data

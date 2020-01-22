@@ -27,6 +27,8 @@ dependencies:
   - scikit-learn=0.21.3
   - pytest
   - papermill>=1.0.1
+  - r-base
+  - r-bayesm
   - pip:
     - black
     - flake8

@@ -59,10 +59,10 @@ This repository provides examples on how to run various forecasting algorithms o
 To download the `orangeJuice` dataset run the [download_oj_data.R](tools/scripts/download_oj_data.R) script, e.g.
 
 ```
-Rscript ./tools/scripts/download_oj_data.R
+Rscript ./tools/scripts/download_oj_data.R ./ojdata
 ```
 
-Note that the script will create two `csv` files in directory `~/ojdata`. To chenge the data download location, modify the download script accordingly. 
+Note that the script will create two `csv` files in the directory passed as an argument to the download script (e.g. `./ojdata`).
 
 
 ### Run Examples

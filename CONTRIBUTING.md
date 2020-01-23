@@ -52,18 +52,9 @@ The library is installed in developer mode with the `-e` flag. This means that a
 
 ## Getting Started with Examples
 
-### Dataset download
+### Dataset
 
-This repository provides examples on how to run various forecasting algorithms on a publicly available `orangeJuice` dataset. This dataset containes weekly sales of refrigerated orange juice at 83 stores, as well as, demographic information on those stores. The data is provided via [`bayesm`](https://CRAN.R-project.org/package=bayesm) package in `R`, and further described in [Chapter 5, Bayesian Statistics and Marketing by Rossi, Allenby, and McCulloch](http://www.perossi.org/home/bsm-1).
-
-To download the `orangeJuice` dataset run the [download_oj_data.R](tools/scripts/download_oj_data.R) script, e.g.
-
-```
-Rscript ./tools/scripts/download_oj_data.R ./ojdata
-```
-
-Note that the script will create two `csv` files in the directory passed as an argument to the download script (e.g. `./ojdata`).
-
+This repository provides examples on how to run various forecasting algorithms on a publicly available `orangeJuice` dataset. This dataset containes weekly sales of refrigerated orange juice at 83 stores, as well as, demographic information on those stores. The data is provided via [`bayesm`](https://CRAN.R-project.org/package=bayesm) package in `R`, and further described in [Chapter 5, Bayesian Statistics and Marketing by Rossi, Allenby, and McCulloch](http://www.perossi.org/home/bsm-1). `Forecasting_lib` package provides utilies for downloading and processing this data. 
 
 ### Run Examples
 

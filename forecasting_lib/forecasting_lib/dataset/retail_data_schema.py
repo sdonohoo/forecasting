@@ -7,8 +7,7 @@ import datetime
 import itertools
 import pandas as pd
 from forecasting_lib.dataset.data_schema import specify_data_schema
-from forecasting_lib.dataset.retail.benchmark_paths import DATA_DIR
-from forecasting_lib.dataset.retail.benchmark_settings import FIRST_WEEK_START
+from forecasting_lib.dataset.benchmark_settings import FIRST_WEEK_START
 
 DEFAULT_TARGET_COL = "move"
 DEFAULT_STATIC_FEA = None
@@ -16,6 +15,7 @@ DEFAULT_DYNAMIC_FEA = ["deal", "feat"]
 
 
 def specify_retail_data_schema(
+    data_dir,
     sales=None,
     target_col_name=DEFAULT_TARGET_COL,
     static_feat_names=DEFAULT_STATIC_FEA,
@@ -38,8 +38,8 @@ def specify_retail_data_schema(
     # Read the 1st round training data if "sales" is not specified
     if sales is None:
         print("Sales dataframe is not given! The 1st round training data will be used.")
-        sales = pd.read_csv(os.path.join(DATA_DIR, "train", "train_round_1.csv"), index_col=False)
-        aux = pd.read_csv(os.path.join(DATA_DIR, "train", "aux_round_1.csv"), index_col=False)
+        sales = pd.read_csv(os.path.join(data_dir, "train", "train_round_1.csv"), index_col=False)
+        aux = pd.read_csv(os.path.join(data_dir, "train", "aux_round_1.csv"), index_col=False)
         # Merge with future price, deal, and advertisement info
         aux_features = [
             "price1",
@@ -59,7 +59,7 @@ def specify_retail_data_schema(
         sales = pd.merge(sales, aux, how="right", on=["store", "brand", "week"] + aux_features)
 
     # Read store demographic data
-    storedemo = pd.read_csv(os.path.join(DATA_DIR, "storedemo.csv"), index_col=False)
+    storedemo = pd.read_csv(os.path.join(data_dir, "storedemo.csv"), index_col=False)
 
     # Compute unit sales
     sales["move"] = sales["logmove"].apply(lambda x: round(math.exp(x)) if x > 0 else 0)
@@ -94,5 +94,6 @@ def specify_retail_data_schema(
 
 
 if __name__ == "__main__":
-    df_config, sales = specify_retail_data_schema()
+    data_dir = "/home/vapaunic/forecasting/ojdata"
+    df_config, sales = specify_retail_data_schema(data_dir)
     print(df_config)

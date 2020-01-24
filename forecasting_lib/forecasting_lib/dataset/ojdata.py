@@ -61,18 +61,9 @@ def split_train_test(data_dir, write_csv=False):
     sales and external features; testing data contains the future sales and external features; 
     auxiliary data includes the future price, deal, and advertisement information which can be 
     used for making predictions (we assume such auxiliary information is available at the time 
-    when we generate the forecasts).
+    when we generate the forecasts). Use this function to generate the train, test, aux data for
+    each forecast period on the fly, or use write_csv flag to write data to files.
 
-    You can use this script in either of the following two ways
-    1. Import the serve_folds module from this script to generate the training and testing data for
-    each forecast period on the fly
-    2. Run the script using the syntax below
-       python serve_folds [-h] [--test] [--save]
-    where if '--test' is specified a quick test of serve_folds module will run and furthermore if
-    `--save' is specified the training and testing data will be saved as csv files. Note that '--save'
-    is effective only if '--test' is specified. This means that you need to run
-       python serve_folds --test --save
-    to get the output data files stored in /train and /test folders under the data directory.
     Note that train_*.csv files in /train folder contain all the features in the training period
     and aux_*.csv files in /train folder contain all the features except 'logmove', 'constant',
     'profit' up until the forecast period end week. Both train_*.csv and aux_*csv can be used for
@@ -102,7 +93,7 @@ def split_train_test(data_dir, write_csv=False):
                     print("")
 
     Args:
-        write_csv (Boolean): Whether to write the data files or not
+        write_csv (Boolean): Whether to write out the data files or not
     """
     # Read sales data into dataframe
     sales = pd.read_csv(os.path.join(data_dir, "yx.csv"), index_col=0)
@@ -381,6 +372,6 @@ def specify_retail_data_schema(
 
 
 if __name__ == "__main__":
-    data_dir = "/home/vapaunic/forecasting/ojdata"
+    data_dir = "/home/forecasting/ojdata"
     df_config, sales = specify_retail_data_schema(data_dir)
     print(df_config)

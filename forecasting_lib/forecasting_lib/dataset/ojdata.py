@@ -98,17 +98,17 @@ def split_train_test(data_dir, experiment_settings, write_csv=False):
         if not os.path.isdir(TEST_DATA_DIR):
             os.mkdir(TEST_DATA_DIR)
 
-    for i in range(experiment_settings["NUM_ROUNDS"]):
-        data_mask = (sales.week >= experiment_settings["TRAIN_START_WEEK"]) & (
-            sales.week <= experiment_settings["TRAIN_END_WEEK_LIST"][i]
+    for i in range(experiment_settings.NUM_ROUNDS):
+        data_mask = (sales.week >= experiment_settings.TRAIN_START_WEEK) & (
+            sales.week <= experiment_settings.TRAIN_END_WEEK_LIST[i]
         )
         train = sales[data_mask].copy()
-        data_mask = (sales.week >= experiment_settings["TEST_START_WEEK_LIST"][i]) & (
-            sales.week <= experiment_settings["TEST_END_WEEK_LIST"][i]
+        data_mask = (sales.week >= experiment_settings.TEST_START_WEEK_LIST[i]) & (
+            sales.week <= experiment_settings.TEST_END_WEEK_LIST[i]
         )
         test = sales[data_mask].copy()
-        data_mask = (sales.week >= experiment_settings["TRAIN_START_WEEK"]) & (
-            sales.week <= experiment_settings["TEST_END_WEEK_LIST"][i]
+        data_mask = (sales.week >= experiment_settings.TRAIN_START_WEEK) & (
+            sales.week <= experiment_settings.TEST_END_WEEK_LIST[i]
         )
         aux = sales[data_mask].copy()
         aux.drop(["logmove", "constant", "profit"], axis=1, inplace=True)
@@ -375,8 +375,9 @@ def specify_retail_data_schema(
 
 
 if __name__ == "__main__":
-    from forecasting_lib.common.utils import experiment_settings
+    from forecasting_lib.common import experiment_settings
 
+    experiment_settings.NUM_ROUNDS = 3
     data_dir = "/home/vapaunic/forecasting/ojdata"
 
     for train, test, aux in split_train_test(data_dir=data_dir, experiment_settings=experiment_settings):

@@ -70,7 +70,7 @@ def split_train_test(data_dir, experiment_settings, write_csv=False):
     Example:
         from forecasting_lib.common.utils import experiment_settings
 
-        data_dir = "/home/vapaunic/forecasting/ojdata"
+        data_dir = "/home/forecasting/ojdata"
 
         for train, test, aux in split_train_test(data_dir=data_dir, experiment_settings=experiment_settings):
             print("Training data size: {}".format(train.shape))
@@ -85,7 +85,10 @@ def split_train_test(data_dir, experiment_settings, write_csv=False):
             print("")
 
     Args:
+        data_dir (str): location of the download directory
+        experiment_settings (dict): dictionary containing experiment parameters
         write_csv (Boolean): Whether to write out the data files or not
+        
     """
     # Read sales data into dataframe
     sales = pd.read_csv(os.path.join(data_dir, "yx.csv"), index_col=0)

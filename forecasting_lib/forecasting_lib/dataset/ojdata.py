@@ -53,7 +53,7 @@ def maybe_download(dest_dir):
         print("Data already exists at the specified location.")
 
 
-def split_train_test(data_dir, experiment_settings, write_csv=False):
+def split_train_test(data_dir, forecast_settings, write_csv=False):
     """Generate training, testing, and auxiliary datasets. Training data includes the historical 
     sales and external features; testing data contains the future sales and external features; 
     auxiliary data includes the future price, deal, and advertisement information which can be 
@@ -68,11 +68,11 @@ def split_train_test(data_dir, experiment_settings, write_csv=False):
     for model performance evaluation.
 
     Example:
-        from forecasting_lib.common.utils import experiment_settings
+        from forecasting_lib.common.utils import forecast_settings
 
         data_dir = "/home/forecasting/ojdata"
 
-        for train, test, aux in split_train_test(data_dir=data_dir, experiment_settings=experiment_settings):
+        for train, test, aux in split_train_test(data_dir=data_dir, forecast_settings=forecast_settings):
             print("Training data size: {}".format(train.shape))
             print("Testing data size: {}".format(test.shape))
             print("Auxiliary data size: {}".format(aux.shape))
@@ -86,7 +86,7 @@ def split_train_test(data_dir, experiment_settings, write_csv=False):
 
     Args:
         data_dir (str): location of the download directory
-        experiment_settings (dict): dictionary containing experiment parameters
+        forecast_settings (dict): dictionary containing forecast experiment parameters
         write_csv (Boolean): Whether to write out the data files or not
         
     """
@@ -101,23 +101,23 @@ def split_train_test(data_dir, experiment_settings, write_csv=False):
         if not os.path.isdir(TEST_DATA_DIR):
             os.mkdir(TEST_DATA_DIR)
 
-    for i in range(experiment_settings.NUM_ROUNDS):
-        data_mask = (sales.week >= experiment_settings.TRAIN_START_WEEK) & (
-            sales.week <= experiment_settings.TRAIN_END_WEEK_LIST[i]
+    for i in range(forecast_settings.NUM_ROUNDS):
+        data_mask = (sales.week >= forecast_settings.TRAIN_START_WEEK) & (
+            sales.week <= forecast_settings.TRAIN_END_WEEK_LIST[i]
         )
         train = sales[data_mask].copy()
-        data_mask = (sales.week >= experiment_settings.TEST_START_WEEK_LIST[i]) & (
-            sales.week <= experiment_settings.TEST_END_WEEK_LIST[i]
+        data_mask = (sales.week >= forecast_settings.TEST_START_WEEK_LIST[i]) & (
+            sales.week <= forecast_settings.TEST_END_WEEK_LIST[i]
         )
         test = sales[data_mask].copy()
-        data_mask = (sales.week >= experiment_settings.TRAIN_START_WEEK) & (
-            sales.week <= experiment_settings.TEST_END_WEEK_LIST[i]
+        data_mask = (sales.week >= forecast_settings.TRAIN_START_WEEK) & (
+            sales.week <= forecast_settings.TEST_END_WEEK_LIST[i]
         )
         aux = sales[data_mask].copy()
         aux.drop(["logmove", "constant", "profit"], axis=1, inplace=True)
 
         if write_csv:
-            roundstr = "_" + str(i + 1) if experiment_settings.NUM_ROUNDS > 1 else ""
+            roundstr = "_" + str(i + 1) if forecast_settings.NUM_ROUNDS > 1 else ""
             train.to_csv(os.path.join(TRAIN_DATA_DIR, "train" + roundstr + ".csv"))
             test.to_csv(os.path.join(TEST_DATA_DIR, "test" + roundstr + ".csv"))
             aux.to_csv(os.path.join(TRAIN_DATA_DIR, "aux" + roundstr + ".csv"))
@@ -294,7 +294,7 @@ def _check_static_feat(df, ts_id_col_names, static_feat_names):
 
 def specify_retail_data_schema(
     data_dir,
-    experiment_settings,
+    forecast_settings,
     sales=None,
     target_col_name=DEFAULT_TARGET_COL,
     static_feat_names=DEFAULT_STATIC_FEA,
@@ -362,7 +362,7 @@ def specify_retail_data_schema(
 
     # Create timestamp
     df["timestamp"] = df["week"].apply(
-        lambda x: experiment_settings["FIRST_WEEK_START"] + datetime.timedelta(days=(x - 1) * 7)
+        lambda x: forecast_settings.FIRST_WEEK_START + datetime.timedelta(days=(x - 1) * 7)
     )
 
     df_config = specify_data_schema(
@@ -380,14 +380,12 @@ def specify_retail_data_schema(
 
 
 if __name__ == "__main__":
-    from forecasting_lib.common import experiment_settings
+    from forecasting_lib.common import forecast_settings
 
-    experiment_settings.NUM_ROUNDS = 3
+    forecast_settings.NUM_ROUNDS = 3
     data_dir = "/home/vapaunic/forecasting/ojdata"
 
-    for train, test, aux in split_train_test(
-        data_dir=data_dir, experiment_settings=experiment_settings, write_csv=True
-    ):
+    for train, test, aux in split_train_test(data_dir=data_dir, forecast_settings=forecast_settings, write_csv=True):
         print("Training data size: {}".format(train.shape))
         print("Testing data size: {}".format(test.shape))
         print("Auxiliary data size: {}".format(aux.shape))

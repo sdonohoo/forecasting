@@ -4,7 +4,7 @@ This repository contains examples and best practices for building Forecasting so
 
 ## Getting Started
 
-To get started, navigate to the [Contributing Guide](./CONTRIBUTING.md), which lists instructions on how to setup your environment and dependencies, download the data and run examples provided in the repository.
+To get started, navigate to the [Contributing Guide](./CONTRIBUTING.md), which lists instructions on how to set up your environment and dependencies, download the data and run examples provided in the repository.
 
 ## Build Status
 | Build | Branch | Status |

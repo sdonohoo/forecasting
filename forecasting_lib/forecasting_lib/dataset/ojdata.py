@@ -115,10 +115,12 @@ def split_train_test(data_dir, experiment_settings, write_csv=False):
         )
         aux = sales[data_mask].copy()
         aux.drop(["logmove", "constant", "profit"], axis=1, inplace=True)
+
         if write_csv:
-            train.to_csv(os.path.join(TRAIN_DATA_DIR, "train_round_" + str(i + 1) + ".csv"))
-            test.to_csv(os.path.join(TEST_DATA_DIR, "test_round_" + str(i + 1) + ".csv"))
-            aux.to_csv(os.path.join(TRAIN_DATA_DIR, "aux_round_" + str(i + 1) + ".csv"))
+            roundstr = "_" + str(i + 1) if experiment_settings.NUM_ROUNDS > 1 else ""
+            train.to_csv(os.path.join(TRAIN_DATA_DIR, "train" + roundstr + ".csv"))
+            test.to_csv(os.path.join(TEST_DATA_DIR, "test" + roundstr + ".csv"))
+            aux.to_csv(os.path.join(TRAIN_DATA_DIR, "aux" + roundstr + ".csv"))
         yield train, test, aux
 
 
@@ -383,7 +385,9 @@ if __name__ == "__main__":
     experiment_settings.NUM_ROUNDS = 3
     data_dir = "/home/vapaunic/forecasting/ojdata"
 
-    for train, test, aux in split_train_test(data_dir=data_dir, experiment_settings=experiment_settings):
+    for train, test, aux in split_train_test(
+        data_dir=data_dir, experiment_settings=experiment_settings, write_csv=True
+    ):
         print("Training data size: {}".format(train.shape))
         print("Testing data size: {}".format(test.shape))
         print("Auxiliary data size: {}".format(aux.shape))

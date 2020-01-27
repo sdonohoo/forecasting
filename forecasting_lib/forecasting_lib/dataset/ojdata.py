@@ -9,9 +9,6 @@ import math
 import datetime
 import itertools
 
-import forecasting_lib.dataset.benchmark_settings as bs
-
-
 DATA_FILE_LIST = ["yx.csv", "storedemo.csv"]
 SCRIPT_NAME = "download_oj_data.R"
 
@@ -56,7 +53,7 @@ def maybe_download(dest_dir):
         print("Data already exists at the specified location.")
 
 
-def split_train_test(data_dir, write_csv=False):
+def split_train_test(data_dir, experiment_settings, write_csv=False):
     """Generate training, testing, and auxiliary datasets. Training data includes the historical 
     sales and external features; testing data contains the future sales and external features; 
     auxiliary data includes the future price, deal, and advertisement information which can be 
@@ -71,26 +68,21 @@ def split_train_test(data_dir, write_csv=False):
     for model performance evaluation.
 
     Example:
-        if __name__ == "__main__":
-            # Test serve_folds
-            parser = argparse.ArgumentParser()
-            parser.add_argument("--test", help="Run the test of serve_folds function", action="store_true")
-            parser.add_argument("--save", help="Write training and testing data into csv files", action="store_true")
-            parser.add_argument("--data-dir", help="The location of the downloaded oj data")
-            args = parser.parse_args()
+        from forecasting_lib.common.utils import experiment_settings
 
-            if args.test:
-                for train, test, aux in split_train_test(data_dir=args.data_dir, write_csv=args.save):
-                    print("Training data size: {}".format(train.shape))
-                    print("Testing data size: {}".format(test.shape))
-                    print("Auxiliary data size: {}".format(aux.shape))
-                    print("Minimum training week number: {}".format(min(train["week"])))
-                    print("Maximum training week number: {}".format(max(train["week"])))
-                    print("Minimum testing week number: {}".format(min(test["week"])))
-                    print("Maximum testing week number: {}".format(max(test["week"])))
-                    print("Minimum auxiliary week number: {}".format(min(aux["week"])))
-                    print("Maximum auxiliary week number: {}".format(max(aux["week"])))
-                    print("")
+        data_dir = "/home/vapaunic/forecasting/ojdata"
+
+        for train, test, aux in split_train_test(data_dir=data_dir, experiment_settings=experiment_settings):
+            print("Training data size: {}".format(train.shape))
+            print("Testing data size: {}".format(test.shape))
+            print("Auxiliary data size: {}".format(aux.shape))
+            print("Minimum training week number: {}".format(min(train["week"])))
+            print("Maximum training week number: {}".format(max(train["week"])))
+            print("Minimum testing week number: {}".format(min(test["week"])))
+            print("Maximum testing week number: {}".format(max(test["week"])))
+            print("Minimum auxiliary week number: {}".format(min(aux["week"])))
+            print("Maximum auxiliary week number: {}".format(max(aux["week"])))
+            print("")
 
     Args:
         write_csv (Boolean): Whether to write out the data files or not
@@ -106,12 +98,18 @@ def split_train_test(data_dir, write_csv=False):
         if not os.path.isdir(TEST_DATA_DIR):
             os.mkdir(TEST_DATA_DIR)
 
-    for i in range(bs.NUM_ROUNDS):
-        data_mask = (sales.week >= bs.TRAIN_START_WEEK) & (sales.week <= bs.TRAIN_END_WEEK_LIST[i])
+    for i in range(experiment_settings["NUM_ROUNDS"]):
+        data_mask = (sales.week >= experiment_settings["TRAIN_START_WEEK"]) & (
+            sales.week <= experiment_settings["TRAIN_END_WEEK_LIST"][i]
+        )
         train = sales[data_mask].copy()
-        data_mask = (sales.week >= bs.TEST_START_WEEK_LIST[i]) & (sales.week <= bs.TEST_END_WEEK_LIST[i])
+        data_mask = (sales.week >= experiment_settings["TEST_START_WEEK_LIST"][i]) & (
+            sales.week <= experiment_settings["TEST_END_WEEK_LIST"][i]
+        )
         test = sales[data_mask].copy()
-        data_mask = (sales.week >= bs.TRAIN_START_WEEK) & (sales.week <= bs.TEST_END_WEEK_LIST[i])
+        data_mask = (sales.week >= experiment_settings["TRAIN_START_WEEK"]) & (
+            sales.week <= experiment_settings["TEST_END_WEEK_LIST"][i]
+        )
         aux = sales[data_mask].copy()
         aux.drop(["logmove", "constant", "profit"], axis=1, inplace=True)
         if write_csv:
@@ -155,6 +153,8 @@ def specify_data_schema(
 
         Returns:
             df_config (dict): configuration of the time series data 
+        
+        TODO: Check if this is used before release.
         
         Examples:
             >>> # Case 1
@@ -289,6 +289,7 @@ def _check_static_feat(df, ts_id_col_names, static_feat_names):
 
 def specify_retail_data_schema(
     data_dir,
+    experiment_settings,
     sales=None,
     target_col_name=DEFAULT_TARGET_COL,
     static_feat_names=DEFAULT_STATIC_FEA,
@@ -355,7 +356,9 @@ def specify_retail_data_schema(
     df.drop("STORE", axis=1, inplace=True)
 
     # Create timestamp
-    df["timestamp"] = df["week"].apply(lambda x: bs.FIRST_WEEK_START + datetime.timedelta(days=(x - 1) * 7))
+    df["timestamp"] = df["week"].apply(
+        lambda x: experiment_settings["FIRST_WEEK_START"] + datetime.timedelta(days=(x - 1) * 7)
+    )
 
     df_config = specify_data_schema(
         df,
@@ -372,6 +375,18 @@ def specify_retail_data_schema(
 
 
 if __name__ == "__main__":
-    data_dir = "/home/forecasting/ojdata"
-    df_config, sales = specify_retail_data_schema(data_dir)
-    print(df_config)
+    from forecasting_lib.common.utils import experiment_settings
+
+    data_dir = "/home/vapaunic/forecasting/ojdata"
+
+    for train, test, aux in split_train_test(data_dir=data_dir, experiment_settings=experiment_settings):
+        print("Training data size: {}".format(train.shape))
+        print("Testing data size: {}".format(test.shape))
+        print("Auxiliary data size: {}".format(aux.shape))
+        print("Minimum training week number: {}".format(min(train["week"])))
+        print("Maximum training week number: {}".format(max(train["week"])))
+        print("Minimum testing week number: {}".format(min(test["week"])))
+        print("Maximum testing week number: {}".format(max(test["week"])))
+        print("Minimum auxiliary week number: {}".format(min(aux["week"])))
+        print("Maximum auxiliary week number: {}".format(max(aux["week"])))
+        print("")

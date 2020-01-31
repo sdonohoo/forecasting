@@ -32,20 +32,22 @@ jobs:
       ls
       uname -ra
       echo "Running cleanup ... "
-      conda env remove -n forecasting_cpu
+      conda env remove -n forecast_cpu
       echo "Cleanup done."
     displayName: 'Cleanup existing conda environment'
 
   - bash: |
       echo "Running conda env setup ..."
-      yes | conda env create -n forecasting_cpu -f tools/environment.yml
+      yes | conda env create -n forecast_cpu -f tools/environment.yml
       eval "$(conda shell.bash hook)" && conda activate forecast_cpu
       pip install -e forecasting_lib
       echo "Conda env installed."
     displayName: 'Creating Conda Environment with dependencies'
 
   - bash: |
+      sudo ln -s /usr/lib/R/modules/lapack.so /usr/lib/libRlapack.so
       eval "$(conda shell.bash hook)" && conda activate forecast_cpu
+      python -m ipykernel install --user --name forecast_cpu
       pytest --durations=0 forecasting_lib/tests -m "not notebooks and not gpu and not azureml" --junitxml=junit/test-unitttest.xml
     displayName: 'Run Unit tests'
 

@@ -31,8 +31,7 @@ A template of the submission file can be found [here](https://github.com/Microso
 ### Dataset description
 
 1. The data files can be downloaded from ISO New England website via the
-[zonal information page of the energy, load and demand reports](https://www
-.iso-ne.com/isoexpress/web/reports/load-and-demand/-/tree/zone-info). If you
+[zonal information page of the energy, load and demand reports](https://www.iso-ne.com/isoexpress/web/reports/load-and-demand/-/tree/zone-info). If you
 are outside United States, you may need a VPN to access the data. Use columns
 A, B, D, M and N in the worksheets of "YYYY SMD Hourly Data" files, where YYYY
 represents the year. Detailed information of each column can be found in the

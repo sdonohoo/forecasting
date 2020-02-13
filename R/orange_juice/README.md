@@ -17,6 +17,6 @@ The easiest way to install them is to run
 install.packages("bayesm")
 install.packages("tidyverse") # installs all tidyverse packages
 install.packages("fable")     # installs other tidyverts packages as dependencies
-install.packages("feasts)
+install.packages("feasts")
 ```
 

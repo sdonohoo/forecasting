@@ -3,7 +3,7 @@ title: Data preparation
 output: html_notebook
 ---
 
-```{r, echo=FALSE, results="hide"}
+```{r, echo=FALSE, results="hide", message=FALSE}
 library(tidyr)
 library(dplyr)
 library(tsibble)

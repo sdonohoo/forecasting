@@ -1,9 +1,10 @@
 ---
 title: Simple models
 output: html_notebook
+encoding: utf8
 ---
 
-```{r, echo=FALSE, results="hide"}
+```{r, echo=FALSE, results="hide", message=FALSE}
 library(tidyr)
 library(dplyr)
 library(tsibble)
@@ -12,6 +13,7 @@ library(fable)
 ```
 
 We fit some simple models to the orange juice data. One model is fit for each combination of store and brand.
+
 - `mean`: This is just a simple mean.
 - `naive`: A random walk model without any other components. This amounts to setting all forecast values to the last observed value.
 - `drift`: This adjusts the `naive` model to incorporate a trend.
@@ -46,7 +48,7 @@ oj_modelset <- parallel::parLapply(cl, oj_train, function(df)
 head(oj_modelset[[1]])
 ```
 
-Having fit the models, let's examine their goodness of fit, using the MAPE (mean average percentage error) metric.
+Having fit the models, let's examine their goodness of fit, using the MAPE (mean absolute percentage error) metric.
 
 ```{r}
 # compute forecasts, again parallelised by dataset

@@ -40,4 +40,4 @@ dependencies:
     - gitpython==3.0.8
     - azureml-sdk[explain,automl]==1.0.85
     - statsmodels==0.11.1
-    - pyramid-arima==0.9.0
+    - pmdarima==1.1.1

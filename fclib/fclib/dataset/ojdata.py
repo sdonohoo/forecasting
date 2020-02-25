@@ -75,7 +75,7 @@ def complete_and_fill_df(df, stores, brands, weeks):
     data_grid = df_from_cartesian_product(d)
     # Complete all rows
     df_filled = pd.merge(data_grid, df, how="left", on=["store", "brand", "week"])
-    # Fill missing values
+    # Fill in missing values
     df_filled = df_filled.groupby(["store", "brand"]).apply(lambda x: x.fillna(method="ffill").fillna(method="bfill"))
 
     return df_filled

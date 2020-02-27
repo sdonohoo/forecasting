@@ -1,10 +1,23 @@
 ## Setting up Environment
 
-Follow the instruction below to read about compute requirements and install required libraries. Or you can directly run 
+Please follow these instructions to set up your environment.
+
+#### Clone the forecasting repository
+To clone the Forecasting repository to your local machine, please run:
+
+```
+git clone https://github.com/microsoft/forecasting.git
+cd forecasting/
+```
+
+Next, follow the instruction below to read about compute requirements and manually install all dependencies required to run the examples provided in the repository. 
+
+Alternatively, we provide a script to install all dependencies automatically. To execute the script, please run: 
+
 ```
 ./tools/environment_setup.sh
 ```
-from the root of Forecasting repo.
+from the root of Forecasting repo. Once you've executed the `environment_setup.sh` script, you can read the rest of the Setup for your information, but do not have to execute the listed commands.
 
 #### Compute environment
 

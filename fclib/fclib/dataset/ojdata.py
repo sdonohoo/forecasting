@@ -9,6 +9,8 @@ import math
 import datetime
 import itertools
 
+from fclib.feature_engineering.feature_utils import df_from_cartesian_product
+
 DATA_FILE_LIST = ["yx.csv", "storedemo.csv"]
 SCRIPT_NAME = "download_oj_data.R"
 
@@ -54,6 +56,29 @@ def maybe_download(dest_dir):
             print(e.output)
     else:
         print("Data already exists at the specified location.")
+
+
+def complete_and_fill_df(df, stores, brands, weeks):
+    """Completes missing rows in Orange Juice datasets and fills in the missing values.
+    
+    Args:
+        df (pd.DataFrame): data frame to fill in the rows and missing values in
+        stores (list[int]): list of stores to include
+        brands (list[int]): list of brands to include
+        weeks (list[int]): list of weeks to include
+        
+    Returns:
+        pd.DataFrame: data frame with completed rows and missing values filled in
+    
+    """
+    d = {"store": stores, "brand": brands, "week": weeks}
+    data_grid = df_from_cartesian_product(d)
+    # Complete all rows
+    df_filled = pd.merge(data_grid, df, how="left", on=["store", "brand", "week"])
+    # Fill in missing values
+    df_filled = df_filled.groupby(["store", "brand"]).apply(lambda x: x.fillna(method="ffill").fillna(method="bfill"))
+
+    return df_filled
 
 
 def _gen_split_indices(n_splits=12, horizon=2, gap=2, first_week=40, last_week=156):

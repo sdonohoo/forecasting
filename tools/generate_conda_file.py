@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 # Copyright (c) Microsoft Corporation.
-# Licensed under the MIT License.
+# Licensed under the MIT License. 
 
 # This script creates yaml files to build conda environments
 # For generating a conda file for running only python code:

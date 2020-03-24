@@ -1,5 +1,5 @@
 REM Copyright (c) Microsoft Corporation.
-REM Licensed under the MIT License.
+REM Licensed under the MIT License. 
 
 REM Please follow instructions in this link 
 REM https://docs.conda.io/projects/conda/en/latest/user-guide/install/windows.html 

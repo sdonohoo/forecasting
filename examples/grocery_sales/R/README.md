@@ -1,6 +1,6 @@
 # Forecasting examples in R: orange juice retail sales
 
-The Rmarkdown notebooks in this directory are as follows. Each notebook also has a corresponding HTML file, which is the rendered output from running the code. 
+The Rmarkdown notebooks in this directory are as follows. Each notebook also has a corresponding HTML file, which is the rendered output from running the code.
 
 - [`01_dataprep.Rmd`](01_dataprep.Rmd) creates the training and test datasets
 - [`02_basic_models.Rmd`](02_basic_models.Rmd) fits a range of simple time series models to the data, including ARIMA and ETS.

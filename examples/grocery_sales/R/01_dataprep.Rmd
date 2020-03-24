@@ -4,7 +4,7 @@ output: html_notebook
 ---
 
 _Copyright (c) Microsoft Corporation._<br/>
-_Licensed under the MIT License._ 
+_Licensed under the MIT License._
 
 In this notebook, we generate the datasets that will be used for model training and validating. 
 

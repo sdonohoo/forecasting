@@ -2,8 +2,10 @@
 # Licensed under the MIT License.
 
 
+import subprocess
 import pandas as pd
 from git import Repo
+from sys import platform
 from pkgutil import iter_modules
 
 
@@ -15,8 +17,53 @@ def git_repo_path():
 
 
 def module_exists(module_name):
-    """Check if a package is installed"""
+    """Check if a package is installed.
+
+    Args:
+        module_name (str): name of the package/module
+    
+    Returns:
+        bool: True if module exists; otherwise False
+    """
+
     return module_name in (name for loader, name, ispkg in iter_modules())
+
+
+def system_type():
+    """Return type of the current operating system"""
+
+    if platform == "linux" or platform == "linux2":
+        system_type = "linux"
+    elif platform == "darwin":
+        system_type = "mac"
+    elif platform == "win32":
+        system_type = "win"
+    return system_type
+
+
+def module_path(env_name, module_name):
+    """Return the path of a module in a conda environment.
+
+    Args:
+        env_name (str): name of the conda environment
+        module_name (str): name of the package/module	
+
+    Returns:
+        str: path of the package/module
+    """
+
+    system = system_type()
+    if system == "win":
+        command = "where " + module_name
+    else:
+        command = "which " + module_name
+    all_paths = subprocess.check_output(command, shell=True)
+    all_paths = all_paths.decode("utf-8").split("\n")
+    module_path = [path for path in all_paths if env_name in path][0]
+    if system == "win":
+        # Remove additional char \r
+        module_path = module_path[:-1]
+    return module_path
 
 
 # Source repo:
